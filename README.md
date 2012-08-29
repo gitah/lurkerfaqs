@@ -13,29 +13,31 @@ Python and Django.
 TODO
 ====
 ##Scraper
-1. Define Models
+1. Define Models (OK)
     - User
     - Topic
     - Post
     - Board
 
 2. Write Scraper
-    - investigate BeautifulSoup
+    - investigate BeautifulSoup (OK)
 
-    - posts scraper
+    - posts scraper (WORK)
         - for each page pg in topic:
             - get pg
             - process pg wiht BeautifulSoup
             - for each post:
                 - update db with post info
 
-    - topics scraper
+    - topics scraper (WORK)
         - until unchanged topic processed:
             - scrape page i
             - parse page i with BeautifulSoup
             - for each topic t:
                 - update db with topic info
                 - run posts scraper on topic t
+
+    - write tests
 
 3. Write ScraperController
     - configuration to define boards to scrape
@@ -45,6 +47,8 @@ TODO
 
     - gfaqs authentication and cookie management
         - support multiple users?
+
+    - write tests
 
 ##Front-End
 1. Board List
@@ -67,5 +71,10 @@ TODO
     - FAQs     
 
 7. Misc
+    - logging 
     - google analytics
     - google ads
+
+8. New Features
+    - hot topics of the day/week
+    - top users of the day/week
