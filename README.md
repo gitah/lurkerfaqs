@@ -8,3 +8,64 @@ database. There is a front end to access the archived material.
 
 [LurkerFAQs was originally written in PHP](http://www.lurkerfaqs.com). This is a rewrite of LurkerFAQs using
 Python and Django.
+
+
+TODO
+====
+##Scraper
+1. Define Models
+    - User
+    - Topic
+    - Post
+    - Board
+
+2. Write Scraper
+    - investigate BeautifulSoup
+
+    - posts scraper
+        - for each page pg in topic:
+            - get pg
+            - process pg wiht BeautifulSoup
+            - for each post:
+                - update db with post info
+
+    - topics scraper
+        - until unchanged topic processed:
+            - scrape page i
+            - parse page i with BeautifulSoup
+            - for each topic t:
+                - update db with topic info
+                - run posts scraper on topic t
+
+3. Write ScraperController
+    - configuration to define boards to scrape
+        - board url
+        - scrape period
+        - automatically update Board model with boards
+
+    - gfaqs authentication and cookie management
+        - support multiple users?
+
+##Front-End
+1. Board List
+
+2. Topic List
+
+3. Post List
+
+4. User Info
+    - User Posts
+    - User Topics
+
+5. Search
+    - Topic Search
+    - User Search
+
+6. Static
+    - Front Page
+        - updates system
+    - FAQs     
+
+7. Misc
+    - google analytics
+    - google ads
