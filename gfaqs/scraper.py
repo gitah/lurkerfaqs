@@ -22,15 +22,15 @@ class Scraper(object):
         """ generator that returns the next object the scraper will scrape """
         pg = 0
         while True:
-            doc = self.get_page(pg)
+            html = self.get_page(pg)
             try:
-                for topic in self.parse_page(doc):
+                for topic in self.parse_page(html):
                     yield topic
                 pg += 1
             except ValueError:
                 break
 
-    def parse_page(self, doc):
+    def parse_page(self, html):
         # implement in subclass
         raise NotImplementedError()
 
@@ -46,11 +46,11 @@ class BoardScraper(Scraper):
         """ returns the base url (without page numbers) of the board """
         return self.board.url
     
-    def parse_page(self, doc):
+    def parse_page(self, html):
         """ parses the page and returns a list of Topic objects """
         # TODO
         #   Exception: throws ValueError when page doesn't exist
-        soup = BeautifulSoup(doc)
+        soup = BeautifulSoup(html)
 
 class TopicScraper(Scraper):
     def __init__(self, topic):
@@ -58,11 +58,9 @@ class TopicScraper(Scraper):
 
     def base_url(self):
         """ returns the base url (without page numbers) of the topic """
-        #TODO: format properly
         board_url = self.topic.board.url
-        return "%s?id=%s" % (board_url, self.topic.gfaqs_id)
+        return "%s/%s" % (board_url, self.topic.gfaqs_id)
 
-    def parse_page(self, doc):
+    def parse_page(self, html):
         """ parses the page and returns a list of Post objects """
-        # TODO
         pass
