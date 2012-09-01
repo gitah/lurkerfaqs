@@ -57,7 +57,7 @@ class BoardScraper(Scraper):
         """ parses the page and returns a list of Topic objects
 
             DOM Layout of a board
-            <table class="board-topics">
+            <table class="board topics">
                 <tr>
                     <td>status img</td>
                     <td>link to topic</td>
@@ -108,5 +108,58 @@ class TopicScraper(Scraper):
         return "%s/%s" % (board_url, self.topic.gfaqs_id)
 
     def parse_page(self, html):
-        """ parses the page and returns a list of Post objects """
-        pass
+        """ parses the page and returns a list of Post objects 
+
+            DOM Layout of a topic
+            <table class="board messages">
+            <tr>
+               <td class="author">
+                   - username
+                   - post date
+               </td>
+               <td>
+                   <div class="msg_body">
+                       post contents
+                       <br>---<br>
+                       Signature
+                   </div>
+               </td>
+            </tr> 
+        """
+        soup = BeautifulSoup(html)
+        posts = []
+        post_tags = soup.find_all("tr")
+        if not post_tags:
+            raise ValueError("Page contains no topics")
+
+        for post_tag in post_tags:
+            sec = topic_tag.find_all("td")
+            if not sec:
+                continue
+            assert len(sec) == 2, "Board Parser Error: post html invalid format"
+
+            #TODO: parse post date
+            ps_tag = sec[0].find_all("a")
+            assert len(ps_tag) == 3, "Board Parser Error: post html invalid format"
+            post_count = ps_tag[0]["name"]
+            user_count = ps_tag[1].text
+
+            comps = list(sec[1].div.children)
+            contents = []
+            i = 0
+            while i < len(comps):
+                comp = comps[i]
+                if comp.name == "br" and i+1 < len(comps):
+                    if comps[i+1] == "---":
+                        break 
+                else:
+                    contents.append(post_comps[i])
+                i += 1
+
+            signature = []
+            i += 2
+            while i < len(post_comps):
+                signature.append(comps[i])
+
+            content_text = "".join([str(x) for x in contents])
+            signature_text = "".join([str(x) for x in signature])
