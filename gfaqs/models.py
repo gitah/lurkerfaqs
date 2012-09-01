@@ -28,7 +28,6 @@ class Topic(models.Model):
     creator = models.ForeignKey(User)
     gfaqs_id = models.CharField(max_length=15)
     title = models.CharField(max_length=200)
-    votes = models.IntegerField()
     #TODO: number_of_posts Integer
     #TODO: last_post_date DateTime
     status = models.CharField(max_length=2, choices=TOPIC_STATUS)

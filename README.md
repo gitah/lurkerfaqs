@@ -21,14 +21,12 @@ TODO
 
 2. Write Scraper
     - investigate BeautifulSoup (OK)
-
     - posts scraper (WORK)
         - for each page pg in topic:
             - get pg
             - process pg wiht BeautifulSoup
             - for each post:
                 - update db with post info
-
     - topics scraper (WORK)
         - until unchanged topic processed:
             - scrape page i
@@ -36,7 +34,6 @@ TODO
             - for each topic t:
                 - update db with topic info
                 - run posts scraper on topic t
-
     - write tests
 
 3. Write ScraperController
@@ -44,10 +41,8 @@ TODO
         - board url
         - scrape period
         - automatically update Board model with boards
-
     - gfaqs authentication and cookie management
         - support multiple users?
-
     - write tests
 
 ##Front-End
