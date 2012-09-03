@@ -132,19 +132,25 @@ class TopicScraper(Scraper):
         if not post_tags:
             raise ValueError("Page contains no topics")
 
-        for post_tag in post_tags:
-            sec = topic_tag.find_all("td")
-            if not sec:
+        for tr in post_tags:
+            tds = tr.find_all("td")
+            if not tds:
                 continue
-            assert len(sec) == 2, "Board Parser Error: post html invalid format"
+            assert len(tds) == 2, "Board Parser Error: post html invalid format"
 
             #TODO: parse post date
-            ps_tag = sec[0].find_all("a")
-            assert len(ps_tag) == 3, "Board Parser Error: post html invalid format"
-            post_count = ps_tag[0]["name"]
-            user_count = ps_tag[1].text
+            postinfo = list(tds[0].children)
+            assert len(postinfo) == 8, "Board Parser Error: post html invalid format"
+            post_count = postinfo[0]["name"]
+            poster = postinfo[1].text
 
-            comps = list(sec[1].div.children)
+            # Date format:
+            # Posted <mm/dd/yyyy> <hh:mm:ss>\xa0(AM|PM)
+            #TODO: \xa0 char?, datetime
+            date_raw = repr(post[3]) 
+            date_arr = date_raw.split(" ")
+
+            comps = list(tds[1].div.children)
             contents = []
             i = 0
             while i < len(comps):

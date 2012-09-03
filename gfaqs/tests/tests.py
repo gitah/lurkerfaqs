@@ -4,7 +4,7 @@ from gfaqs.scraper import BoardScraper, TopicScraper
 
 class BoardScraperTest(TestCase):
     def setUp(self):
-        path = "http://%s/examples/boards" %s __file__
+        path = "http://%s/examples/boards" % __file__
         ce = Board(url="%s/ce.html" % path, name="Current Events")
         ot = Board(url="%s/ot.html" % path, name="Other Titles")
 
@@ -43,9 +43,3 @@ class BoardScraperTest(TestCase):
 
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
-
-if __name__ == "__main__":
-    test = BoardScraperTest() 
-    test.setUp()
-    test.test_get_page()
-    test.test_parse_page()
