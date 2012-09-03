@@ -1,23 +1,30 @@
+import os
+
 from django.test import TestCase
 from gfaqs.models import Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
 
 class BoardScraperTest(TestCase):
     def setUp(self):
-        path = "http://%s/examples/boards" % __file__
-        ce = Board(url="%s/ce.html" % path, name="Current Events")
-        ot = Board(url="%s/ot.html" % path, name="Other Titles")
+        self.path = "file://%s/examples/boards" % os.path.dirname(__file__)
+        self.ce = Board(url="%s/ce.html" % self.path, name="Current Events")
+        self.ot = Board(url="%s/ot.html" % self.path, name="Other Titles")
 
     def test_get_page(self):
         bs = BoardScraper(self.ce)
         try: 
             bs.get_page(0)
             bs.get_page(1)
-            bs.get_page(706)
         except IOError:
             self.fail("page not found")
 
-    def test_parse_page():
+        try:
+            # should not exist
+            bs.get_page(99999)
+        except IOError:
+            pass
+
+    def test_parse_page(self):
         bs = BoardScraper(self.ot)
         
         ot0_tl = bs.parse_page(bs.get_page(0))
@@ -38,8 +45,11 @@ class BoardScraperTest(TestCase):
         self.assertEquals(t.gfaqs_id, "59271800")
         self.assertEquals(t.title, "Kyubei's true identity (spoiler)")
 
-        ot708_tl = bs.parse_page(bs.get_page(708))
-        self.assertFalse(ot708_tl)
+        try:
+            # this page has no topics
+            ot708_tl = bs.parse_page(bs.get_page(708))
+        except ValueError:
+            pass
 
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
