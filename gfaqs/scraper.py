@@ -1,5 +1,6 @@
 import urllib
 from urlparse import urlparse
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 from gfaqs.models import User, Board, Topic, Post
@@ -95,7 +96,10 @@ class BoardScraper(Scraper):
 
             creator = User(username=tds[2].span.text)
             post_count = tds[3].text
-            last_post_date = tds[4].a.text #TODO: convert to datetime obj?
+
+            #TODO: convert to datetime obj? ex.8/30 9:00AM
+            last_post_date = tds[4].a.text #
+
 
             topic = Topic(board=self.board, creator=creator, 
                     gfaqs_id=topic_gfaqs_id, title=topic_title,
@@ -144,19 +148,19 @@ class TopicScraper(Scraper):
                 continue
             assert len(tds) == 2, "Board Parser Error: post html invalid format"
 
-            #TODO: parse post date
-            postinfo = list(tds[0].children)
+            postinfo = list(tds[0].div.children)
             assert len(postinfo) == 8, "Board Parser Error: post html invalid format"
-            post_count = postinfo[0]["name"]
+            post_num = postinfo[0]["name"]
             poster = postinfo[1].text
 
             # Date format:
-            # Posted <mm/dd/yyyy> <hh:mm:ss>\xa0(AM|PM)
-            #TODO: \xa0 char?, datetime
-            date_raw = repr(post[3]) 
-            date_arr = date_raw.split(" ")
+            format_str = u"%m/%d/%Y %I:%M:%S\\xa0%p"
+            #TODO: \xa0 char?
+            date_raw = repr(postinfo[3]) 
+            #print postinfo[3], str(postinfo[3]), date_raw, date_raw[0]
+            dt = datetime.strptime(date_raw,format_str)
 
-            comps = list(sec[1].div.children)
+            comps = list(tds[1].div.children)
             contents = []
             i = 0
             while i < len(comps):
@@ -175,3 +179,11 @@ class TopicScraper(Scraper):
 
             content_text = "".join([str(x) for x in contents])
             signature_text = "".join([str(x) for x in signature])
+
+            #TODO: edited status
+            creator = User(username=poster)
+            p = Post(topic=self.topic, creator=creator, date=dt,
+                    post_num=post_num, contents=content_text,
+                    signature=signature_text, status=0)
+
+            posts.append(p)

@@ -1,7 +1,8 @@
 import os
+from datetime import datetime
 
 from django.test import TestCase
-from gfaqs.models import Board, Topic, Post
+from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
 
 class BoardScraperTest(TestCase):
@@ -53,3 +54,35 @@ class BoardScraperTest(TestCase):
 
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
+
+class TopicScraperTest(TestCase):
+    def setUp(self):
+        self.path = "file://%s/examples/topics" % os.path.dirname(__file__)
+        ot = Board(url="%s" % self.path, name="Other Titles")
+        self.test_topic = Topic(board=ot, creator=User(username="foo"),
+                title="tmp", gfaqs_id="b.html", status=0); 
+
+    def test_parse_page(self):
+        ts = TopicScraper(self.test_topic)
+        posts = ts.parse_page(ts.get_page(0))
+        self.assertEquals(len(posts),10)
+
+        format_str = "%m/%d/%Y %I:%M:%S %p"
+
+        p = posts[0]
+        self.assertEquals(p.creator, "scarred_steak")
+        self.assertEquals(p.post_num, "1")
+        self.assertTrue(len(p.contents) > 1)
+        self.assertFalse(p.signature)
+        date = datetime.strptime("8/31/2012 11:56:28 PM", format_str)
+        self.assertEquals(p.date.hour, date.hour)
+        self.assertEquals(p.date.day, date.day)
+
+        p = posts[9]
+        self.assertEquals(p.creator, "Bako Ikporamee")
+        self.assertEquals(p.post_num, "10")
+        self.assertTrue(len(p.contents) > 1)
+        self.assertTrue(p.signature)
+        date = datetime.strptime("9/1/2012 6:58:08 AM", format_str)
+        self.assertEquals(p.date.hour, date.hour)
+        self.assertEquals(p.date.day, date.day)
