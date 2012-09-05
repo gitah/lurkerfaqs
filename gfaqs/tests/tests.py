@@ -53,6 +53,7 @@ class BoardScraperTest(TestCase):
             pass
 
     def test_retrieve(self):
+        #TODO
         bs = BoardScraper(self.ce)
 
 class TopicScraperTest(TestCase):
@@ -70,7 +71,7 @@ class TopicScraperTest(TestCase):
         format_str = "%m/%d/%Y %I:%M:%S %p"
 
         p = posts[0]
-        self.assertEquals(p.creator, "scarred_steak")
+        self.assertEquals(p.creator.username, "scarred_steak")
         self.assertEquals(p.post_num, "1")
         self.assertTrue(len(p.contents) > 1)
         self.assertFalse(p.signature)
@@ -79,10 +80,14 @@ class TopicScraperTest(TestCase):
         self.assertEquals(p.date.day, date.day)
 
         p = posts[9]
-        self.assertEquals(p.creator, "Bako Ikporamee")
+        self.assertEquals(p.creator.username, "Bako Ikporamee")
         self.assertEquals(p.post_num, "10")
         self.assertTrue(len(p.contents) > 1)
         self.assertTrue(p.signature)
         date = datetime.strptime("9/1/2012 6:58:08 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
+
+    def test_retrieve(self):
+        #TODO
+        pass

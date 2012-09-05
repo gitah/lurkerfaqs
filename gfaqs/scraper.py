@@ -2,7 +2,7 @@ import urllib
 from urlparse import urlparse
 from datetime import datetime
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, element
 from gfaqs.models import User, Board, Topic, Post
 
 #TODO: fill and possibly move somewhere else
@@ -149,36 +149,39 @@ class TopicScraper(Scraper):
             assert len(tds) == 2, "Board Parser Error: post html invalid format"
 
             postinfo = list(tds[0].div.children)
-            assert len(postinfo) == 8, "Board Parser Error: post html invalid format"
-            post_num = postinfo[0]["name"]
-            poster = postinfo[1].text
-
-            # Date format:
-            format_str = u"%m/%d/%Y %I:%M:%S\\xa0%p"
-            #TODO: \xa0 char?
-            date_raw = repr(postinfo[3]) 
-            #print postinfo[3], str(postinfo[3]), date_raw, date_raw[0]
-            dt = datetime.strptime(date_raw,format_str)
+            for el in postinfo:
+                if type(el) == element.NavigableString:
+                    if el.string.startswith("Posted"):
+                        # Date format:
+                        format_str = "Posted %m/%d/%Y %I:%M:%S %p"
+                        date_raw = " ".join(el.string.split())
+                        dt = datetime.strptime(date_raw,format_str)
+                elif el.get("name"):
+                    post_num = el["name"]
+                elif el.get("class") and el.get("class")[0] == "name":
+                    poster = el.text
 
             comps = list(tds[1].div.children)
             contents = []
             i = 0
             while i < len(comps):
                 comp = comps[i]
-                if comp.name == "br" and i+1 < len(comps):
+                # parse until we reach signature
+                if hasattr(comp,"name") and comp.name == "br" and i+1 < len(comps):
                     if comps[i+1] == "---":
                         break 
                 else:
-                    contents.append(post_comps[i])
+                    contents.append(comp)
                 i += 1
 
             signature = []
             i += 2
-            while i < len(post_comps):
+            while i < len(comps):
                 signature.append(comps[i])
+                i += 1
 
-            content_text = "".join([str(x) for x in contents])
-            signature_text = "".join([str(x) for x in signature])
+            content_text = "".join([unicode(x) for x in contents])
+            signature_text = "".join([unicode(x) for x in signature])
 
             #TODO: edited status
             creator = User(username=poster)
@@ -187,3 +190,4 @@ class TopicScraper(Scraper):
                     signature=signature_text, status=0)
 
             posts.append(p)
+        return posts
