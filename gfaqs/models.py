@@ -1,23 +1,24 @@
 from django.db import models
 
-#TODO: fill in status
 USER_STATUS = (
-    (0,"u1"),
-    (1,"u2"),
-    (2,"u3"),
-    (3,"u4")
+    (0,"normal"),
+    (1,"mod"),
+    (2,"admin"),
+    (9,"hidden")
 )
 TOPIC_STATUS = (
-    (0,"t1"),
-    (1,"t2"),
-    (2,"t3"),
-    (3,"t4")
+    (0,"normal"),
+    (1,"closed"),
+    (2,"archived"),
+    (3,"sticky"),
+    (4,"sticky_closed"),
+    (5,"purged")
 )
 POST_STATUS = (
-    (0,"p1"),
-    (1,"p2"),
-    (2,"p3"),
-    (3,"p4")
+    (0,"normal"),
+    (1,"closed"),
+    (2,"modded"),
+    (3,"edited") #TODO: write tests for this
 )
 class User(models.Model):
     username = models.CharField(max_length=25)
@@ -36,8 +37,8 @@ class Topic(models.Model):
     creator = models.ForeignKey(User)
     gfaqs_id = models.CharField(max_length=15)
     title = models.CharField(max_length=200)
-    #TODO: number_of_posts Integer
-    #TODO: last_post_date DateTime
+    number_of_posts = models.IntegerField()
+    last_post_date = models.DateTimeField()
     status = models.CharField(max_length=2, choices=TOPIC_STATUS)
     
 class Post(models.Model):
@@ -48,5 +49,3 @@ class Post(models.Model):
     contents = models.TextField()
     signature = models.TextField()
     status = models.CharField(max_length=2, choices=POST_STATUS)
-
-

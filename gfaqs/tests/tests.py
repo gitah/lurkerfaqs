@@ -22,7 +22,7 @@ class BoardScraperTest(TestCase):
         try:
             # should not exist
             bs.get_page(99999)
-        except IOError:
+        except:
             pass
 
     def test_parse_page(self):
@@ -53,9 +53,16 @@ class BoardScraperTest(TestCase):
             pass
 
     def test_retrieve(self):
-        #TODO
         bs = BoardScraper(self.ce)
-
+        topics = list(bs.retrieve())
+        self.assertEquals(len(topics), 100)
+        self.assertEquals(topics[0].title,"I love girls with big noses")
+        self.assertEquals(topics[0].creator.username,"HeyJoeSchmoe")
+        self.assertEquals(topics[49].title,"Brought my KKK knife to show and tell >_>")
+        self.assertEquals(topics[49].creator.username,"Definfinite")
+        self.assertEquals(topics[99].title,"The League of Shadows doesn't make any sense")
+        self.assertEquals(topics[99].creator.username,"rattlesnake30")
+        
 class TopicScraperTest(TestCase):
     def setUp(self):
         self.path = "file://%s/examples/topics" % os.path.dirname(__file__)

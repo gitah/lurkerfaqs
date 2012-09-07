@@ -5,17 +5,18 @@ from datetime import datetime
 from bs4 import BeautifulSoup, element
 from gfaqs.models import User, Board, Topic, Post
 
-#TODO: fill and possibly move somewhere else
 TOPIC_STATUS_MAP = {
     "topic.gif": "normal",
     "lock.gif": "locked",
     "topic_poll.gif": "poll",
     "topic_archived.gif": "archived"
 }
+TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
+TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
+POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
 class Scraper(object):
     def get_page(self, pg):
-        #TODO: catch http errors
         base = self.base_url()
         parts = urlparse(base)
         if parts.scheme == "http":
@@ -29,14 +30,17 @@ class Scraper(object):
         else:
             raise ValueError("URL scheme %s not recognized") % parts.scheme
 
-        return "".join(urllib.urlopen(page_url).readlines())
+        try:
+            return "".join(urllib.urlopen(page_url).readlines())
+        except IOError:
+            raise ValueError("page not found")
 
     def retrieve(self):
         """ generator that returns the next object the scraper will scrape """
         pg = 0
         while True:
-            html = self.get_page(pg)
             try:
+                html = self.get_page(pg)
                 for topic in self.parse_page(html):
                     yield topic
                 pg += 1
@@ -75,7 +79,7 @@ class BoardScraper(Scraper):
                 ...
             </table>
         """
-        # TODO: handle exceptions for badly formatted pages
+        # TODO: handle exceptions for badly formatted pages; write archiver first
         soup = BeautifulSoup(html)
         topics = []
         topic_tags = soup.find_all("tr")
@@ -95,14 +99,18 @@ class BoardScraper(Scraper):
             topic_title = tds[1].a.text
 
             creator = User(username=tds[2].span.text)
-            post_count = tds[3].text
+            post_count = int(tds[3].text)
 
-            #TODO: convert to datetime obj? ex.8/30 9:00AM
-            last_post_date = tds[4].a.text #
-
+            try:
+                date_raw = tds[4].a.text
+                dt = datetime.strptime(date_raw,TOPIC_DATE_FORMAT_STR)
+            except ValueError:
+                # archived topic, use alternative format str
+                dt = datetime.strptime(date_raw,TOPIC_DATE_ALT_FORMAT_STR)
 
             topic = Topic(board=self.board, creator=creator, 
                     gfaqs_id=topic_gfaqs_id, title=topic_title,
+                    number_of_posts=post_count, last_post_date=dt, 
                     status=topic_status)
             topics.append(topic)
 
@@ -149,13 +157,15 @@ class TopicScraper(Scraper):
             assert len(tds) == 2, "Board Parser Error: post html invalid format"
 
             postinfo = list(tds[0].div.children)
+            post_status = "normal"
             for el in postinfo:
                 if type(el) == element.NavigableString:
                     if el.string.startswith("Posted"):
-                        # Date format:
-                        format_str = "Posted %m/%d/%Y %I:%M:%S %p"
                         date_raw = " ".join(el.string.split())
-                        dt = datetime.strptime(date_raw,format_str)
+                        dt = datetime.strptime(date_raw,POST_DATE_FORMAT_STR)
+                    elif el.string == "(edited)":
+                        post_status = "edited"
+
                 elif el.get("name"):
                     post_num = el["name"]
                 elif el.get("class") and el.get("class")[0] == "name":
@@ -182,8 +192,8 @@ class TopicScraper(Scraper):
 
             content_text = "".join([unicode(x) for x in contents])
             signature_text = "".join([unicode(x) for x in signature])
+            #TODO: check if content_text is modded or closed
 
-            #TODO: edited status
             creator = User(username=poster)
             p = Post(topic=self.topic, creator=creator, date=dt,
                     post_num=post_num, contents=content_text,
