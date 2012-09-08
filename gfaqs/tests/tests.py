@@ -85,6 +85,7 @@ class TopicScraperTest(TestCase):
         date = datetime.strptime("8/31/2012 11:56:28 PM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
+        self.assertEquals(p.status, "edited")
 
         p = posts[9]
         self.assertEquals(p.creator.username, "Bako Ikporamee")
@@ -94,6 +95,7 @@ class TopicScraperTest(TestCase):
         date = datetime.strptime("9/1/2012 6:58:08 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
+        self.assertEquals(p.status, "normal")
 
     def test_retrieve(self):
         #TODO

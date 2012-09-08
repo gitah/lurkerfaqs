@@ -11,6 +11,10 @@ TOPIC_STATUS_MAP = {
     "topic_poll.gif": "poll",
     "topic_archived.gif": "archived"
 }
+STRING_EDITED = "(edited)";
+STRING_MODDED = "[This message was deleted at the request of a moderator or administrator]";
+STRING_CLOSED = "[This message was deleted at the request of the original poster]";
+
 TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
@@ -163,9 +167,8 @@ class TopicScraper(Scraper):
                     if el.string.startswith("Posted"):
                         date_raw = " ".join(el.string.split())
                         dt = datetime.strptime(date_raw,POST_DATE_FORMAT_STR)
-                    elif el.string == "(edited)":
+                    elif el.string == STRING_EDITED:
                         post_status = "edited"
-
                 elif el.get("name"):
                     post_num = el["name"]
                 elif el.get("class") and el.get("class")[0] == "name":
@@ -192,12 +195,15 @@ class TopicScraper(Scraper):
 
             content_text = "".join([unicode(x) for x in contents])
             signature_text = "".join([unicode(x) for x in signature])
-            #TODO: check if content_text is modded or closed
+            if content_text == STRING_MODDED:
+                post_status = "modded"
+            elif content_text == STRING_CLOSED:
+                post_status = "closed"
 
             creator = User(username=poster)
             p = Post(topic=self.topic, creator=creator, date=dt,
                     post_num=post_num, contents=content_text,
-                    signature=signature_text, status=0)
+                    signature=signature_text, status=post_status)
 
             posts.append(p)
         return posts
