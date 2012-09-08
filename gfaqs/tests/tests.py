@@ -4,6 +4,7 @@ from datetime import datetime
 from django.test import TestCase
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
+from gfaqs.archiver import Archiver
 
 class BoardScraperTest(TestCase):
     def setUp(self):
@@ -98,5 +99,35 @@ class TopicScraperTest(TestCase):
         self.assertEquals(p.status, "normal")
 
     def test_retrieve(self):
-        #TODO
-        pass
+        ts = TopicScraper(self.test_topic)
+        posts = list(ts.retrieve())
+        self.assertEquals(len(posts), 12)
+        self.assertEquals(posts[0].creator.username, "scarred_steak")
+        self.assertEquals(posts[11].creator.username,"Yusuke Urameshi")
+
+class ArchiverTest(TestCase):
+    def setUp(self):
+        base = "file://%s/examples/topics" % os.path.dirname(__file__)
+        board_list = [("ce.html", "CE", 1)]
+        self.archiver = Archiver(board_list)
+
+    def test_archive_board(self):
+        self.assertEquals(Board.objects.all()[0].name, "CE")
+        ce = Board.objects.all()[0]
+
+        Archiver.archive_board(ce,recursive=False)
+        self.assertEquals(len(Topic.objects.all()), 100)
+        Archiver.archive_board(ce,recursive=False)
+        self.assertEquals(len(Topic.objects.all()), 100)
+    
+    def test_archive_topic(self):
+        # make sure db is loaded correctly
+        self.assertEquals(Board.objects.all()[0].name, "CE")
+        ce = Board.objects.all()[0]
+        topic = Topic(board=ce, creator=User(username="foo"),
+                title="tmp", gfaqs_id="b.html", status=0);
+
+        Archiver.archive_topic(topic)
+        self.assertEquals(len(Post.objects.all()), 12)
+        Archiver.archive_topic(topic)
+        self.assertEquals(len(Post.objects.all()), 12)
