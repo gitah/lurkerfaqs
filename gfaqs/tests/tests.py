@@ -106,26 +106,25 @@ class TopicScraperTest(TestCase):
         self.assertEquals(posts[11].creator.username,"Yusuke Urameshi")
 
 class ArchiverTest(TestCase):
-    def setUp(self):
-        base = "file://%s/examples/topics" % os.path.dirname(__file__)
-        board_list = [("ce.html", "CE", 1)]
-        self.archiver = Archiver(board_list)
-
     def test_archive_board(self):
-        self.assertEquals(Board.objects.all()[0].name, "CE")
-        ce = Board.objects.all()[0]
+        path = "file://%s/examples/boards" % os.path.dirname(__file__)
+        ce = Board(url="%s/ce.html" % path, name="Current Events")
+        ce.save()
 
-        Archiver.archive_board(ce,recursive=False)
+        Archiver.archive_board(ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 100)
-        Archiver.archive_board(ce,recursive=False)
+        Archiver.archive_board(ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 100)
     
     def test_archive_topic(self):
-        # make sure db is loaded correctly
-        self.assertEquals(Board.objects.all()[0].name, "CE")
-        ce = Board.objects.all()[0]
-        topic = Topic(board=ce, creator=User(username="foo"),
-                title="tmp", gfaqs_id="b.html", status=0);
+        path = "file://%s/examples/topics" % os.path.dirname(__file__)
+        ot = Board(url="%s" % path, name="Other Titles")
+        ot.save()
+        creator=User(username="foo")
+        creator.save()
+        topic = Topic(board=ot, number_of_posts=12, creator=creator, title="tmp", 
+            gfaqs_id="b.html", last_post_date=datetime.now(), status=0); 
+        topic.save()
 
         Archiver.archive_topic(topic)
         self.assertEquals(len(Post.objects.all()), 12)

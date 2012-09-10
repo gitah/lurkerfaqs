@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup, element
 from gfaqs.models import User, Board, Topic, Post
 
 TOPIC_STATUS_MAP = {
-    "topic.gif": "normal",
-    "lock.gif": "locked",
-    "topic_poll.gif": "poll",
-    "topic_archived.gif": "archived"
+    "topic.gif": Topic.NORMAL,
+    "lock.gif": Topic.CLOSED,
+    "topic_poll.gif": Topic.POLL,
+    "topic_archived.gif": Topic.ARCHIVED
 }
 STRING_EDITED = "(edited)";
 STRING_MODDED = "[This message was deleted at the request of a moderator or administrator]";
@@ -97,7 +97,7 @@ class BoardScraper(Scraper):
 
             status_img = tds[0].img["src"].split("/")[-1]
             topic_status = TOPIC_STATUS_MAP.get(status_img, None)
-            assert topic_status, "Board Parser Error: status image not found"
+            assert topic_status!=None, "Board Parser Error: status image not found"
 
             topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
             topic_title = tds[1].a.text
@@ -161,14 +161,14 @@ class TopicScraper(Scraper):
             assert len(tds) == 2, "Board Parser Error: post html invalid format"
 
             postinfo = list(tds[0].div.children)
-            post_status = "normal"
+            post_status = Post.NORMAL
             for el in postinfo:
                 if type(el) == element.NavigableString:
                     if el.string.startswith("Posted"):
                         date_raw = " ".join(el.string.split())
                         dt = datetime.strptime(date_raw,POST_DATE_FORMAT_STR)
                     elif el.string == STRING_EDITED:
-                        post_status = "edited"
+                        post_status = Post.EDITED
                 elif el.get("name"):
                     post_num = el["name"]
                 elif el.get("class") and el.get("class")[0] == "name":
@@ -196,9 +196,9 @@ class TopicScraper(Scraper):
             content_text = "".join([unicode(x) for x in contents])
             signature_text = "".join([unicode(x) for x in signature])
             if content_text == STRING_MODDED:
-                post_status = "modded"
+                post_status = Post.MODDED
             elif content_text == STRING_CLOSED:
-                post_status = "closed"
+                post_status = Post.CLOSED
 
             creator = User(username=poster)
             p = Post(topic=self.topic, creator=creator, date=dt,

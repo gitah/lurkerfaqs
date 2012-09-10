@@ -21,23 +21,23 @@ TODO
 
 2. Write Scraper
     - investigate BeautifulSoup (OK)
-    - posts scraper (WORK)
+    - posts scraper (OK)
         - for each page pg in topic:
             - get pg
             - process pg wiht BeautifulSoup
             - for each post:
                 - update db with post info
-    - topics scraper (WORK)
+    - topics scraper (OK)
         - until unchanged topic processed:
             - scrape page i
             - parse page i with BeautifulSoup
             - for each topic t:
                 - update db with topic info
                 - run posts scraper on topic t
-    - write tests
+    - write tests (OK)
 
-3. Write ScraperController
-    - configuration to define boards to scrape
+3. Write ScraperController (WORK)
+    - configuration to define boards to scrape (OK)
         - board url
         - scrape period
         - automatically update Board model with boards

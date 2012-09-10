@@ -2,7 +2,7 @@ import time
 from threading import Thread
 
 from scraper import BoardScraper, TopicScraper
-from models import Board, Topic
+from models import User, Board, Topic, Post
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,7 +13,7 @@ TODO:
     - TODO: daemonize
 """
 class BoardArchiverThread(Thread):
-    def __init__(board, refresh):
+    def __init__(self, board, refresh):
         self.board = board
         self.refresh = refresh
 
@@ -36,8 +36,8 @@ class Archiver():
                 board = Board(url=board_url,name=name)
                 board.save()
 
-            th = BoardArchiverThread(board,refersh)
-            self.threads.add(th)
+            th = BoardArchiverThread(board,refresh)
+            self.threads.append(th)
 
     def start(self):
         """ Starts the archiver """
@@ -63,17 +63,39 @@ class Archiver():
                     break 
             except ObjectDoesNotExist:
                 t.pk = None
+            t.creator = Archiver.add_user(t.creator)
             t.save()
             if recursive:
                 Archiver.archive_post(t)
 
     @staticmethod
     def archive_topic(t):
-        ts = TopicScraper(b)
+        """
+        TODO: 
+        handle exceptions
+            - t not in db
+            - multiple results errors for *.get() calls
+        """
+        ts = TopicScraper(t)
         for p in ts.retrieve():
+            # Check of post exists already in db to determine update or add
             try:
-                p_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
-                t.pk = p_db.pk
+                p_db = Post.objects.filter(topic_id=t.id).get(
+                    post_num=p.post_num)
+                # TODO: update instead of ignore, revisions ???
+                continue
             except ObjectDoesNotExist:
-                t.pk = None
+                p.pk = None
+            p.creator = Archiver.add_user(p.creator)
             p.save()
+
+    @staticmethod
+    def add_user(user):
+        """ Check if user exists already in db, if not add it """
+        if user.id:
+            return user
+        try:
+            return User.objects.get(username=user.username)
+        except ObjectDoesNotExist:
+            user.save()
+        return user
