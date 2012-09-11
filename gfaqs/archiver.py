@@ -1,6 +1,7 @@
 import time
 from threading import Thread
 
+from daemon import Daemon
 from scraper import BoardScraper, TopicScraper
 from models import User, Board, Topic, Post
 
@@ -10,7 +11,6 @@ from django.core.exceptions import ObjectDoesNotExist
 """
 TODO:
     - TODO: thread Board/Topic scrapers, threadpools
-    - TODO: daemonize
 """
 class BoardArchiverThread(Thread):
     def __init__(self, board, refresh):
@@ -21,11 +21,10 @@ class BoardArchiverThread(Thread):
         Archiver.archive_board(self.board)
         time.sleep(refresh*60)
     
-class Archiver():
+class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
-            base=settings.GFAQS_BASE_URL):
-
+            base=settings.GFAQS_BASE_URL, pidfile=""):
         self.threads = []
         for path,name,refresh in board_info:
             board_url = "%s/%s" % (base,path)
@@ -38,8 +37,9 @@ class Archiver():
 
             th = BoardArchiverThread(board,refresh)
             self.threads.append(th)
+        super(Archiver,self).__init__(pidfile)
 
-    def start(self):
+    def run(self):
         """ Starts the archiver """
         for th in self.threads:
             th.start()
