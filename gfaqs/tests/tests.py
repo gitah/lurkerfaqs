@@ -6,10 +6,15 @@ from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.archiver import Archiver
 
+from test_server import test_server
+
+EXAMPLE_DIR = "file://%s/examples" % os.path.dirname(__file__)
+#start server
+
 class BoardScraperTest(TestCase):
     def setUp(self):
-        self.path = "file://%s/examples/boards" % os.path.dirname(__file__)
-        self.ce = Board(url="%s/ce.html" % self.path, name="Current Events")
+        self.path = "file://%s/examples" % os.path.dirname(__file__)
+        self.ce = Board(url="%s/ce" % self.path, name="Current Events")
         self.ot = Board(url="%s/ot.html" % self.path, name="Other Titles")
 
     def test_get_page(self):
@@ -133,7 +138,7 @@ class ArchiverTest(TestCase):
 
     def test_daemon(self):
         #base = "file://%s/examples/topics" % os.path.dirname(__file__)
-        #board_list = [("ce.html", "CE", 1)]
+        #board_list = [("ce", "CE", 1)]
         #self.archiver = Archiver(board_list)
         #TODO
         pass

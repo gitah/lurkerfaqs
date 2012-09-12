@@ -25,12 +25,6 @@ class Scraper(object):
         parts = urlparse(base)
         if parts.scheme == "http":
             page_url = "%s?page=%s" % (base,pg)
-        elif parts.scheme == "file":
-            # for testing purposes
-            path = "/".join(parts.path.split("/")[:-1])
-            f = parts.path.split("/")[-1]
-            name,ext = f.split(".")
-            page_url = "%s:///%s/%s-%s.%s" % (parts.scheme,path,name,pg,ext)
         else:
             raise ValueError("URL scheme %s not recognized") % parts.scheme
 
