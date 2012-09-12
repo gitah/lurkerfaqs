@@ -63,10 +63,9 @@ class Daemon(object):
 
     def delpid(self):
         try:
-            with open(self.pidfile) as fp:
-                os.remove(fp)
-        except IOError:
-            pass
+            os.remove(self.pidfile)
+        except OSError:
+            pass # file doesn't exist, so we're all good
 
     def start(self):
         """
@@ -87,7 +86,6 @@ class Daemon(object):
         
         # Start the daemon
         self.daemonize()
-        print "SLKDJFL"
         self.run()
 
     def stop(self):

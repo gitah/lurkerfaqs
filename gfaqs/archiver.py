@@ -8,16 +8,13 @@ from models import User, Board, Topic, Post
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-"""
-TODO:
-    - TODO: thread Board/Topic scrapers, threadpools
-"""
+#TODO: thread Board/Topic scrapers, threadpools
 class BoardArchiverThread(Thread):
     def __init__(self, board, refresh):
         self.board = board
         self.refresh = refresh
 
-    def start():
+    def start(self):
         Archiver.archive_board(self.board)
         time.sleep(refresh*60)
     
@@ -66,7 +63,7 @@ class Archiver(Daemon):
             t.creator = Archiver.add_user(t.creator)
             t.save()
             if recursive:
-                Archiver.archive_post(t)
+                Archiver.archive_topic(t)
 
     @staticmethod
     def archive_topic(t):

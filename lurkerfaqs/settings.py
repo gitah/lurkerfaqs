@@ -150,8 +150,12 @@ LOGGING = {
     }
 }
 
+#-- GFAQs Archiver Settings --#
 
-# GFAQs Archiver Settings
+# path of PID file for gfaqs-archiver daemon
+GFAQS_ARCHIVER_PID_FILE="/var/run/gfaqs-archiver/gfaqs-archiver.pid"
+
+# base url for gamefaqs
 GFAQS_BASE_URL="http://www.gamefaqs.com"
 
 # List of boards to scrape

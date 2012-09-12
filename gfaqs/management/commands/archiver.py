@@ -1,8 +1,9 @@
 import sys
 from django.core.management.base import BaseCommand, CommandError
 from gfaqs.archiver import Archiver
+from django.conf import settings
 
-PIDFILE="/var/run/gfaqs-archiver.pid"
+PIDFILE=settings.GFAQS_ARCHIVER_PID_FILE
 
 def help():
     return "usage: python manage.py archiver [start|stop|restart]\n"

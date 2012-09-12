@@ -130,3 +130,10 @@ class ArchiverTest(TestCase):
         self.assertEquals(len(Post.objects.all()), 12)
         Archiver.archive_topic(topic)
         self.assertEquals(len(Post.objects.all()), 12)
+
+    def test_daemon(self):
+        #base = "file://%s/examples/topics" % os.path.dirname(__file__)
+        #board_list = [("ce.html", "CE", 1)]
+        #self.archiver = Archiver(board_list)
+        #TODO
+        pass
