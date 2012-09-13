@@ -19,22 +19,17 @@ def start_server(port):
 class BoardScraperTest(TestCase):
     @classmethod
     def setUpClass(cls):
-        print "FALKSJFLKSDJF"
-        print "FALKSJFLKSDJF"
-        print "FALKSJFLKSDJF"
-        print "FALKSJFLKSDJF"
-        print "FALKSJFLKSDJF"
-        print "FALKSJFLKSDJF"
-        cls.th = test_server.start_server(14100)
+        cls.server_port = 14100
+        cls.th = test_server.start_server(cls.server_port)
 
     @classmethod
     def tearDownClass(cls):
-        cls.th.shutdown()
+        cls.th.stop()
 
     def setUp(self):
-        self.path = "file://%s/examples" % os.path.dirname(__file__)
-        self.ce = Board(url="%s/ce" % self.path, name="Current Events")
-        self.ot = Board(url="%s/ot.html" % self.path, name="Other Titles")
+        path = "http://localhost:%s" % BoardScraperTest.server_port
+        self.ce = Board(url="%s/boards/ce" % path, name="Current Events")
+        self.ot = Board(url="%s/boards/ot" % path, name="Other Titles")
 
     def test_get_page(self):
         bs = BoardScraper(self.ce)
@@ -54,22 +49,15 @@ class BoardScraperTest(TestCase):
         bs = BoardScraper(self.ot)
         
         ot0_tl = bs.parse_page(bs.get_page(0))
-        self.assertEquals(len(ot0_tl), 50)
+        self.assertEquals(len(ot0_tl), 10)
         t = ot0_tl[0]
-        self.assertEquals(t.creator.username, "Hildetorr")
-        self.assertEquals(t.gfaqs_id, "63892639")
-        self.assertEquals(t.title, "Naruto 599 Very Heavy Spoilers")
+        self.assertEquals(t.creator.username, "EmeralDragon23")
+        self.assertEquals(t.gfaqs_id, "64019288")
+        self.assertEquals(t.title, "Here's my Cage of Eden prediction *spoilers*")
         t = ot0_tl[-1]
-        self.assertEquals(t.creator.username, "McDohl MR")
-        self.assertEquals(t.gfaqs_id, "63892769")
-        self.assertEquals(t.title, "Happy birthday Makoto Kikuchi! (THE iDOLM@STER, 8/29)")
-
-        ot0_tl = bs.parse_page(bs.get_page(707))
-        self.assertEquals(len(ot0_tl), 8)
-        t = ot0_tl[4]
-        self.assertEquals(t.creator.username, "jabini")
-        self.assertEquals(t.gfaqs_id, "59271800")
-        self.assertEquals(t.title, "Kyubei's true identity (spoiler)")
+        self.assertEquals(t.creator.username, "Hellcopter")
+        self.assertEquals(t.gfaqs_id, "64017353")
+        self.assertEquals(t.title, 'What\'s anime really got you "into" anime?')
 
         try:
             # this page has no topics
@@ -80,22 +68,21 @@ class BoardScraperTest(TestCase):
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
         topics = list(bs.retrieve())
-        self.assertEquals(len(topics), 100)
-        self.assertEquals(topics[0].title,"I love girls with big noses")
-        self.assertEquals(topics[0].creator.username,"HeyJoeSchmoe")
-        self.assertEquals(topics[49].title,"Brought my KKK knife to show and tell >_>")
-        self.assertEquals(topics[49].creator.username,"Definfinite")
-        self.assertEquals(topics[99].title,"The League of Shadows doesn't make any sense")
-        self.assertEquals(topics[99].creator.username,"rattlesnake30")
+        self.assertEquals(len(topics), 20)
+        self.assertEquals(topics[0].title,"How do you keep yourself from lucid dreaming?")
+        self.assertEquals(topics[0].creator.username,"hikaru_beoulve")
+        self.assertEquals(topics[19].title,"What were/are you the biggest fan of, Rock Band or Guitar Hero")
+        self.assertEquals(topics[19].creator.username,"Purecorruption")
         
 class TopicScraperTest(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.th = test_server.start_server(14101)
+        cls.server_port = 14101
+        cls.th = test_server.start_server(cls.server_port)
 
     @classmethod
     def tearDownClass(cls):
-        cls.th.shutdown()
+        cls.th.stop()
 
     def setUp(self):
         self.path = "file://%s/examples/topics" % os.path.dirname(__file__)
@@ -140,11 +127,12 @@ class TopicScraperTest(TestCase):
 class ArchiverTest(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.th = test_server.start_server(14102)
+        cls.server_port = 14102
+        cls.th = test_server.start_server(cls.server_port)
 
     @classmethod
     def tearDownClass(cls):
-        cls.th.shutdown()
+        cls.th.stop()
 
     def test_archive_board(self):
         path = "file://%s/examples/boards" % os.path.dirname(__file__)
