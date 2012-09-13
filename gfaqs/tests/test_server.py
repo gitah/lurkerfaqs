@@ -1,6 +1,8 @@
-import BaseHTTPServer
 import os
 import urlparse
+import threading
+import BaseHTTPServer
+import SocketServer
 
 """
 Implements a webserver that emulates a gamefaqs GET request for testing
@@ -9,6 +11,10 @@ HOSTNAME="localhost"
 PORT_NUMBER= 9999
 
 EXAMPLE_DIR = "file://%s/examples" % os.path.dirname(__file__)
+
+class ThreadingHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
+    pass
+
 
 class TestRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
@@ -54,19 +60,22 @@ class TestRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except IOError:
             die()
 
-test_server = BaseHTTPServer.HTTPServer(
-    (HOSTNAME, PORT_NUMBER), TestRequestHandler)
 
-if __name__ == "__main__":
-    import threading
-    class ServerThread(threading.Thread):
-        def __init__(self, server):
-            self.server = server
-        def start(self):
-            self.server.serve_forever()
+class TestServerThread(threading.Thread):
+    def __init__(self, port, hostname="localhost"):
+        super(TestServerThread,self).__init__()
+        self.port=port
+        self.hostname=hostname
+        self.server = ThreadingHTTPServer(
+            (self.hostname, self.port), TestRequestHandler)
 
-    print "bar"
-    th = ServerThread(test_server)
-    print "as"
+    def run(self):
+        self.server.serve_forever()
+
+    def stop(self):
+        self.server.shutdown()
+
+def start_server(port, hostname="localhost"):
+    th = TestServerThread(port,hostname)
     th.start()
-    print "foo"
+    return th

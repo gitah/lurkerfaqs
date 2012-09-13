@@ -1,17 +1,36 @@
 import os
 from datetime import datetime
+from threading import Thread
 
 from django.test import TestCase
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.archiver import Archiver
 
-from test_server import test_server
+import test_server
 
 EXAMPLE_DIR = "file://%s/examples" % os.path.dirname(__file__)
 #start server
 
+def start_server(port):
+        server = test_server.create_server(port)
+        server.serve_forever()
+
 class BoardScraperTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        print "FALKSJFLKSDJF"
+        print "FALKSJFLKSDJF"
+        print "FALKSJFLKSDJF"
+        print "FALKSJFLKSDJF"
+        print "FALKSJFLKSDJF"
+        print "FALKSJFLKSDJF"
+        cls.th = test_server.start_server(14100)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.th.shutdown()
+
     def setUp(self):
         self.path = "file://%s/examples" % os.path.dirname(__file__)
         self.ce = Board(url="%s/ce" % self.path, name="Current Events")
@@ -70,6 +89,14 @@ class BoardScraperTest(TestCase):
         self.assertEquals(topics[99].creator.username,"rattlesnake30")
         
 class TopicScraperTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.th = test_server.start_server(14101)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.th.shutdown()
+
     def setUp(self):
         self.path = "file://%s/examples/topics" % os.path.dirname(__file__)
         ot = Board(url="%s" % self.path, name="Other Titles")
@@ -111,6 +138,14 @@ class TopicScraperTest(TestCase):
         self.assertEquals(posts[11].creator.username,"Yusuke Urameshi")
 
 class ArchiverTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.th = test_server.start_server(14102)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.th.shutdown()
+
     def test_archive_board(self):
         path = "file://%s/examples/boards" % os.path.dirname(__file__)
         ce = Board(url="%s/ce.html" % path, name="Current Events")
