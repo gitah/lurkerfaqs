@@ -85,10 +85,10 @@ class TopicScraperTest(TestCase):
         cls.th.stop()
 
     def setUp(self):
-        self.path = "file://%s/examples/topics" % os.path.dirname(__file__)
-        ot = Board(url="%s" % self.path, name="Other Titles")
-        self.test_topic = Topic(board=ot, creator=User(username="foo"),
-                title="tmp", gfaqs_id="b.html", status=0); 
+        path = "http://localhost:%s" % TopicScraperTest.server_port
+        ce = Board(url="%s/boards/ce" % path, name="Other Titles")
+        self.test_topic = Topic(board=ce, creator=User(username="foo"),
+                title="tmp", gfaqs_id="63995827", status=0);
 
     def test_parse_page(self):
         ts = TopicScraper(self.test_topic)
@@ -98,31 +98,31 @@ class TopicScraperTest(TestCase):
         format_str = "%m/%d/%Y %I:%M:%S %p"
 
         p = posts[0]
-        self.assertEquals(p.creator.username, "scarred_steak")
+        self.assertEquals(p.creator.username, "CoolBeansAvl")
         self.assertEquals(p.post_num, "1")
         self.assertTrue(len(p.contents) > 1)
-        self.assertFalse(p.signature)
-        date = datetime.strptime("8/31/2012 11:56:28 PM", format_str)
+        self.assertTrue(p.signature)
+        date = datetime.strptime("9/9/2012 11:36:44 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
-        self.assertEquals(p.status, "edited")
+        self.assertEquals(p.status, Post.NORMAL)
 
         p = posts[9]
-        self.assertEquals(p.creator.username, "Bako Ikporamee")
+        self.assertEquals(p.creator.username, "stepalicious")
         self.assertEquals(p.post_num, "10")
         self.assertTrue(len(p.contents) > 1)
         self.assertTrue(p.signature)
-        date = datetime.strptime("9/1/2012 6:58:08 AM", format_str)
+        date = datetime.strptime("9/10/2012 7:11:39 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
-        self.assertEquals(p.status, "normal")
+        self.assertEquals(p.status, Post.NORMAL)
 
     def test_retrieve(self):
         ts = TopicScraper(self.test_topic)
         posts = list(ts.retrieve())
-        self.assertEquals(len(posts), 12)
-        self.assertEquals(posts[0].creator.username, "scarred_steak")
-        self.assertEquals(posts[11].creator.username,"Yusuke Urameshi")
+        self.assertEquals(len(posts), 53)
+        self.assertEquals(posts[0].creator.username, "CoolBeansAvl")
+        self.assertEquals(posts[-1].creator.username,"Xelltrix")
 
 class ArchiverTest(TestCase):
     @classmethod
@@ -135,29 +135,29 @@ class ArchiverTest(TestCase):
         cls.th.stop()
 
     def test_archive_board(self):
-        path = "file://%s/examples/boards" % os.path.dirname(__file__)
-        ce = Board(url="%s/ce.html" % path, name="Current Events")
+        path = "http://localhost:%s" % ArchiverTest.server_port
+        ce = Board(url="%s/boards/ce" % path, name="CE")
         ce.save()
 
         Archiver.archive_board(ce, recursive=False)
-        self.assertEquals(len(Topic.objects.all()), 100)
+        self.assertEquals(len(Topic.objects.all()), 20)
         Archiver.archive_board(ce, recursive=False)
-        self.assertEquals(len(Topic.objects.all()), 100)
+        self.assertEquals(len(Topic.objects.all()), 20)
     
     def test_archive_topic(self):
-        path = "file://%s/examples/topics" % os.path.dirname(__file__)
-        ot = Board(url="%s" % path, name="Other Titles")
+        path = "http://localhost:%s" % ArchiverTest.server_port
+        ot = Board(url="%s/boards/ot" % path, name="Other Titles")
         ot.save()
         creator=User(username="foo")
         creator.save()
-        topic = Topic(board=ot, number_of_posts=12, creator=creator, title="tmp", 
-            gfaqs_id="b.html", last_post_date=datetime.now(), status=0); 
+        topic = Topic(board=ot, number_of_posts=57, creator=creator, title="tmp", 
+            gfaqs_id="64010226", last_post_date=datetime.now(), status=0); 
         topic.save()
 
         Archiver.archive_topic(topic)
-        self.assertEquals(len(Post.objects.all()), 12)
+        self.assertEquals(len(Post.objects.all()), 57)
         Archiver.archive_topic(topic)
-        self.assertEquals(len(Post.objects.all()), 12)
+        self.assertEquals(len(Post.objects.all()), 57)
 
     def test_daemon(self):
         #base = "file://%s/examples/topics" % os.path.dirname(__file__)
