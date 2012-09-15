@@ -1,7 +1,10 @@
 import os
+import time
+
 from datetime import datetime
 from threading import Thread
 
+from django.conf import settings
 from django.test import TestCase
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
@@ -130,9 +133,32 @@ class ArchiverTest(TestCase):
         cls.server_port = 14102
         cls.th = test_server.start_server(cls.server_port)
 
+        path = "http://localhost:%s" % ArchiverTest.server_port
+        ce_url = "%s/boards/ce" % path
+        board_list = [(ce_url, "CE", 5)]
+        archiver = Archiver(board_list)
+        Board(url="2").save()
+        print "^^", Board.objects.all()
+        cls.archiver_th = ArchiverTest.DaemonRunnerThread(archiver)
+
     @classmethod
     def tearDownClass(cls):
+        cls.archiver_th.stop()
         cls.th.stop()
+
+    class DaemonRunnerThread(Thread):
+        def __init__(self,daemon):
+            super(ArchiverTest.DaemonRunnerThread, self).__init__()
+            self.daemon = daemon
+            self.is_running = False
+
+        def run(self):
+            self.is_running = True
+            self.daemon.start()
+        
+        def stop(self):
+            if self.is_running:
+                self.daemon.stop()
 
     def test_archive_board(self):
         path = "http://localhost:%s" % ArchiverTest.server_port
@@ -160,8 +186,25 @@ class ArchiverTest(TestCase):
         self.assertEquals(len(Post.objects.all()), 57)
 
     def test_daemon(self):
-        #base = "file://%s/examples/topics" % os.path.dirname(__file__)
-        #board_list = [("ce", "CE", 1)]
-        #self.archiver = Archiver(board_list)
-        #TODO
-        pass
+        Board(url="3").save()
+        print "&&", Board.objects.all()
+        self.assertEquals(len(Board.objects.all()), 1)
+
+        cls.archiver_th.start()
+        # ensure pid file present
+        try:
+            open(settings.GFAQS_ARCHIVER_PID_FILE)
+        except IOError:
+            self.fail("pid file not found")
+
+        time.sleep(1) #wait a while for archiver to do its thing
+        self.assertEquals(len(Topic.objects.all()), 1)
+        self.assertEquals(len(Post.objects.all()), 1)
+        archiver.stop()
+
+        # ensure pid file gone
+        try:
+            open(settings.GFAQS_ARCHIVER_PID_FILE)
+            self.fail("pid file still exists")
+        except IOError:
+            pass

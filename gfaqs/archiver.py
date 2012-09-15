@@ -16,12 +16,13 @@ class BoardArchiverThread(Thread):
 
     def start(self):
         Archiver.archive_board(self.board)
-        time.sleep(refresh*60)
+        time.sleep(self.refresh*60)
     
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
-            base=settings.GFAQS_BASE_URL, pidfile=""):
+            base=settings.GFAQS_BASE_URL,
+            pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
         self.threads = []
         for path,name,refresh in board_info:
             board_url = "%s/%s" % (base,path)
@@ -35,6 +36,7 @@ class Archiver(Daemon):
             th = BoardArchiverThread(board,refresh)
             self.threads.append(th)
         super(Archiver,self).__init__(pidfile)
+        print "*", Board.objects.all()
 
     def run(self):
         """ Starts the archiver """
