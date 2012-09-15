@@ -19,7 +19,7 @@ TODO
     - Post
     - Board
 
-2. Write Scraper
+2. Write Scraper (OK
     - investigate BeautifulSoup (OK)
     - posts scraper (OK)
         - for each page pg in topic:
@@ -41,7 +41,7 @@ TODO
         - board url
         - scrape period
         - automatically update Board model with boards
-    - gfaqs authentication and cookie management
+    - gfaqs authentication and cookie management (WORK)
         - support multiple users?
     - write tests
 

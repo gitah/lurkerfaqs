@@ -13,32 +13,40 @@ class BoardArchiverThread(Thread):
     def __init__(self, board, refresh):
         self.board = board
         self.refresh = refresh
+        self.sleeping = False
 
     def start(self):
-        Archiver.archive_board(self.board)
-        time.sleep(self.refresh*60)
+        while True:
+            Archiver.archive_board(self.board)
+            self.sleeping = True
+            time.sleep(self.refresh*60)
+            self.sleeping = False
     
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
             base=settings.GFAQS_BASE_URL,
             pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
+        self.board_info = board_info
+        self.base_url = base
         self.threads = []
-        for path,name,refresh in board_info:
-            board_url = "%s/%s" % (base,path)
+        super(Archiver,self).__init__(pidfile)
+
+    def run(self):
+        for path,name,refresh in self.board_info:
+            board_url = "%s/%s" % (self.base_url,path)
             # create board if not in db
             try:
                 board = Board.objects.get(url=board_url)
             except ObjectDoesNotExist:
                 board = Board(url=board_url,name=name)
                 board.save()
+                print board.url, board.name
 
             th = BoardArchiverThread(board,refresh)
             self.threads.append(th)
-        super(Archiver,self).__init__(pidfile)
-        print "*", Board.objects.all()
 
-    def run(self):
+        print len([th.board for th in self.threads])
         """ Starts the archiver """
         for th in self.threads:
             th.start()

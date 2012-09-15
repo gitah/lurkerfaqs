@@ -128,24 +128,6 @@ class TopicScraperTest(TestCase):
         self.assertEquals(posts[-1].creator.username,"Xelltrix")
 
 class ArchiverTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server_port = 14102
-        cls.th = test_server.start_server(cls.server_port)
-
-        path = "http://localhost:%s" % ArchiverTest.server_port
-        ce_url = "%s/boards/ce" % path
-        board_list = [(ce_url, "CE", 5)]
-        archiver = Archiver(board_list)
-        Board(url="2").save()
-        print "^^", Board.objects.all()
-        cls.archiver_th = ArchiverTest.DaemonRunnerThread(archiver)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.archiver_th.stop()
-        cls.th.stop()
-
     class DaemonRunnerThread(Thread):
         def __init__(self,daemon):
             super(ArchiverTest.DaemonRunnerThread, self).__init__()
@@ -155,10 +137,26 @@ class ArchiverTest(TestCase):
         def run(self):
             self.is_running = True
             self.daemon.start()
-        
+
         def stop(self):
             if self.is_running:
                 self.daemon.stop()
+                self.is_running=False
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server_port = 14102
+        cls.th = test_server.start_server(cls.server_port)
+
+        path = "http://localhost:%s" % ArchiverTest.server_port
+        board_list = [("boards/ce", "CE", 5)]
+        archiver = Archiver(board_info=board_list,base=path)
+        cls.archiver_th = ArchiverTest.DaemonRunnerThread(archiver)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.archiver_th.stop()
+        cls.th.stop()
 
     def test_archive_board(self):
         path = "http://localhost:%s" % ArchiverTest.server_port
@@ -186,21 +184,20 @@ class ArchiverTest(TestCase):
         self.assertEquals(len(Post.objects.all()), 57)
 
     def test_daemon(self):
-        Board(url="3").save()
-        print "&&", Board.objects.all()
-        self.assertEquals(len(Board.objects.all()), 1)
+        ArchiverTest.archiver_th.start()
 
-        cls.archiver_th.start()
+        # wait a while for archiver to do its thing
+        time.sleep(5)
+        self.assertEquals(len(Board.objects.all()), 1)
         # ensure pid file present
         try:
             open(settings.GFAQS_ARCHIVER_PID_FILE)
         except IOError:
             self.fail("pid file not found")
 
-        time.sleep(1) #wait a while for archiver to do its thing
-        self.assertEquals(len(Topic.objects.all()), 1)
-        self.assertEquals(len(Post.objects.all()), 1)
-        archiver.stop()
+        self.assertEquals(len(Topic.objects.all()), 20)
+        self.assertEquals(len(Post.objects.all()), 285)
+        ArchiverTest.archiver_th.stop()
 
         # ensure pid file gone
         try:
