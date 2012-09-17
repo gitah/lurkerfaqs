@@ -2,26 +2,15 @@ import time
 from threading import Thread
 
 from daemon import Daemon
+from threadpool import ThreadPool
 from scraper import BoardScraper, TopicScraper
 from models import User, Board, Topic, Post
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-#TODO: thread Board/Topic scrapers, threadpools
-class BoardArchiverThread(Thread):
-    def __init__(self, board, refresh):
-        self.board = board
-        self.refresh = refresh
-        self.sleeping = False
+THREAD_POOL_WORKERS = 10
 
-    def start(self):
-        while True:
-            Archiver.archive_board(self.board)
-            self.sleeping = True
-            time.sleep(self.refresh*60)
-            self.sleeping = False
-    
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
@@ -29,10 +18,16 @@ class Archiver(Daemon):
             pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
         self.board_info = board_info
         self.base_url = base
-        self.threads = []
+
+        self.pool = ThreadPool(THREAD_POOL_WORKERS)
         super(Archiver,self).__init__(pidfile)
 
     def run(self):
+        def archive_board_task(board, refresh):
+            while True:
+                self.archive_board(board)
+                time.sleep(self.refresh*60)
+
         for path,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url,path)
             # create board if not in db
@@ -41,24 +36,18 @@ class Archiver(Daemon):
             except ObjectDoesNotExist:
                 board = Board(url=board_url,name=name)
                 board.save()
-                print board.url, board.name
+            self.pool.add_task(archive_board_task, board, refresh)
 
-            th = BoardArchiverThread(board,refresh)
-            self.threads.append(th)
-
-        print len([th.board for th in self.threads])
-        """ Starts the archiver """
-        for th in self.threads:
-            th.start()
-
-    @staticmethod
-    def archive_board(b, recursive=True):
+    def archive_board(self, b, recursive=True):
         """ scrapes and saves the topics of a board to the db 
         
             b: the models.Board to archive
             recursive: archives the posts of each topic as well
         """
         bs = BoardScraper(b)
+        if recursive:
+            pool = ThreadPool()
+
         #TODO: make one query for all topics
         for t in bs.retrieve():
             try:
@@ -70,39 +59,38 @@ class Archiver(Daemon):
                     break 
             except ObjectDoesNotExist:
                 t.pk = None
-            t.creator = Archiver.add_user(t.creator)
+            t.creator = self.add_user(t.creator)
             t.save()
             if recursive:
-                Archiver.archive_topic(t)
+                self.pool.add_task(self.archive_topic,t)
 
-    @staticmethod
-    def archive_topic(t):
-        """
-        TODO: 
-        handle exceptions
-            - t not in db
-            - multiple results errors for *.get() calls
-        """
-        ts = TopicScraper(t)
-        for p in ts.retrieve():
-            # Check of post exists already in db to determine update or add
+        def archive_topic(self, t):
+            """
+            TODO: 
+            handle exceptions
+                - t not in db
+                - multiple results errors for *.get() calls
+            """
+            ts = TopicScraper(t)
+            
+            for p in ts.retrieve():
+                # Check of post exists already in db to determine update or add
+                try:
+                    p_db = Post.objects.filter(topic_id=t.id).get(
+                        post_num=p.post_num)
+                    # TODO: update instead of ignore, revisions ???
+                    continue
+                except ObjectDoesNotExist:
+                    p.pk = None
+                p.creator = self.add_user(p.creator)
+                p.save()
+
+        def add_user(self, user):
+            """ Check if user exists already in db, if not add it """
+            if user.id:
+                return user
             try:
-                p_db = Post.objects.filter(topic_id=t.id).get(
-                    post_num=p.post_num)
-                # TODO: update instead of ignore, revisions ???
-                continue
+                return User.objects.get(username=user.username)
             except ObjectDoesNotExist:
-                p.pk = None
-            p.creator = Archiver.add_user(p.creator)
-            p.save()
-
-    @staticmethod
-    def add_user(user):
-        """ Check if user exists already in db, if not add it """
-        if user.id:
+                user.save()
             return user
-        try:
-            return User.objects.get(username=user.username)
-        except ObjectDoesNotExist:
-            user.save()
-        return user
