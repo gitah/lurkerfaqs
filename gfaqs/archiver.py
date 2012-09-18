@@ -9,6 +9,8 @@ from models import User, Board, Topic, Post
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
+#from multiprocessing import Pool as ThreadPool
+
 THREAD_POOL_WORKERS = 10
 
 class Archiver(Daemon):
@@ -16,17 +18,19 @@ class Archiver(Daemon):
     def __init__(self, board_info=settings.GFAQS_BOARDS,
             base=settings.GFAQS_BASE_URL,
             pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
+        super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
 
-        self.pool = ThreadPool(THREAD_POOL_WORKERS)
-        super(Archiver,self).__init__(pidfile)
-
     def run(self):
+        # we need at least one thread for each board
+        # TODO: allocate automatically
+        assert THREAD_POOL_WORKERS > len(self.board_info)
+        self.pool = ThreadPool(THREAD_POOL_WORKERS)
         def archive_board_task(board, refresh):
             while True:
                 self.archive_board(board)
-                time.sleep(self.refresh*60)
+                time.sleep(refresh*60)
 
         for path,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url,path)
@@ -45,8 +49,6 @@ class Archiver(Daemon):
             recursive: archives the posts of each topic as well
         """
         bs = BoardScraper(b)
-        if recursive:
-            pool = ThreadPool()
 
         #TODO: make one query for all topics
         for t in bs.retrieve():
@@ -64,33 +66,33 @@ class Archiver(Daemon):
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
 
-        def archive_topic(self, t):
-            """
-            TODO: 
-            handle exceptions
-                - t not in db
-                - multiple results errors for *.get() calls
-            """
-            ts = TopicScraper(t)
-            
-            for p in ts.retrieve():
-                # Check of post exists already in db to determine update or add
-                try:
-                    p_db = Post.objects.filter(topic_id=t.id).get(
-                        post_num=p.post_num)
-                    # TODO: update instead of ignore, revisions ???
-                    continue
-                except ObjectDoesNotExist:
-                    p.pk = None
-                p.creator = self.add_user(p.creator)
-                p.save()
+    def archive_topic(self, t):
+        """
+        TODO:
+        handle exceptions
+            - t not in db
+            - multiple results errors for *.get() calls
+        """
+        ts = TopicScraper(t)
 
-        def add_user(self, user):
-            """ Check if user exists already in db, if not add it """
-            if user.id:
-                return user
+        for p in ts.retrieve():
+            # Check of post exists already in db to determine update or add
             try:
-                return User.objects.get(username=user.username)
+                p_db = Post.objects.filter(topic_id=t.id).get(
+                    post_num=p.post_num)
+                # TODO: update instead of ignore, revisions ???
+                continue
             except ObjectDoesNotExist:
-                user.save()
+                p.pk = None
+            p.creator = self.add_user(p.creator)
+            p.save()
+
+    def add_user(self, user):
+        """ Check if user exists already in db, if not add it """
+        if user.id:
             return user
+        try:
+            return User.objects.get(username=user.username)
+        except ObjectDoesNotExist:
+            user.save()
+        return user

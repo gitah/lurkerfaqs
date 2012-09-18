@@ -150,8 +150,8 @@ class ArchiverTest(TestCase):
 
         path = "http://localhost:%s" % ArchiverTest.server_port
         board_list = [("boards/ce", "CE", 5)]
-        archiver = Archiver(board_info=board_list,base=path)
-        cls.archiver_th = ArchiverTest.DaemonRunnerThread(archiver)
+        cls.archiver = Archiver(board_info=board_list,base=path)
+        cls.archiver_th = ArchiverTest.DaemonRunnerThread(cls.archiver)
 
     @classmethod
     def tearDownClass(cls):
@@ -163,9 +163,10 @@ class ArchiverTest(TestCase):
         ce = Board(url="%s/boards/ce" % path, name="CE")
         ce.save()
 
-        Archiver.archive_board(ce, recursive=False)
+        archiver = ArchiverTest.archiver
+        archiver.archive_board(ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 20)
-        Archiver.archive_board(ce, recursive=False)
+        archiver.archive_board(ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 20)
     
     def test_archive_topic(self):
@@ -178,9 +179,10 @@ class ArchiverTest(TestCase):
             gfaqs_id="64010226", last_post_date=datetime.now(), status=0); 
         topic.save()
 
-        Archiver.archive_topic(topic)
+        archiver = ArchiverTest.archiver
+        archiver.archive_topic(topic)
         self.assertEquals(len(Post.objects.all()), 57)
-        Archiver.archive_topic(topic)
+        archiver.archive_topic(topic)
         self.assertEquals(len(Post.objects.all()), 57)
 
     def test_daemon(self):
