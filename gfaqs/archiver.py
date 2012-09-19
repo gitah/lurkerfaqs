@@ -1,8 +1,8 @@
 import time
 from threading import Thread
 
-from daemon import Daemon
-from threadpool import ThreadPool
+from utils.daemon import Daemon
+from utils.threadpool import ThreadPool
 from scraper import BoardScraper, TopicScraper
 from models import User, Board, Topic, Post
 
