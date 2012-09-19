@@ -66,6 +66,9 @@ class TestRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except IOError:
             die()
 
+    def log_message(self, format, *args):
+            return
+
 
 class TestServerThread(threading.Thread):
     def __init__(self, port, hostname="localhost"):

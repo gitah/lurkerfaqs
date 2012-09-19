@@ -9,9 +9,8 @@ from models import User, Board, Topic, Post
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-#from multiprocessing import Pool as ThreadPool
-
-THREAD_POOL_WORKERS = 10
+#TODO: transactions
+WORKERS_PER_BOARD = 10
 
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
@@ -24,9 +23,8 @@ class Archiver(Daemon):
 
     def run(self):
         # we need at least one thread for each board
-        # TODO: allocate automatically
-        assert THREAD_POOL_WORKERS > len(self.board_info)
-        self.pool = ThreadPool(THREAD_POOL_WORKERS)
+        num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
+        self.pool = ThreadPool(num_workers)
         def archive_board_task(board, refresh):
             while True:
                 self.archive_board(board)
@@ -50,7 +48,6 @@ class Archiver(Daemon):
         """
         bs = BoardScraper(b)
 
-        #TODO: make one query for all topics
         for t in bs.retrieve():
             try:
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
