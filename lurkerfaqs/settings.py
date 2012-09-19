@@ -153,10 +153,12 @@ LOGGING = {
 #-- GFAQs Archiver Settings --#
 
 # path of PID file for gfaqs-archiver daemon
-GFAQS_ARCHIVER_PID_FILE="/var/run/gfaqs-archiver/gfaqs-archiver.pid"
+GFAQS_ARCHIVER_DIR = "/var/run/gfaqs-archiver"
+GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % GFAQS_ARCHIVER_DIR
 
 # base url for gamefaqs
-GFAQS_BASE_URL="http://www.gamefaqs.com"
+GFAQS_BASE_URL = "http://www.gamefaqs.com"
+GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_BASE_URL
 
 # List of boards to scrape
 # Each board is represented as a 2-tuple:
