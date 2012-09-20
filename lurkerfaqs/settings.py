@@ -167,3 +167,7 @@ GFAQS_BOARDS = [
     ("boards/2000121-anime-and-manga-other-titles", "Anime and Manga - Other Titles", 5),
     ("boards/8-gamefaqs-contests", "GameFAQs Contests", 5)
 ]
+
+GFAQS_LOGIN_AS_USER=False
+GFAQS_LOGIN_EMAIL=""
+GFAQS_LOGIN_PASSWORD=""

@@ -1,4 +1,4 @@
-import urllib
+import urllib2
 from urlparse import urlparse
 from datetime import datetime
 
@@ -20,7 +20,7 @@ TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
 class Scraper(object):
-    def get_page(self, pg):
+    def get_page(self, opener, pg):
         base = self.base_url()
         parts = urlparse(base)
         if parts.scheme == "http":
@@ -29,12 +29,15 @@ class Scraper(object):
             raise ValueError("URL scheme %s not recognized") % parts.scheme
 
         try:
-            return "".join(urllib.urlopen(page_url).readlines())
+            return "".join(opener.open(page_url).readlines())
         except IOError:
             raise ValueError("page not found")
 
-    def retrieve(self):
+    def retrieve(self, opener=None):
         """ generator that returns the next object the scraper will scrape """
+        if not None:
+            opener=urllib2.build_opener()
+
         pg = 0
         while True:
             try:

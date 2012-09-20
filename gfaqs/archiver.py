@@ -1,10 +1,12 @@
 import time
+import urllib2
 from threading import Thread
 
 from utils.daemon import Daemon
 from utils.threadpool import ThreadPool
 from scraper import BoardScraper, TopicScraper
 from models import User, Board, Topic, Post
+from login import authenticate
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -20,6 +22,12 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
+
+        # login to gamefaqs
+        if settings.GFAQS_LOGIN_AS_USER:
+            self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+        else:
+            self.opener = urllib2.build_opener()
 
     def run(self):
         # we need at least one thread for each board
@@ -48,7 +56,7 @@ class Archiver(Daemon):
         """
         bs = BoardScraper(b)
 
-        for t in bs.retrieve():
+        for t in bs.retrieve(self.opener):
             try:
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
                 t.pk = t_db.pk
@@ -72,7 +80,7 @@ class Archiver(Daemon):
         """
         ts = TopicScraper(t)
 
-        for p in ts.retrieve():
+        for p in ts.retrieve(self.opener):
             # Check of post exists already in db to determine update or add
             try:
                 p_db = Post.objects.filter(topic_id=t.id).get(
