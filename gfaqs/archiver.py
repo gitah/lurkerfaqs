@@ -48,6 +48,10 @@ class Archiver(Daemon):
                 board.save()
             self.pool.add_task(archive_board_task, board, refresh)
 
+        # hang thread, so daemon keeps running
+        while True:
+            time.sleep(10)
+
     def archive_board(self, b, recursive=True):
         """ scrapes and saves the topics of a board to the db 
         

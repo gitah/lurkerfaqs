@@ -25,12 +25,15 @@ TODO
     - topics scraper (OK)
     - write tests (OK)
 
-3. Write Archiver (WORK)
+3. Write Archiver (DONE)
     - configuration to define boards to scrape (OK)
-    - write daemon (WORK)
-    - gfaqs authentication and cookie management (WORK)
+    - write daemon (DONE)
+    - write tests (DONE)
+
+4. Misc (WORK)
+    - gfaqs authentication and cookie management (DONE)
         - support multiple users?
-    - write tests (WORK)
+    - logging (WORK)
 
 ##Front-End
 1. Board List

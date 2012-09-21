@@ -38,6 +38,9 @@ class Topic(models.Model):
     number_of_posts = models.IntegerField()
     last_post_date = models.DateTimeField()
     status = models.CharField(max_length=2, choices=TOPIC_STATUS, default=NORMAL)
+
+    def __str__(self):
+        return "[%s] (Creator=%s)" % (self.title, self.creator.username)
     
 class Post(models.Model):
     NORMAL, CLOSED, MODDED, EDITED = 0,1,2,3
@@ -54,3 +57,7 @@ class Post(models.Model):
     contents = models.TextField()
     signature = models.TextField()
     status = models.CharField(max_length=2, choices=POST_STATUS, default=NORMAL)
+
+    def __str__(self):
+        return "[%s] (Creator=%s)\n %s \n---\n %s" % (self.topic.title,
+                self.creator.username, self.contents, self.signature)

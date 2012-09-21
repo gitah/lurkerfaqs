@@ -100,7 +100,7 @@ class TopicScraperTest(TestCase):
         ts = TopicScraper(self.test_topic)
         opener = urllib2.build_opener()
 
-        posts = ts.parse_page(opener,ts.get_page(opener,0))
+        posts = ts.parse_page(ts.get_page(opener,0))
         self.assertEquals(len(posts),10)
 
         format_str = "%m/%d/%Y %I:%M:%S %p"

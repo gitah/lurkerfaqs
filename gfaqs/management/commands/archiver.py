@@ -25,13 +25,10 @@ class Command(BaseCommand):
             except IOError:
                 print "unable to write pid file %s" % PIDFILE
                 sys.exit(2)
-            print "gfaqs-archiver started"
         elif args[0] == "stop":
             daemon.stop()
         elif args[0] == "restart":
-            print "gfaqs-archiver stopped"
             daemon.restart()
-            print "gfaqs-archiver restarted"
         else:
             print "unknown command"
             print help()
