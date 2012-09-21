@@ -37,22 +37,24 @@ class BoardScraperTest(TestCase):
 
     def test_get_page(self):
         bs = BoardScraper(self.ce)
+        opener = urllib2.build_opener()
         try: 
-            bs.get_page(0)
-            bs.get_page(1)
+            bs.get_page(opener,0)
+            bs.get_page(opener,1)
         except IOError:
             self.fail("page not found")
 
         try:
             # should not exist
-            bs.get_page(99999)
+            bs.get_page(opener,99999)
         except:
             pass
 
     def test_parse_page(self):
         bs = BoardScraper(self.ot)
+        opener = urllib2.build_opener()
         
-        ot0_tl = bs.parse_page(bs.get_page(0))
+        ot0_tl = bs.parse_page(bs.get_page(opener,0))
         self.assertEquals(len(ot0_tl), 10)
         t = ot0_tl[0]
         self.assertEquals(t.creator.username, "EmeralDragon23")
@@ -65,7 +67,7 @@ class BoardScraperTest(TestCase):
 
         try:
             # this page has no topics
-            ot708_tl = bs.parse_page(bs.get_page(708))
+            ot708_tl = bs.parse_page(bs.get_page(opener,708))
         except ValueError:
             pass
 
@@ -96,7 +98,9 @@ class TopicScraperTest(TestCase):
 
     def test_parse_page(self):
         ts = TopicScraper(self.test_topic)
-        posts = ts.parse_page(ts.get_page(0))
+        opener = urllib2.build_opener()
+
+        posts = ts.parse_page(opener,ts.get_page(opener,0))
         self.assertEquals(len(posts),10)
 
         format_str = "%m/%d/%Y %I:%M:%S %p"

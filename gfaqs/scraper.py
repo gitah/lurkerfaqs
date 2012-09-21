@@ -41,7 +41,7 @@ class Scraper(object):
         pg = 0
         while True:
             try:
-                html = self.get_page(pg)
+                html = self.get_page(opener,pg)
                 for topic in self.parse_page(html):
                     yield topic
                 pg += 1
