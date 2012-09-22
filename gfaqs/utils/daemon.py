@@ -46,7 +46,6 @@ class Daemon(object):
             sys.exit(1) 
 
         # redirect standard file descriptors
-        # TODO: uncomment once working
         #sys.stdout.flush()
         #sys.stderr.flush()
         #si = file(self.stdin, 'r')

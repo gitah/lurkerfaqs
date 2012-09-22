@@ -1,8 +1,11 @@
 import urllib2
+import logging
 from urlparse import urlparse
 from datetime import datetime
 
 from bs4 import BeautifulSoup, element
+from django.conf import settings
+
 from gfaqs.models import User, Board, Topic, Post
 
 TOPIC_STATUS_MAP = {
@@ -18,6 +21,8 @@ STRING_CLOSED = "[This message was deleted at the request of the original poster
 TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
+
+logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
 
 class Scraper(object):
     def get_page(self, opener, pg):
@@ -42,8 +47,11 @@ class Scraper(object):
         while True:
             try:
                 html = self.get_page(opener,pg)
-                for topic in self.parse_page(html):
-                    yield topic
+                try:
+                    for topic in self.parse_page(html):
+                        yield topic
+                except Exception, e:
+                    logger.error(e)
                 pg += 1
             except ValueError:
                 break

@@ -1,6 +1,10 @@
 import time
 import urllib2
+import logging
 from threading import Thread
+
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 from utils.daemon import Daemon
 from utils.threadpool import ThreadPool
@@ -8,11 +12,11 @@ from scraper import BoardScraper, TopicScraper
 from models import User, Board, Topic, Post
 from login import authenticate
 
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 
 #TODO: transactions
 WORKERS_PER_BOARD = 10
+
+logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
 
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
@@ -70,8 +74,14 @@ class Archiver(Daemon):
                     break 
             except ObjectDoesNotExist:
                 t.pk = None
-            t.creator = self.add_user(t.creator)
-            t.save()
+
+            try:
+                t.creator = self.add_user(t.creator)
+                t.save()
+            except Exception, e:
+                logger.error(e)
+                continue
+
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
 
@@ -89,12 +99,16 @@ class Archiver(Daemon):
             try:
                 p_db = Post.objects.filter(topic_id=t.id).get(
                     post_num=p.post_num)
-                # TODO: update instead of ignore, revisions ???
+                # TODO: update post instead of ignore for edited ones
                 continue
             except ObjectDoesNotExist:
                 p.pk = None
-            p.creator = self.add_user(p.creator)
-            p.save()
+            try:
+                p.creator = self.add_user(p.creator)
+                p.save()
+            except Exception, e:
+                logger.error(e)
+                continue
 
     def add_user(self, user):
         """ Check if user exists already in db, if not add it """

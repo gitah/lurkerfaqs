@@ -108,53 +108,16 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    #'django.contrib.auth',
-    #'django.contrib.contenttypes',
-    #'django.contrib.sessions',
-    #'django.contrib.sites',
-    #'django.contrib.messages',
-    #'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
     'gfaqs',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
+#-- LurkerFAQs General vars ---#
+LURKERFAQS_LOG_DIR = "/var/log/lurkerfaqs"
+LURKERFAQS_RUN_DIR = "/var/run/lurkerfaqs"
 
 #-- GFAQs Archiver Settings --#
-
 # path of PID file for gfaqs-archiver daemon
-GFAQS_ARCHIVER_DIR = "/var/run/gfaqs-archiver"
-GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % GFAQS_ARCHIVER_DIR
+GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % LURKERFAQS_RUN_DIR
 
 # base url for gamefaqs
 GFAQS_BASE_URL = "http://www.gamefaqs.com"
@@ -171,3 +134,36 @@ GFAQS_BOARDS = [
 GFAQS_LOGIN_AS_USER=False
 GFAQS_LOGIN_EMAIL=""
 GFAQS_LOGIN_PASSWORD=""
+
+
+
+#-- Logging Settings --#
+GFAQS_ERROR_LOGGER = 'gfaqs.errors'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'file': {
+            'level': 'ERROR', 
+            'class': 'logging.FileHandler',
+            'filename': '%s/gfaqs_archiver_error.log' % LURKERFAQS_LOG_DIR
+        }
+    },
+    'loggers': {
+        GFAQS_ERROR_LOGGER: {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
+}
