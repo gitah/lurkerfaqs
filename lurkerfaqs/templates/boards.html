@@ -1,0 +1,16 @@
+{% extends base_table.html %}
+
+{% block title_main %} Archived Message Boards {% endblock %}
+{% block table_header %} <tr><th>Boards</th></tr> {% endblock %}
+
+{% block table_contents %}
+    {% for board in boards %}
+
+        <tr class="{% cycle odd even %}">
+        <td>
+            <-- TODO: display boards>
+        </td>
+        </tr>
+        
+    {% endfor %}
+{% endblock %}

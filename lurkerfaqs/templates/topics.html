@@ -1,0 +1,22 @@
+{% extends base_table.html %}
+
+{% block title_main %}  {{board_name}} {% endblock %}
+
+{% block table_header %} 
+<tr>
+    <th>Topic</th>
+    <th>Created By</th>
+    <th>Msgs</th>
+    <th>Last Post</th>
+</tr> 
+{% endblock %}
+
+{% block table_contents %}
+    {% for topic in topics %}
+        <tr class="{% cycle odd even %}">
+            <td>
+                <-- TODO: display topics>
+            </td>
+        </tr>
+    {% endfor %}
+{% endblock %}

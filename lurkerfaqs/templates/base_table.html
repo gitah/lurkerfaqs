@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block main %} 
+<div class="title"><h1>{% block title_main %}</h1></div>
+
+<table>
+  {% block table_header %} <tr><th>{% block title_sub %}</th></tr> {% endblock %}
+  {% block table_contents %} <tr><td> <td></tr> {% endblock %}
+</table>
+{% endblock}

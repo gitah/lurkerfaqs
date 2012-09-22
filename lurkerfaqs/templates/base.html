@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>{% block title %}LurkerFAQs{% endblock %}</title>
+  <!-- TODO: import css -->
+  <!-- TODO: import js -->
+</head>
+
+
+
+<body>
+
+<div id="container">
+  <!-- Header -->
+  <div id="header">
+
+    <div id="headerBlock">
+      <div id="logo" class="center">
+        <a href="/"><!-- TODO: main header image --></a>
+      </div>
+    </div>
+
+    <div id="menu">
+      <div class="menuWrapper blockCenter">
+        <!-- TODO: fill with links -->
+        <div class="searchbar right"></div>
+        <div class='clear'></div>
+      </div>
+    </div>
+    <div class="headerHorizRule"></div>
+  </div>
+
+  <!-- Main -->
+  <div id="contents">
+    {% block main %}
+  </div>
+
+
+  <!-- Footer --> 
+  <br/><br/><br/><br/><br/>
+  <div id="footer">
+    <div id="footerBar" class="blockCenter">
+    <div id="footerLinks" class="innerCenter">
+      "Other Resources"
+      <a href='http://www.gamefaqs.com'>GameFAQs</a>
+      <a href='http://wikicedia.net/'>WikiCEdia</a>
+      <a href='http://www.gamefaqsarchive.com/'>GameFAQs Archive</a>
+    </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
