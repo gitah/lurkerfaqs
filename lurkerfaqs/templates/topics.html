@@ -15,7 +15,10 @@
     {% for topic in topics %}
         <tr class="{% cycle odd even %}">
             <td>
-                <-- TODO: display topics>
+                <td>{% url lurkerfaqs.views.show_topic board.alias topic.id %}</td>
+                <td>{{topic.creator}}</td>
+                <td>{{topic.num_posts}}</td>
+                <td>{{topic.last_post_date}}</td>
             </td>
         </tr>
     {% endfor %}

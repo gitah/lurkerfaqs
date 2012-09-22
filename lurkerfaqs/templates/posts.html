@@ -8,10 +8,14 @@
 
 {% block table_contents %}
     {% for post in posts %}
-        <tr class="{% cycle odd even %}">
-            <td>
-                <-- TODO: display posts>
-            </td>
-        </tr>
+    <tr><td>
+        <a href={% url lurkerfaqs.views.show_user %}>{{post.creator}}</a> | Posted on {{post.last_post_date}}		
+    </td></tr>
+    
+    <tr class="even"></td>
+        {{post.contents}}
+        <br>--<br>
+        {{post.signature}}
+    </td></tr>
     {% endfor %}
 {% endblock %}

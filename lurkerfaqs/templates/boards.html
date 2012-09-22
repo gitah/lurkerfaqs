@@ -5,11 +5,8 @@
 
 {% block table_contents %}
     {% for board in boards %}
-
         <tr class="{% cycle odd even %}">
-        <td>
-            <-- TODO: display boards>
-        </td>
+            <td>{% url lurkrfaqs.views.show_board board.alias %}</td>
         </tr>
         
     {% endfor %}
