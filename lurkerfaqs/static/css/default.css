@@ -1,0 +1,207 @@
+/* ------------------------------------------------*/
+/* ------------------ General ---------------------*/
+/* ------------------------------------------------*/
+html,
+body {
+   margin:0;
+   padding:0;
+   height:100%;
+}
+body{
+	font: 11px arial,helvetica,sans-serif;
+    margin: 0px;	
+	padding: 0px;
+}
+
+a{
+	color: #00004F;
+	font-weight: bold;
+	text-decoration: none;
+}
+a:hover{text-decoration: underline;}
+
+#container {
+   min-height:100%;
+   position:relative;
+}
+
+/* Header */
+#header{
+    margin-bottom: 20px;
+    padding: 0px;
+    width: 100%;
+}
+#headerBlock {
+	height: 77px;
+	/*background-color: #6564FF;*/
+	background-color: #81BD00;
+
+}
+/* Menu */
+#menu{
+	background:#DFDFDF;
+	border: 0 solid #898989;
+	/*border-bottom: 1px solid #6F6F6F;*/
+	width: 100%;
+	height: 30px;
+	margin: 0 auto;
+}
+
+#menu .block{
+	border-right:1px solid #00004F;
+	padding: 0 8px 0 9px;
+	margin: 8px 0 8px 0;
+	float: left;
+        display: block;
+}
+
+
+
+/*footer*/
+#footer {
+
+	position:absolute;
+	bottom:0;  
+	width: 100%;   
+}
+
+#footerBar{
+    background: #868278;
+	height: 22px;
+}
+#footerLinks{
+	background: none;
+	padding-top: 3px;
+	font: 9px/16px tahoma,arial,helvetica,sans-serif;
+	text-align: center;		
+}
+#footer a{
+
+	border-right:1px solid black;
+	color: #DFDFDF;
+	padding: 0 3px 0 3px;
+	margin: 3px 0 3px 0;
+
+}
+#logo{ 
+	
+	width: 980px; 
+	padding-top: 10px;
+}
+
+/* Misc */
+.left{ float: left; }
+.right{	float: right; }
+.clear{ clear: both; }
+.hidden{ visibility:hidden; display: none;}
+.center{ margin-left:auto; margin-right:auto; }
+
+.blockCenter{ width: 980px; margin-left: auto; margin-right: auto; }
+.innerCenter{ width: 400px; margin-left: auto; margin-right: auto;}
+
+p.em{font-weight:bold}
+p.text{width:70%; font-size:12px}
+/* ------------------------------------------------*/
+/* --------------------- Page ---------------------*/
+/* ------------------------------------------------*/
+
+/* Contents */
+#contents {
+    width: 980px;
+    margin-left:auto;
+    margin-right:auto;
+    
+    padding: 0px 5px;
+}
+
+/*Title*/
+.title {
+
+	border-bottom: 1px solid #898989;
+	margin-bottom: 20px;
+	padding: 0px;
+	
+	/*width: 60%;*/
+}
+
+.title h1 {
+	font-size: 22px;
+	color: blue;
+	margin: 0px;
+}
+
+
+/***  Nav **/
+.navLinks{
+	margin-top: 10px;
+	display: inline;
+        margin-bottom: 5px;
+}
+
+/*Search Bar*/
+.searchbar{ padding-top: 1px; }
+.searchbar label{margin-right: 5px;}
+#UserSearchPostForm div{ float: left; }
+
+#TopicSearchPostForm div{ float: left;}
+#TopicSearchText{ width: 300px;}
+
+
+.head{
+	background:#6564FF;
+	color: white;
+	font-weight: bold;
+	padding: 6px 8px;
+	line-height: 16px;
+}
+
+
+
+.colorVisitedLink a:visited{ color: #6666cc; }
+.small{ width: 70% }
+/* ------------------------------------------------*/
+/* ------------------ Table -----------------------*/
+/* ------------------------------------------------*/
+/*Table*/
+
+table.board{
+	border-collapse: collapse;
+	width: 100%;
+	text-align: left;	
+}
+
+table.board th{
+	background:#6564FF;
+	color: white;
+}
+
+table.board td, th{
+    padding:6px 5px;
+}
+table.board tr{
+	background:#EEE;
+}
+table.board tr.even{
+	background:white;
+}
+
+
+
+table.board p{ margin: 0px; }
+/* ------------------------------------------------*/
+/* ------------- Post List View -------------------*/
+/* ------------------------------------------------*/
+
+
+table.message{
+	border: 0 solid #999;
+	border-width: 2px 0 0;
+	margin: 1px 0 15px;
+}
+table.message td{
+	border: 0 solid #999;
+	border-width: 0 0 2px;
+	font-size: 12px;
+	padding: 10px;
+	vertical-align: top;
+}
