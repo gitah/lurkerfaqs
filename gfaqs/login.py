@@ -17,7 +17,7 @@ def authenticate(email, password):
     post_data = {
         "EMAILADDR": email,
         "PASSWORD": password,
-        "path": settings.GFAQS_BASE_URL,
+        "path": settings.GFAQS_URL,
         "key": _get_login_key()
     }
     cj = cookielib.CookieJar()
@@ -34,7 +34,7 @@ def authenticate(email, password):
 def _get_login_key():
     """ GameFAQs requires a 'key' field when logging in
         This method makes url request to main page and gets the key """
-    fp = urllib2.urlopen(settings.GFAQS_BASE_URL)
+    fp = urllib2.urlopen(settings.GFAQS_URL)
     html = "".join(fp.readlines())
     soup = BeautifulSoup(html)
     soup.find(id="login").find_all("input", name="hidden")
@@ -44,7 +44,7 @@ def _validate_login(resp):
     """ Inspects the response from a login attempt and returns true if login
         successful
     """
-    fp = urllib2.urlopen(settings.GFAQS_BASE_URL)
+    fp = urllib2.urlopen(settings.GFAQS_URL)
     html = "".join(fp.readlines())
     soup = BeautifulSoup(html)
 

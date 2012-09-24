@@ -4,14 +4,8 @@ from django.conf.urls import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'lurkerfaqs.views.home', name='home'),
-    # url(r'^lurkerfaqs/', include('lurkerfaqs.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+urlpatterns = patterns('lurkerfaqs.views',
+    url(r'^boards/$', 'show_boards'),
+    url(r'^boards/(?P<board_alias>\w+)/$', 'show_board'),
+    url(r'^boards/(?P<board_alias>\(?P<topic_num>\d+)/$', 'show_topic'),
 )

@@ -14,6 +14,7 @@ class User(models.Model):
 class Board(models.Model):
     url = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
+    alias = models.CharField(max_length=200)
     #TODO: figureout what to do with these:
     #next_update	datetime			No			 	 	 	 	 	 	
     #last_topic_date	datetime			No			 	 	 	 	 	 	

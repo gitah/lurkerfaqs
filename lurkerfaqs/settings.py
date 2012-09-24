@@ -120,15 +120,16 @@ LURKERFAQS_RUN_DIR = "/var/run/lurkerfaqs"
 GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % LURKERFAQS_RUN_DIR
 
 # base url for gamefaqs
-GFAQS_BASE_URL = "http://www.gamefaqs.com"
-GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_BASE_URL
+GFAQS_URL = "http://www.gamefaqs.com"
+GFAQS_BOARD_URL = "/%s" % GFAQS_URL
+GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_URL
 
 # List of boards to scrape
 # Each board is represented as a 2-tuple:
 # (<board_path>,<board_name>, <refresh_time_in_minutes>) 
 GFAQS_BOARDS = [
-    ("boards/2000121-anime-and-manga-other-titles", "Anime and Manga - Other Titles", 5),
-    ("boards/8-gamefaqs-contests", "GameFAQs Contests", 5)
+    ("2000121-anime-and-manga-other-titles", "Anime and Manga - Other Titles", 5),
+    ("8-gamefaqs-contests", "GameFAQs Contests", 5)
 ]
 
 GFAQS_LOGIN_AS_USER=False

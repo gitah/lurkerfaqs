@@ -21,7 +21,7 @@ logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
-            base=settings.GFAQS_BASE_URL,
+            base=settings.GFAQS_BOARD_URL,
             pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
@@ -42,13 +42,14 @@ class Archiver(Daemon):
                 self.archive_board(board)
                 time.sleep(refresh*60)
 
-        for path,name,refresh in self.board_info:
-            board_url = "%s/%s" % (self.base_url,path)
+        for alias,name,refresh in self.board_info:
+            board_url = "%s/%s" % (self.base_url, alias)
             # create board if not in db
             try:
                 board = Board.objects.get(url=board_url)
             except ObjectDoesNotExist:
-                board = Board(url=board_url,name=name)
+                alias = 
+                board = Board(url=board_url, name=name, alias=alias)
                 board.save()
             self.pool.add_task(archive_board_task, board, refresh)
 
