@@ -121,7 +121,7 @@ GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % LURKERFAQS_RUN_DIR
 
 # base url for gamefaqs
 GFAQS_URL = "http://www.gamefaqs.com"
-GFAQS_BOARD_URL = "/%s" % GFAQS_URL
+GFAQS_BOARD_URL = "%s/boards" % GFAQS_URL
 GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_URL
 
 # List of boards to scrape

@@ -48,7 +48,6 @@ class Archiver(Daemon):
             try:
                 board = Board.objects.get(url=board_url)
             except ObjectDoesNotExist:
-                alias = 
                 board = Board(url=board_url, name=name, alias=alias)
                 board.save()
             self.pool.add_task(archive_board_task, board, refresh)
