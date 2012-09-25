@@ -115,6 +115,9 @@ INSTALLED_APPS = (
 LURKERFAQS_LOG_DIR = "/var/log/lurkerfaqs"
 LURKERFAQS_RUN_DIR = "/var/run/lurkerfaqs"
 
+LURKERFAQS_TOPICS_PER_PAGE = 30
+LURKERFAQS_POSTS_PER_PAGE = 3
+
 #-- GFAQs Archiver Settings --#
 # path of PID file for gfaqs-archiver daemon
 GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % LURKERFAQS_RUN_DIR

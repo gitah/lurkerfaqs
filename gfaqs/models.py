@@ -1,5 +1,10 @@
 from django.db import models
 
+#TODO:
+#       make `User`.`username` unique
+#       make `Board`.`alias` unique
+#       make `Topic`.`gfaqs_id` unique
+
 class User(models.Model):
     NORMAL, MOD, ADMIN, HIDDEN= 0,1,2,9
     USER_STATUS = (
