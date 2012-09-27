@@ -65,8 +65,8 @@ def show_board(request, board_alias):
 # -- Posts -- #
 def show_topic(request, board_alias, topic_num):
     # /boards/<board_alias>/<topic_num>?page=2
+    #TODO: make a version that does not need board_alias
     try:
-        board = models.Boards.get(alias=board_alias)
         topic = models.Topics.get(gfaqs_id=topic_num)
     except ObjectDoesNotExist:
         raise HTTP404
@@ -76,7 +76,7 @@ def show_topic(request, board_alias, topic_num):
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('lurkerfaqs/templates/posts.html')
-    c = Context(board=board, topic=topic, posts=posts)
+    c = Context(board=topic.board, topic=topic, posts=posts)
     return HTTPResponse(t.render(c))
 
 # -- Users -- #

@@ -1,0 +1,29 @@
+{% extends base_table.html %}
+
+{% block title_main %}  Board User Info {% endblock %}
+
+{% block nav_contents %}
+Topics created by <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+{% endblock %}
+
+{% block table_header %}
+<tr>
+    <th>Board</th>
+    <th>Topic</th>
+    <th>Msgs</th>
+    <th>Date</th>
+</tr>
+{% endblock %}
+
+{% block table_contents %}
+    {% for topic in topics %}
+        <tr class="{% cycle odd even %}">
+            <td>
+                <td><a href="{% url lurkerfaqs.views.show_board topic.board.alias %}">{{topic.board.title}}</a></td>
+                <td><a href="{% url lurkerfaqs.views.show_topic topic.board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
+                <td>{{topic.number_of_posts}}</td>
+                <td>{{topic.last_post_date}}</td>
+            </td>
+        </tr>
+    {% endfor %}
+{% endblock %}

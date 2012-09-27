@@ -2,6 +2,9 @@
 
 {% block title_main %}  {{board.name}} {% endblock %}
 
+{% block nav_orientation %} right {% endblock %}
+{% block nav_contents %} <!-- TODO: Board list | Topic list | Live Link --> {% endblock %}
+
 {% block table_header %}
     <tr><th>{{topic.title}}</th></tr> 
 {% endblock %}
@@ -12,7 +15,7 @@
         <a href={% url lurkerfaqs.views.show_user %}>{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
     </td></tr>
     
-    <tr class="even"></td>
+    <tr class="even"><td>
         {{post.contents}}
         <br>--<br>
         {{post.signature}}

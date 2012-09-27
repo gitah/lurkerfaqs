@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 
 {% block main %} 
-<div class="title"><h1>{% block title_main %}</h1></div>
+<div class="title"><h1>{% block title_main %}{% endblock %}</h1></div>
+
+<div class="nav">
+  <div class="navLinks {%block nav_orientation %}left{%block%}">
+    {%block nav_contents %}{% endblock %}
+  </div>
+</div>
 
 <table>
-  {% block table_header %} <tr><th>{% block title_sub %}</th></tr> {% endblock %}
-  {% block table_contents %} <tr><td> <td></tr> {% endblock %}
+  {% block table_header %}<tr><th></th></tr>{% endblock %}
+  {% block table_contents %}<tr><td> <td></tr>{% endblock %}
 </table>
 {% endblock}

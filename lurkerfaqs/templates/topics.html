@@ -2,6 +2,9 @@
 
 {% block title_main %}  {{board.name}} {% endblock %}
 
+{% block nav %} <!-- TODO: topic search, how to ?? --> {% endblock}
+{% block nav_contents %} <!-- TODO: Board list | Live Link --> {% endblock %}
+
 {% block table_header %} 
 <tr>
     <th>Topic</th>
@@ -15,8 +18,8 @@
     {% for topic in topics %}
         <tr class="{% cycle odd even %}">
             <td>
-                <td>{% url lurkerfaqs.views.show_topic board.alias topic.id %}</td>
-                <td>{{topic.creator.username}}</td>
+                <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.id %}">{{topic.title}}</a></td>
+                <td><a href="{% url lurkerfaqs.views.shw_user user.username %}">{{topic.creator.username}}</a></td>
                 <td>{{topic.num_posts}}</td>
                 <td>{{topic.last_post_date}}</td>
             </td>
