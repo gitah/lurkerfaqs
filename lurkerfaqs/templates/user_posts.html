@@ -1,11 +1,14 @@
 {% extends base_table.html %}
 
-{% block title_main %}  Board User Info {% endblock %}
+{% block header_main %}Board User Info{% endblock %}
 
-{% block nav_contents %}
-Posts posted by <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+{% block nav %}
+<div class="navLinks right">
+    Posts posted by <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+</div>
 {% endblock %}
 
+{% block table_class %}board message{% endblock %}
 {% block table_header %}
 <tr>
     <th>Board</th>

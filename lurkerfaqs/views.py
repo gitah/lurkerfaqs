@@ -88,15 +88,22 @@ def get_user(username):
         raise HTTP404
     return user
 
-
 def show_user(request, username):
     # /users/<username>
     user = get_user(username)
-    num_topics = len(models.Topic.objects.filter(creator=creator))
-    num_posts = len(models.Post.objects.filter(creator=creator))
+
+    topics_qs = models.Topic.objects.filter(creator=creator)
+    posts_qs = models.Post.objects.filter(creator=creator)
+
+    total_topics = len(topics_qs)
+    total_posts = len(posts_qs)
+
+    #TODO how to query active
+    #active_topics = len(last_post_date)
+    #total_topics = len(posts_qs.filter())
 
     t = loader.get_template('lurkerfaqs/templates/user.html')
-    c = Context(user=user, num_topics=num_topics, num_posts=num_posts)
+    c = Context(user=user, total_topics=total_topics, total_posts=total_posts)
     return HTTPResponse(t.render(c))
 
 def show_user_topics(request):

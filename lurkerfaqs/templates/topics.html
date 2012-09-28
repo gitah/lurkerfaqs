@@ -1,17 +1,42 @@
 {% extends base_table.html %}
 
-{% block title_main %}  {{board.name}} {% endblock %}
+{% block header_main %}  {{board.name}} {% endblock %}
 
-{% block nav %} <!-- TODO: topic search, how to ?? --> {% endblock}
-{% block nav_contents %} <!-- TODO: Board list | Live Link --> {% endblock %}
+{% block nav %}
+<div class="nav">
 
-{% block table_header %} 
+<div class="searchbar left">
+    <form action="/contact/" method="post">{% csrf_token %}
+
+    <form id="TopicSearchPostForm" method="get" action="{% url lurkerfaqs.views.user_search %}" accept-charset="utf-8">
+        <div class="input text">
+            <input name="search_text" type="text" id="TopicSearchText">
+        </div>
+        <input type="hidden" name="board_alias" value="{{board_alias}}" id="TopicBoardId">
+        <div class="submit"><input type="submit" value="Search"></div>
+    </form>
+</div>
+
+<div class="navLinks right">
+    Back To:
+    <a href="{% url lurkerfaqs.views.show_boards %}">Board list</a> |
+    <a href="{{livelink}}">Live Link</a>
+</div>
+
+</div>
+{% endblock}
+
+
+
+{% block table_class %}board topics colorVisitedLink{% endblock %}
+
+{% block table_header %}
 <tr>
     <th>Topic</th>
     <th>Created By</th>
     <th>Msgs</th>
     <th>Last Post</th>
-</tr> 
+</tr>
 {% endblock %}
 
 {% block table_contents %}

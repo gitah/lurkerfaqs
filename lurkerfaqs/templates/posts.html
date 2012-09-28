@@ -1,20 +1,27 @@
 {% extends base_table.html %}
 
-{% block title_main %}  {{board.name}} {% endblock %}
+{% block header_main %} {{board.name}} {% endblock %}
 
-{% block nav_orientation %} right {% endblock %}
-{% block nav_contents %} <!-- TODO: Board list | Topic list | Live Link --> {% endblock %}
-
-{% block table_header %}
-    <tr><th>{{topic.title}}</th></tr> 
+{% block nav %}
+<div class="navLinks right">
+    Back To:
+    <a href="{% url lurkerfaqs.views.show_boards %}">Board list</a> |
+    <a href="{% url lurkerfaqs.views.show_board board.alias %}">Topic list</a> |
+    <a href="{{livelink}}">Live Link</a>
+</div>
 {% endblock %}
 
+
+
+{% block header %}<div class="head">{{ topic.title }}</div>{% endblock %}
+
+{% block table_class %}board message colorVisitedLink{% endblock %}
+{% block table_header %}{% endblock %}
 {% block table_contents %}
     {% for post in posts %}
     <tr><td>
         <a href={% url lurkerfaqs.views.show_user %}>{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
     </td></tr>
-    
     <tr class="even"><td>
         {{post.contents}}
         <br>--<br>
