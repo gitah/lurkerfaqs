@@ -98,6 +98,7 @@ WSGI_APPLICATION = 'lurkerfaqs.wsgi.application'
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, "lurkerfaqs/templates"),
 )
+raise Exception(TEMPLATE_DIRS)
 
 INSTALLED_APPS = (
     'gfaqs',

@@ -97,7 +97,7 @@ class Archiver(Daemon):
         for p in ts.retrieve(self.opener):
             # Check of post exists already in db to determine update or add
             try:
-                p_db = Post.objects.filter(topic_id=t.id).get(
+                p_db = Post.objects.filter(topic=t).get(
                     post_num=p.post_num)
                 # TODO: update post instead of ignore for edited ones
                 continue

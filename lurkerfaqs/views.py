@@ -1,8 +1,8 @@
-from django.http import HTTPResponse, HTTPResponseServerError, HTTPResponseNotFound, HTTP404
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import loader, Context
-from django.config import settings
+from django.conf import settings
 from django.db import connection, transaction
 
 import gfaqs.models as models
@@ -43,9 +43,9 @@ def get_page_from_request(req):
 def show_boards(request):
     # /boards
     boards = models.Boards.objects.all()
-    t = loader.get_template('lurkerfaqs/templates/boards.html')
+    t = loader.get_template('boards.html')
     c = Context(boards = boards)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 # -- Topics -- #
 def show_board(request, board_alias):
@@ -53,7 +53,7 @@ def show_board(request, board_alias):
     try:
         board = models.Board.objects.get(alias=board_alias)
     except ObjectDoesNotExist:
-        raise HTTP404
+        raise Http404
 
     qs = models.Topic.objects.filter(board=board)
     page = get_page_from_request(request)
@@ -61,7 +61,7 @@ def show_board(request, board_alias):
             settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     c = Context(board=board, topics=topics, total_topics=total)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 # -- Posts -- #
 def show_topic(request, board_alias, topic_num):
@@ -71,41 +71,38 @@ def show_topic(request, board_alias, topic_num):
         board = models.Board.objects.get(alias=board_alias)
         topic = models.Topic.get(gfaqs_id=topic_num)
     except ObjectDoesNotExist:
-        raise HTTP404
+        raise Http404
 
     qs = models.Post.objects.filter(topic=topic)
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
-    t = loader.get_template('lurkerfaqs/templates/posts.html')
+    t = loader.get_template('posts.html')
     c = Context(board=topic.board, topic=topic, posts=posts)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 def search_topic(request, board_alias, query):
     cursor = connection.cursor()
     try:
         board = models.Board.objects.get(alias=board_alias)
     except ObjectDoesNotExist:
-        raise HTTP404
+        raise Http404
 
     cursor.execute("SELECT * FROM gfaqs_topic WHERE board_id='%s' AND title LIKE '%s%", [board.id,query])
     desc = cursor.description
-    topics = [
-        dict(zip([col[0] for col in desc], row) 
-        for row in cursor.fetchall()
-    ]
+    topics = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
-    t = loader.get_template('lurkerfaqs/templates/topic_search.html')
+    t = loader.get_template('topic_search.html')
     c = Context(topics=topics, board=board, query=query)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 # -- Users -- #
 def get_user(username):
-    """ returns user with given username; raises HTTP404 if no user found"""
+    """ returns user with given username; raises Http404 if no user found"""
     try:
         user = models.User.objects.get(username=username)
     except ObjectDoesNotExist:
-        raise HTTP404
+        raise Http404
     return user
 
 def show_user(request, username):
@@ -122,9 +119,9 @@ def show_user(request, username):
     #active_topics = len(last_post_date)
     #total_topics = len(posts_qs.filter())
 
-    t = loader.get_template('lurkerfaqs/templates/user.html')
+    t = loader.get_template('user.html')
     c = Context(user=user, total_topics=total_topics, total_posts=total_posts)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 def show_user_topics(request):
     # /users/<username>/topics?page=2
@@ -134,9 +131,9 @@ def show_user_topics(request):
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
-    t = loader.get_template('lurkerfaqs/templates/user_topics.html')
+    t = loader.get_template('user_topics.html')
     c = Context(user=user, posts=posts, total_topics=total)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 def show_user_posts(request):
     # /users/<username>/posts?page=2
@@ -146,24 +143,26 @@ def show_user_posts(request):
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
-    t = loader.get_template('lurkerfaqs/templates/user_posts.html')
+    t = loader.get_template('user_posts.html')
     c = Context(user=user, posts=posts, total_topics=total)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 def search_user(request, query):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM gfaqs_users WHERE username LIKE '%s%", [query])
+    cursor.execute("SELECT * FROM gfaqs_users WHERE username LIKE '\%s%", [query])
     desc = cursor.description
-    users = [
-        dict(zip([col[0] for col in desc], row) 
-        for row in cursor.fetchall()
-    ]
+    users = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
-    t = loader.get_template('lurkerfaqs/templates/user_search.html')
+    t = loader.get_template('user_search.html')
     c = Context(users=users, query=query)
-    return HTTPResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
 
 # -- Misc -- #
 def top_users(request):
     pass
+
+def show_home(request):
+    t = loader.get_template('home.html')
+    c = Context()
+    return HttpResponse(t.render(c))

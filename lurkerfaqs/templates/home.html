@@ -1,0 +1,55 @@
+{% extends base.html %}
+
+{% block main %}
+<div class="title"><h1>Welcome to LurkerFAQs!</h1></div>
+
+<div id="content">
+  <p class="text"> <!--TODO: announcemenets--> </p><br>
+
+  <p class="text"> 
+  LurkerFAQS is an archive of the <a href="http://www.gamefaqs.com/boards">GameFAQS message boards</a>. Because
+  there are thousands of boards on GameFAQS, only a selected few are archived.
+  </p>
+  
+  <br>
+
+  <p class="text">
+    Please visit	<a href="/boards"> here </a> for a complete list of boards
+  </p>
+		
+  <br><br>
+		
+  <p class="text">You can search for a GameFAQs user and view their archived posts.</p>
+		
+  <div class="searchbar left">
+    <!--TODO: searcher-->
+    <!--<form id="UserSearchPostForm" method="get" action="/users/searchPost"-->
+      <!--accept-charset="utf-8"><div class="input text"><label-->
+          <!--for="UserSearchText">Username</label><input name="search_text"-->
+        <!--type="text" id="UserSearchText" /></div><div class="submit"><input-->
+        <!--type="submit" value="Search" /></div></form>			-->
+  </div>		
+		
+  <!--Why do I need this??-->
+  <div class="clear"></div>
+	
+  <br/><br/><br/>
+
+  <div>
+     <p class="text">
+          You are able to view archived topics even after they're purged on the original boards.<br/>
+          Let's say someone sends you a link to a topic:
+          <br/><br/>
+          <a href="http://www.gamefaqs.com/boards/213-nonstop-gaming-general/58411735">http://www.gamefaqs.com/boards/213-nonstop-gaming-general/58411735</a>
+          <br/><br/>
+
+          You go to the topic, but find out it has been purged. If the topic is on a board archived by LurkerFAQs, you can simply replace <b>gamefaqs</b>
+          with <b>lurkerfaqs</b> in the URL to find an archived version of the topic.
+
+          <br/><br/>
+          <a href="http://www.lurkerfaqs.com/boards/213-nonstop-gaming-general/58411735">http://www.lurkerfaqs.com/boards/213-nonstop-gaming-general/58411735</a>
+          <br/><br/>
+      </p>
+  </div>
+</div>
+{% endblock %}
