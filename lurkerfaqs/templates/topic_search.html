@@ -1,0 +1,30 @@
+{% extends base_table.html %}
+
+{% block header_main %}  {{board.title}} {% endblock %}
+
+{% block nav %}
+<div class="navLinks right">
+    Results for your search using the string '{{query}}':
+</div>
+{% endblock %}
+
+{% block table_class %}board{% endblock %}
+{% block table_header %}
+<tr>
+    <th>Creator</th>
+    <th>Title</th>
+    <th>Post Count</th>
+    <th>Last Post Date</th>
+</tr>
+{% endblock %}
+
+{% block table_contents %}
+    {% for topic in topics %}
+        <tr class="{% cycle odd even %}">
+            <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
+            <td><a href="{% url lurkerfaqs.views.show_topic topic.gfaqs_id %}">{{topic.title}}</a></td> <!-- TODO: alt. url -->
+            <td>{{topic.num_posts}}</td>
+            <td>{{topic.last_post_date}}</td>
+        </tr>
+    {% endfor %}
+{% endblock %}

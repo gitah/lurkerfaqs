@@ -3,6 +3,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import loader, Context
 from django.config import settings
+from django.db import connection, transaction
 
 import gfaqs.models as models
 
@@ -67,7 +68,8 @@ def show_topic(request, board_alias, topic_num):
     # /boards/<board_alias>/<topic_num>?page=2
     #TODO: make a version that does not need board_alias
     try:
-        topic = models.Topics.get(gfaqs_id=topic_num)
+        board = models.Board.objects.get(alias=board_alias)
+        topic = models.Topic.get(gfaqs_id=topic_num)
     except ObjectDoesNotExist:
         raise HTTP404
 
@@ -77,6 +79,24 @@ def show_topic(request, board_alias, topic_num):
 
     t = loader.get_template('lurkerfaqs/templates/posts.html')
     c = Context(board=topic.board, topic=topic, posts=posts)
+    return HTTPResponse(t.render(c))
+
+def search_topic(request, board_alias, query):
+    cursor = connection.cursor()
+    try:
+        board = models.Board.objects.get(alias=board_alias)
+    except ObjectDoesNotExist:
+        raise HTTP404
+
+    cursor.execute("SELECT * FROM gfaqs_topic WHERE board_id='%s' AND title LIKE '%s%", [board.id,query])
+    desc = cursor.description
+    topics = [
+        dict(zip([col[0] for col in desc], row) 
+        for row in cursor.fetchall()
+    ]
+
+    t = loader.get_template('lurkerfaqs/templates/topic_search.html')
+    c = Context(topics=topics, board=board, query=query)
     return HTTPResponse(t.render(c))
 
 # -- Users -- #
@@ -130,16 +150,20 @@ def show_user_posts(request):
     c = Context(user=user, posts=posts, total_topics=total)
     return HTTPResponse(t.render(c))
 
-def user_search(request):
-    pass
+def search_user(request, query):
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM gfaqs_users WHERE username LIKE '%s%", [query])
+    desc = cursor.description
+    users = [
+        dict(zip([col[0] for col in desc], row) 
+        for row in cursor.fetchall()
+    ]
+
+    t = loader.get_template('lurkerfaqs/templates/user_search.html')
+    c = Context(users=users, query=query)
+    return HTTPResponse(t.render(c))
+
 
 # -- Misc -- #
 def top_users(request):
     pass
-
-# -- Something is wrong ----#
-def not_found(request):
-    return HTTPResponseNotFound()
-
-def server_error(request):
-    return HTTPResponseServerError()

@@ -1,0 +1,22 @@
+{% extends base_table.html %}
+
+{% block header_main %}  Board User Info {% endblock %}
+
+{% block nav %}
+<div class="navLinks right">
+    Results for your search using the string '{{query}}':
+</div>
+{% endblock %}
+
+{% block table_class %}board{% endblock %}
+{% block table_header %}<tr><th>Matches</th></tr>{% endblock %}
+
+{% block table_contents %}
+{% for user in users %}
+<tr class="{% cycle odd even %}">
+    <td>
+        <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}

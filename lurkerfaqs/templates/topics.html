@@ -42,12 +42,10 @@
 {% block table_contents %}
     {% for topic in topics %}
         <tr class="{% cycle odd even %}">
-            <td>
-                <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.id %}">{{topic.title}}</a></td>
-                <td><a href="{% url lurkerfaqs.views.shw_user user.username %}">{{topic.creator.username}}</a></td>
-                <td>{{topic.num_posts}}</td>
-                <td>{{topic.last_post_date}}</td>
-            </td>
+            <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.id %}">{{topic.title}}</a></td>
+            <td><a href="{% url lurkerfaqs.views.show_user user.username %}">{{topic.creator.username}}</a></td>
+            <td>{{topic.num_posts}}</td>
+            <td>{{topic.last_post_date}}</td>
         </tr>
     {% endfor %}
 {% endblock %}
