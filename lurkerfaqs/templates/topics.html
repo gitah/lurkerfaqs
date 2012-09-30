@@ -1,10 +1,11 @@
-{% extends base_table.html %}
+{% extends "base_table.html" %}
 
 {% block header_main %}  {{board.name}} {% endblock %}
 
 {% block nav %}
 <div class="nav">
 
+{% comment %}
 <div class="searchbar left">
     <form action="/contact/" method="post">{% csrf_token %}
 
@@ -16,6 +17,7 @@
         <div class="submit"><input type="submit" value="Search"></div>
     </form>
 </div>
+{% endcomment %}
 
 <div class="navLinks right">
     Back To:
@@ -24,7 +26,7 @@
 </div>
 
 </div>
-{% endblock}
+{% endblock %}
 
 
 
@@ -43,7 +45,7 @@
     {% for topic in topics %}
         <tr class="{% cycle odd even %}">
             <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.id %}">{{topic.title}}</a></td>
-            <td><a href="{% url lurkerfaqs.views.show_user user.username %}">{{topic.creator.username}}</a></td>
+            <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
             <td>{{topic.num_posts}}</td>
             <td>{{topic.last_post_date}}</td>
         </tr>

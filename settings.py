@@ -98,7 +98,6 @@ WSGI_APPLICATION = 'lurkerfaqs.wsgi.application'
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, "lurkerfaqs/templates"),
 )
-raise Exception(TEMPLATE_DIRS)
 
 INSTALLED_APPS = (
     'gfaqs',
@@ -131,7 +130,6 @@ GFAQS_BOARDS = [
 GFAQS_LOGIN_AS_USER=False
 GFAQS_LOGIN_EMAIL=""
 GFAQS_LOGIN_PASSWORD=""
-
 
 
 #-- Logging Settings --#

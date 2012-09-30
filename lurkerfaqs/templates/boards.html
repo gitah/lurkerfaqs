@@ -1,4 +1,4 @@
-{% extends base_table.html %}
+{% extends "base_table.html" %}
 
 {% block header_main %} Archived Message Boards {% endblock %}
 {% block table_header %} <tr><th>Boards</th></tr> {% endblock %}
@@ -6,7 +6,7 @@
 {% block table_contents %}
     {% for board in boards %}
     <tr class="{% cycle odd even %}"><td>
-        <a href="{% url lurkrfaqs.views.show_board board.alias %}">{{board.name}}</a>
+        <a href="{% url lurkerfaqs.views.show_board board.alias %}">{{board.name}}</a>
     </td></tr>
     {% endfor %}
 {% endblock %}

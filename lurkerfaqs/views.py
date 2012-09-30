@@ -34,7 +34,7 @@ def get_page_from_request(req):
             - 1 is returned if parameter does not exist or has a non-integer value
     """
     try:
-        page = int(request.GET.get('page',0)) + 1 # paginator is 1-indexed
+        page = int(req.GET.get('page',0)) + 1 # paginator is 1-indexed
     except ValueError:
         page = 1
     return page
@@ -42,9 +42,9 @@ def get_page_from_request(req):
 # -- Boards -- #
 def show_boards(request):
     # /boards
-    boards = models.Boards.objects.all()
+    boards = models.Board.objects.all()
     t = loader.get_template('boards.html')
-    c = Context(boards = boards)
+    c = Context({"boards": boards})
     return HttpResponse(t.render(c))
 
 # -- Topics -- #
@@ -57,10 +57,10 @@ def show_board(request, board_alias):
 
     qs = models.Topic.objects.filter(board=board)
     page = get_page_from_request(request)
-    topics, total = get_qs_paged(topics_qs,
-            settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    topics,total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
-    c = Context(board=board, topics=topics, total_topics=total)
+    t = loader.get_template('topics.html')
+    c = Context({"board": board, "topics": topics, "total_topics": total})
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
