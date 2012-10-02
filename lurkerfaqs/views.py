@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
-from django.template import loader, Context
+from django.template import loader, RequestContext
 from django.conf import settings
 from django.db import connection, transaction
 
@@ -44,7 +44,9 @@ def show_boards(request):
     # /boards
     boards = models.Board.objects.all()
     t = loader.get_template('boards.html')
-    c = Context({"boards": boards})
+    c = RequestContext(request, {
+        "boards": boards
+    })
     return HttpResponse(t.render(c))
 
 # -- Topics -- #
@@ -60,7 +62,9 @@ def show_board(request, board_alias):
     topics,total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('topics.html')
-    c = Context({"board": board, "topics": topics, "total_topics": total})
+    c = RequestContext(request, {
+        "board": board, "topics": topics, "total_topics": total
+    })
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
@@ -69,7 +73,7 @@ def show_topic(request, board_alias, topic_num):
     #TODO: make a version that does not need board_alias
     try:
         board = models.Board.objects.get(alias=board_alias)
-        topic = models.Topic.get(gfaqs_id=topic_num)
+        topic = models.Topic.objects.get(gfaqs_id=topic_num)
     except ObjectDoesNotExist:
         raise Http404
 
@@ -78,7 +82,9 @@ def show_topic(request, board_alias, topic_num):
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('posts.html')
-    c = Context(board=topic.board, topic=topic, posts=posts)
+    c = RequestContext(request, {
+        "board": topic.board, "topic": topic, "posts": posts
+    })
     return HttpResponse(t.render(c))
 
 def search_topic(request, board_alias, query):
@@ -93,7 +99,9 @@ def search_topic(request, board_alias, query):
     topics = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
     t = loader.get_template('topic_search.html')
-    c = Context(topics=topics, board=board, query=query)
+    c = RequestContext(request, {
+        "topics": topics, "board":board, "query":query
+        })
     return HttpResponse(t.render(c))
 
 # -- Users -- #
@@ -109,42 +117,48 @@ def show_user(request, username):
     # /users/<username>
     user = get_user(username)
 
-    topics_qs = models.Topic.objects.filter(creator=creator)
-    posts_qs = models.Post.objects.filter(creator=creator)
+    topics_qs = models.Topic.objects.filter(creator=user)
+    posts_qs = models.Post.objects.filter(creator=user)
 
     total_topics = len(topics_qs)
     total_posts = len(posts_qs)
 
-    #TODO how to query active
+    #TODO how to query active, even include it ???
     #active_topics = len(last_post_date)
     #total_topics = len(posts_qs.filter())
 
-    t = loader.get_template('user.html')
-    c = Context(user=user, total_topics=total_topics, total_posts=total_posts)
+    t = loader.get_template('user_profile.html')
+    c = RequestContext(request, {
+        "user": user, "total_topics": total_topics, "total_posts": total_posts
+    })
     return HttpResponse(t.render(c))
 
-def show_user_topics(request):
+def show_user_topics(request, username):
     # /users/<username>/topics?page=2
     user = get_user(username)
 
-    qs = models.Topic.objects.filter(creator=creator)
+    qs = models.Topic.objects.filter(creator=user)
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('user_topics.html')
-    c = Context(user=user, posts=posts, total_topics=total)
+    c = RequestContext(request, {
+        "user": user, "posts": posts, "total_topics": total
+    })
     return HttpResponse(t.render(c))
 
-def show_user_posts(request):
+def show_user_posts(request, username):
     # /users/<username>/posts?page=2
     user = get_user(username)
 
-    qs = models.Post.objects.filter(creator=creator)
+    qs = models.Post.objects.filter(creator=user)
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('user_posts.html')
-    c = Context(user=user, posts=posts, total_topics=total)
+    c = RequestContext(request, {
+        "user": user, "posts": posts, "total_topics": total
+    })
     return HttpResponse(t.render(c))
 
 def search_user(request, query):
@@ -154,7 +168,9 @@ def search_user(request, query):
     users = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
     t = loader.get_template('user_search.html')
-    c = Context(users=users, query=query)
+    c = RequestContext(request, {
+        "users": users, "query": query
+    })
     return HttpResponse(t.render(c))
 
 
@@ -164,5 +180,5 @@ def top_users(request):
 
 def show_home(request):
     t = loader.get_template('home.html')
-    c = Context()
+    c = RequestContext(request, {})
     return HttpResponse(t.render(c))

@@ -75,12 +75,21 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '9#m4_@rlb)d11)ecc24+k2j=ao__c+p2sg4qk-4d6&amp;qgl%!lyo'
 
-# List of callables that know how to import templates from various sources.
+#-- Template Stuff --#
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.static',
+)
+
+TEMPLATE_DIRS = (
+    os.path.join(PROJECT_ROOT, "lurkerfaqs/templates"),
+)
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -95,9 +104,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'lurkerfaqs.urls'
 
 WSGI_APPLICATION = 'lurkerfaqs.wsgi.application'
-TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT, "lurkerfaqs/templates"),
-)
 
 INSTALLED_APPS = (
     'gfaqs',

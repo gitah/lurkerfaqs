@@ -1,4 +1,4 @@
-{% extends base_table.html %}
+{% extends "base_table.html" %}
 
 {% block header_main %} {{board.name}} {% endblock %}
 
@@ -20,7 +20,7 @@
 {% block table_contents %}
     {% for post in posts %}
     <tr><td>
-        <a href={% url lurkerfaqs.views.show_user %}>{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
+        <a href={% url lurkerfaqs.views.show_user post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
     </td></tr>
     <tr class="even"><td>
         {{post.contents}}

@@ -1,4 +1,4 @@
-{% extends base_table.html %}
+{% extends "base_table.html" %}
 
 {% block header_main %}Board User Info{% endblock %}
 
@@ -21,7 +21,8 @@
 {% block table_contents %}
     {% for post in posts %}
     <tr><td>
-        <a href="{% url lurkerfaqs.views.show_user %}">{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
+     {#TODO: Format date #}
+      <a href="{% url lurkerfaqs.views.show_topic post.topic.board.alias post.topic.gfaqs_id %}">{{post.topic.title}}</a> ({{post.topic.number_of_posts}}) | Posted on {{post.topic.last_post_date}}
     </td></tr>
 
     <tr class="even"><td>{{post.contents}}</td></tr>

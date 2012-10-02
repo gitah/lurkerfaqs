@@ -12,9 +12,9 @@ urlpatterns = patterns('lurkerfaqs.views',
     url(r'^boards/(?P<board_alias>[\w-]+)/$', 'show_board'),
     url(r'^boards/(?P<board_alias>[\w-]+)/(?P<topic_num>\d+)/$', 'show_topic'),
 
-    url(r'^users/(?P<username>\w+)', 'show_user'),
-    url(r'^users/(?P<username>\w+)/topics', 'show_user_topics'),
-    url(r'^users/(?P<username>\w+)/posts', 'show_user_posts'),
+    url(r'^users/(?P<username>[\w+ -]+)$', 'show_user'),
+    url(r'^users/(?P<username>[\w+ -]+)/topics$', 'show_user_topics'),
+    url(r'^users/(?P<username>[\w+ -]+)/posts$', 'show_user_posts'),
 )
 
 urlpatterns += patterns('django.views',
