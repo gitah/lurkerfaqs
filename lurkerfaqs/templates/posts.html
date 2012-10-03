@@ -9,11 +9,10 @@
     <a href="{% url lurkerfaqs.views.show_board board.alias %}">Topic list</a> |
     <a href="{{livelink}}">Live Link</a>
 </div>
+<div class="clear"></div>
 {% endblock %}
 
-
-
-{% block header %}<div class="head">{{ topic.title }}</div>{% endblock %}
+{% block header %} <div class="head">{{ topic.title }}</div> {% endblock %}
 
 {% block table_class %}board message colorVisitedLink{% endblock %}
 {% block table_header %}{% endblock %}

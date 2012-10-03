@@ -1,8 +1,9 @@
 {% extends "base_table.html" %}
 
 {% block header_main %} Archived Message Boards {% endblock %}
-{% block table_header %} <tr><th>Boards</th></tr> {% endblock %}
 
+{% block table_class %}board topics colorVisitedLink{% endblock %}
+{% block table_header %} <tr><th>Boards</th></tr> {% endblock %}
 {% block table_contents %}
     {% for board in boards %}
     <tr class="{% cycle odd even %}"><td>

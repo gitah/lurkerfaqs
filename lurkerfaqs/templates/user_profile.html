@@ -2,14 +2,14 @@
 
 {% block header_main %}  Board User Info {% endblock %}
 
-{% block header %}<div class="head">Current Information for Purging_Flame</div>{% endblock %}
-
-
 
 {% block table_class %}board small{% endblock %}
 
 {% block table_header %}
-<tr><th>Current Information for {{user.username}}</th></tr>
+<tr>
+    <th>Current Information for {{user.username}}</th>
+    <th></th>
+</tr>
 {% endblock %}
 
 {% block table_contents %}

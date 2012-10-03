@@ -80,6 +80,7 @@ def show_topic(request, board_alias, topic_num):
     qs = models.Post.objects.filter(topic=topic)
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    # TODO: icons
 
     t = loader.get_template('posts.html')
     c = RequestContext(request, {
@@ -139,11 +140,11 @@ def show_user_topics(request, username):
 
     qs = models.Topic.objects.filter(creator=user)
     page = get_page_from_request(request)
-    posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    topics, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('user_topics.html')
     c = RequestContext(request, {
-        "user": user, "posts": posts, "total_topics": total
+        "user": user, "topics": topics, "total_topics": total
     })
     return HttpResponse(t.render(c))
 

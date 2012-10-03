@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>{% block title %}LurkerFAQs{% endblock %}</title>
+  <title>{% block title %}TESTING{# TODO: change #}{% endblock %}</title>
   <link rel="stylesheet" type="text/css" href={{ STATIC_URL }}css/default.css />
-  <!-- TODO: import js -->
+  <link rel="shortcut icon" href="{{STATIC_URL}}img/favicon.ico" type="image/x-icon" />
+  {# TODO: import js #}
 </head>
 
 <body>
@@ -12,13 +13,24 @@
   <div id="header">
     <div id="headerBlock">
       <div id="logo" class="center">
-        <a href="/"><!-- TODO: main header image + link --></a>
+          <a href="{% url lurkerfaqs.views.show_boards %}"</a><img src="{{STATIC_URL}}img/logo.jpg" alt="logo" /></a>
       </div>
     </div>
     <div id="menu">
       <div class="menuWrapper blockCenter">
-        <!-- TODO: fill with links -->
-        <div class="searchbar right"></div>
+        <div class="block"><a href="{% url lurkerfaqs.views.show_boards %}">Boards</a></div>
+        {# TODO #}
+        <div class="block"><a href="/users/topUsers">Top Users</a> </div>
+        <div class="block"><a href="/pages/faq">FAQ</a></div>
+
+        <div class="searchbar right">
+            {# TODO link up#}
+            <form id="UserSearchPostForm" method="get" action="/users/searchPost" accept-charset="utf-8">
+                <div class="input text"><label for="UserSearchText"><a href="/pages/user_search">Username</a></label><input name="search_text" type="text" id="UserSearchText"></div>
+               <div class="submit"><input type="submit" value="Search"></div>
+           </form>
+
+        </div>
         <div class='clear'></div>
       </div>
     </div>
