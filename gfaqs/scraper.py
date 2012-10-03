@@ -112,8 +112,11 @@ class BoardScraper(Scraper):
 
             try:
                 date_raw = tds[4].a.text
-                #TODO: set year on dt obj
                 dt = datetime.strptime(date_raw,TOPIC_DATE_FORMAT_STR)
+                # the year is not sepcified on gfaqs, 
+                # so I'll set it to the current year
+                curr_yr = datetime.now().year
+                dt = datetime(curr_year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
             except ValueError:
                 # archived topic, use alternative format str
                 dt = datetime.strptime(date_raw,TOPIC_DATE_ALT_FORMAT_STR)

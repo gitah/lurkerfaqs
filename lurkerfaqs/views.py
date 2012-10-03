@@ -11,6 +11,17 @@ import gfaqs.models as models
 URL paths were designed to mimic the url paths on gamefaqs
 """
 
+#TODO: add missing icons for topic status
+TOPIC_STATUS_TO_IMG = {
+    models.Topic.NORMAL: "topic_normal.gif",
+    #models.Topic.CLOSED: "topic_closed.gif",
+    #models.Topic.ARCHIVED: "topic_archived.gif",
+    #models.Topic.STICKY: "topic_sticky.gif",
+    #models.Topic.STICKY_CLOSED: "topic_sticky_closed.gif",
+    #models.Topic.PURGED: "topic_purged.gif",
+    "default": "topic_normal.gif"
+}
+
 # -- Utils -- #
 def get_qs_paged(qs, window_size, page):
     """ page the qs to the given (page, window_size)
@@ -39,6 +50,12 @@ def get_page_from_request(req):
         page = 1
     return page
 
+def build_context(request, **kwargs):
+    """ returns a RequestContext for a template """ 
+    kwargs["pages_to_display"] = settings.LURKERFAQS_PAGES_TO_DISPLAY
+    context = RequestContext(request, kwargs)
+    return context
+
 # -- Boards -- #
 def show_boards(request):
     # /boards
@@ -61,10 +78,13 @@ def show_board(request, board_alias):
     page = get_page_from_request(request)
     topics,total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
+    # map topic status to icons
+    for tp in topics:
+        tp.status_icon = TOPIC_STATUS_TO_IMG.get(tp.status,
+            TOPIC_STATUS_TO_IMG["default"])
+
     t = loader.get_template('topics.html')
-    c = RequestContext(request, {
-        "board": board, "topics": topics, "total_topics": total
-    })
+    c = build_context(request, board=board, topics=topics, total_topics=total)
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
@@ -80,7 +100,6 @@ def show_topic(request, board_alias, topic_num):
     qs = models.Post.objects.filter(topic=topic)
     page = get_page_from_request(request)
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
-    # TODO: icons
 
     t = loader.get_template('posts.html')
     c = RequestContext(request, {

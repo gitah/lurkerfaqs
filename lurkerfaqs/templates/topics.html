@@ -34,6 +34,7 @@
 
 {% block table_header %}
 <tr>
+    <th></th>
     <th>Topic</th>
     <th>Created By</th>
     <th>Msgs</th>
@@ -44,10 +45,25 @@
 {% block table_contents %}
 {% for topic in topics %}
     <tr class="{% cycle 'even' 'odd' %}">
+        <td><img src="{{STATIC_URL}}img/{{topic.status_icon}}"/></td>
         <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
         <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
-        <td>{{topic.num_posts}}</td>
+        <td>{{topic.number_of_posts}}</td>
         <td>{{topic.last_post_date}}</td>
     </tr>
 {% endfor %}
+{% endblock %}
+
+
+{% block pagination %}
+    Jump to page: <span class="current">1</span> | <span><a
+            href="/topics/view/6/page:2">2</a></span> | <span><a
+            href="/topics/view/6/page:3">3</a></span> | <span><a
+            href="/topics/view/6/page:4">4</a></span> | <span><a
+            href="/topics/view/6/page:5">5</a></span> | <span><a
+            href="/topics/view/6/page:6">6</a></span> | <span><a
+            href="/topics/view/6/page:7">7</a></span> | <span><a
+            href="/topics/view/6/page:8">8</a></span> | <span><a
+            href="/topics/view/6/page:9">9</a></span> | <span><a
+            href="/topics/view/6/page:10">10</a></span></div>
 {% endblock %}

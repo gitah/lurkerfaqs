@@ -117,6 +117,7 @@ LURKERFAQS_RUN_DIR = "/var/run/lurkerfaqs"
 
 LURKERFAQS_TOPICS_PER_PAGE = 30
 LURKERFAQS_POSTS_PER_PAGE = 3
+LURKERFAQS_PAGES_TO_DISPLAY = 10
 
 #-- GFAQs Archiver Settings --#
 # path of PID file for gfaqs-archiver daemon

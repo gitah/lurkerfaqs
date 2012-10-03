@@ -19,7 +19,7 @@
 {% block table_contents %}
     {% for post in posts %}
     <tr><td>
-        <a href={% url lurkerfaqs.views.show_user post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.last_post_date}}
+        <a href={% url lurkerfaqs.views.show_user post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
     </td></tr>
     <tr class="even"><td>
         {{post.contents}}
