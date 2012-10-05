@@ -56,14 +56,12 @@
 
 
 {% block pagination %}
-    Jump to page: <span class="current">1</span> | <span><a
-            href="/topics/view/6/page:2">2</a></span> | <span><a
-            href="/topics/view/6/page:3">3</a></span> | <span><a
-            href="/topics/view/6/page:4">4</a></span> | <span><a
-            href="/topics/view/6/page:5">5</a></span> | <span><a
-            href="/topics/view/6/page:6">6</a></span> | <span><a
-            href="/topics/view/6/page:7">7</a></span> | <span><a
-            href="/topics/view/6/page:8">8</a></span> | <span><a
-            href="/topics/view/6/page:9">9</a></span> | <span><a
-            href="/topics/view/6/page:10">10</a></span></div>
+Jump to page: 
+{% for i in pages_to_display %}
+    {% if i == current_page %}
+    <span class="current">{{i}}</span> |
+    {% else %}
+    <span><a href="{% url lurkerfaqs.views.show_board board.alias %}?page={{i}}">{{i}}</a></span> |
+    {% endif %}
+{% endfor %}
 {% endblock %}

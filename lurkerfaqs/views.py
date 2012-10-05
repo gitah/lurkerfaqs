@@ -15,7 +15,7 @@ URL paths were designed to mimic the url paths on gamefaqs
 TOPIC_STATUS_TO_IMG = {
     models.Topic.NORMAL: "topic_normal.gif",
     #models.Topic.CLOSED: "topic_closed.gif",
-    #models.Topic.ARCHIVED: "topic_archived.gif",
+    models.Topic.ARCHIVED: "topic_archived.gif",
     #models.Topic.STICKY: "topic_sticky.gif",
     #models.Topic.STICKY_CLOSED: "topic_sticky_closed.gif",
     #models.Topic.PURGED: "topic_purged.gif",
@@ -34,8 +34,8 @@ def get_qs_paged(qs, window_size, page):
     paginator = Paginator(qs, window_size)
     try:
         paged_qs = paginator.page(page)
-    except PageNotAnInteger, EmptyPage:
-        paged_qs = paginator.page(1)
+    except (PageNotAnInteger, EmptyPage):
+        raise Http404
     return (paged_qs, paginator.count)
 
 def get_page_from_request(req):
@@ -45,14 +45,14 @@ def get_page_from_request(req):
             - 1 is returned if parameter does not exist or has a non-integer value
     """
     try:
-        page = int(req.GET.get('page',0)) + 1 # paginator is 1-indexed
+        page = int(req.GET.get('page',1)) # paginator is 1-indexed
     except ValueError:
         page = 1
     return page
 
 def build_context(request, **kwargs):
-    """ returns a RequestContext for a template """ 
-    kwargs["pages_to_display"] = settings.LURKERFAQS_PAGES_TO_DISPLAY
+    """ returns a RequestContext for a template """
+    kwargs["pages_to_display"] = range(1, settings.LURKERFAQS_PAGES_TO_DISPLAY+1)
     context = RequestContext(request, kwargs)
     return context
 
@@ -84,7 +84,8 @@ def show_board(request, board_alias):
             TOPIC_STATUS_TO_IMG["default"])
 
     t = loader.get_template('topics.html')
-    c = build_context(request, board=board, topics=topics, total_topics=total)
+    c = build_context(request, board=board, topics=topics,
+            total_topics=total, current_page=page)
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
@@ -99,12 +100,11 @@ def show_topic(request, board_alias, topic_num):
 
     qs = models.Post.objects.filter(topic=topic)
     page = get_page_from_request(request)
-    posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    posts, total = get_qs_paged(qs, settings.LURKERFAQS_POSTS_PER_PAGE, page)
 
     t = loader.get_template('posts.html')
-    c = RequestContext(request, {
-        "board": topic.board, "topic": topic, "posts": posts
-    })
+    c = build_context(request, board=topic.board, topic=topic,
+            posts=posts, total_posts=total, current_page=page)
     return HttpResponse(t.render(c))
 
 def search_topic(request, board_alias, query):
@@ -119,9 +119,7 @@ def search_topic(request, board_alias, query):
     topics = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
     t = loader.get_template('topic_search.html')
-    c = RequestContext(request, {
-        "topics": topics, "board":board, "query":query
-        })
+    c = build_context(request, topics=topics, boards=boards, query=query)
     return HttpResponse(t.render(c))
 
 # -- Users -- #
@@ -148,9 +146,8 @@ def show_user(request, username):
     #total_topics = len(posts_qs.filter())
 
     t = loader.get_template('user_profile.html')
-    c = RequestContext(request, {
-        "user": user, "total_topics": total_topics, "total_posts": total_posts
-    })
+    c = build_context(request, user=user, total_topics=total_topics,
+            total_posts=total_posts)
     return HttpResponse(t.render(c))
 
 def show_user_topics(request, username):
@@ -162,9 +159,8 @@ def show_user_topics(request, username):
     topics, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('user_topics.html')
-    c = RequestContext(request, {
-        "user": user, "topics": topics, "total_topics": total
-    })
+    c = build_context(request, user=user, topics=topics,
+        total_topics=total, current_page=page)
     return HttpResponse(t.render(c))
 
 def show_user_posts(request, username):
@@ -176,9 +172,8 @@ def show_user_posts(request, username):
     posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
 
     t = loader.get_template('user_posts.html')
-    c = RequestContext(request, {
-        "user": user, "posts": posts, "total_topics": total
-    })
+    c = build_context(request, user=user, posts=posts,
+        total_topics=total, current_page=page)
     return HttpResponse(t.render(c))
 
 def search_user(request, query):

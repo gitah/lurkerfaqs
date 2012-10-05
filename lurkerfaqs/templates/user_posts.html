@@ -23,3 +23,14 @@
     <tr class="even"><td>{{post.contents}}</td></tr>
 {% endfor %}
 {% endblock %}
+
+{% block pagination %}
+Jump to page: 
+{% for i in pages_to_display %}
+    {% if i == current_page %}
+    <span class="current">{{i}}</span> |
+    {% else %}
+    <span><a href="{% url lurkerfaqs.views.show_user_posts user.username %}?page={{i}}">{{i}}</a></span> |
+    {% endif %}
+{% endfor %}
+{% endblock %}
