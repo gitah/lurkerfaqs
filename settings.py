@@ -108,6 +108,7 @@ WSGI_APPLICATION = 'lurkerfaqs.wsgi.application'
 INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'gfaqs',
+    'batch',
     'lurkerfaqs',
 )
 
