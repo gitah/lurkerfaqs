@@ -11,6 +11,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('lurkerfaqs.views',
     url(r'^$', 'show_home'),
+    url(r'^faq/$', 'show_faq'),
 
     url(r'^boards/$', 'show_boards'),
     url(r'^boards/(?P<board_alias>[\w-]+)/$', 'show_board'),
@@ -19,6 +20,8 @@ urlpatterns = patterns('lurkerfaqs.views',
     url(r'^users/(?P<username>[\w+ -]+)$', 'show_user'),
     url(r'^users/(?P<username>[\w+ -]+)/topics$', 'show_user_topics'),
     url(r'^users/(?P<username>[\w+ -]+)/posts$', 'show_user_posts'),
+
+    url(r'^users/search/*$', 'search_user'),
 )
 
 urlpatterns += staticfiles_urlpatterns()

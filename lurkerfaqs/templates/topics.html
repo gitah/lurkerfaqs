@@ -5,19 +5,15 @@
 {% block nav %}
 <div class="nav">
 
-{% comment %}
 <div class="searchbar left">
-    <form action="/contact/" method="post">{% csrf_token %}
-
-    <form id="TopicSearchPostForm" method="get" action="{% url lurkerfaqs.views.user_search %}" accept-charset="utf-8">
+    {#<form id="TopicSearchPostForm" method="get" action="{% url lurkerfaqs.views.search_user %}" accept-charset="utf-8">#}
+    <form id="TopicSearchPostForm" method="get" action="" accept-charset="utf-8">
         <div class="input text">
-            <input name="search_text" type="text" id="TopicSearchText">
+            <input name="search" type="text" id="TopicSearchText">
         </div>
-        <input type="hidden" name="board_alias" value="{{board_alias}}" id="TopicBoardId">
         <div class="submit"><input type="submit" value="Search"></div>
     </form>
 </div>
-{% endcomment %}
 
 <div class="navLinks right">
     Back To:

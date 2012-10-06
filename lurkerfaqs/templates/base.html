@@ -21,12 +21,15 @@
         <div class="block"><a href="{% url lurkerfaqs.views.show_boards %}">Boards</a></div>
         {# TODO #}
         <div class="block"><a href="/users/topUsers">Top Users</a> </div>
-        <div class="block"><a href="/pages/faq">FAQ</a></div>
+        <div class="block"><a href="{% url lurkerfaqs.views.show_faq %}">FAQ</a></div>
 
         <div class="searchbar right">
             {# TODO link up#}
-            <form id="UserSearchPostForm" method="get" action="/users/searchPost" accept-charset="utf-8">
-                <div class="input text"><label for="UserSearchText"><a href="/pages/user_search">Username</a></label><input name="search_text" type="text" id="UserSearchText"></div>
+            <form id="UserSearchPostForm" method="get" action="/users/search/" accept-charset="utf-8">
+                <div class="input text">
+                    <label for="UserSearchText"><a href="/pages/user_search">Username</a></label>
+                    <input name="search" type="text" id="UserSearchText">
+                </div>
                <div class="submit"><input type="submit" value="Search"></div>
            </form>
 

@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound, Http404
+from django.http import HttpResponse, HttpResponseRedirect 
+from django.http import HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import loader, RequestContext
@@ -69,6 +70,9 @@ def show_boards(request):
 # -- Topics -- #
 def show_board(request, board_alias):
     # /boards/<board_alias>?page=2
+    if request.GET.get("search"):
+        return search_topic(request, board_alias, request.GET.get("search"))
+
     try:
         board = models.Board.objects.get(alias=board_alias)
     except ObjectDoesNotExist:
@@ -114,12 +118,12 @@ def search_topic(request, board_alias, query):
     except ObjectDoesNotExist:
         raise Http404
 
-    cursor.execute("SELECT * FROM gfaqs_topic WHERE board_id='%s' AND title LIKE '%s%", [board.id,query])
-    desc = cursor.description
-    topics = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
+    #TODO: use a proper search server for this rather than full table sweep
+    topics = models.Topic.objects.filter(
+        board_id=board.id).filter(title__contains=query).all()
 
     t = loader.get_template('topic_search.html')
-    c = build_context(request, topics=topics, boards=boards, query=query)
+    c = build_context(request, topics=topics, board=board, query=query)
     return HttpResponse(t.render(c))
 
 # -- Users -- #
@@ -176,11 +180,12 @@ def show_user_posts(request, username):
         total_topics=total, current_page=page)
     return HttpResponse(t.render(c))
 
-def search_user(request, query):
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM gfaqs_users WHERE username LIKE '\%s%", [query])
-    desc = cursor.description
-    users = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
+def search_user(request):
+    if not request.GET.get("search"):
+       return HttpResponseRedirect("/") 
+        
+    query = request.GET.get("search")
+    users = models.User.objects.filter(username__startswith=query).all()
 
     t = loader.get_template('user_search.html')
     c = RequestContext(request, {
@@ -195,5 +200,10 @@ def top_users(request):
 
 def show_home(request):
     t = loader.get_template('home.html')
+    c = RequestContext(request, {})
+    return HttpResponse(t.render(c))
+
+def show_faq(request):
+    t = loader.get_template('faq.html')
     c = RequestContext(request, {})
     return HttpResponse(t.render(c))

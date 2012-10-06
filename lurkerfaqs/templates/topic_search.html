@@ -1,14 +1,14 @@
-{% extends base_table.html %}
+{% extends "base_table.html" %}
 
 {% block header_main %}  {{board.title}} {% endblock %}
 
 {% block nav %}
-<div class="navLinks right">
+<div class="navLinks">
     Results for your search using the string '{{query}}':
 </div>
 {% endblock %}
 
-{% block table_class %}board{% endblock %}
+{% block table_class %}board topics colorVisitedLink{% endblock %}
 {% block table_header %}
 <tr>
     <th>Creator</th>
@@ -22,9 +22,20 @@
 {% for topic in topics %}
     <tr class="{% cycle 'even' 'odd' %}">
         <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
-        <td><a href="{% url lurkerfaqs.views.show_topic topic.gfaqs_id %}">{{topic.title}}</a></td> <!-- TODO: alt. url -->
-        <td>{{topic.num_posts}}</td>
+        <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td> <!-- TODO: alt. url -->
+        <td>{{topic.number_of_posts}}</td>
         <td>{{topic.last_post_date}}</td>
     </tr>
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}
+Jump to page: 
+{% for i in pages_to_display %}
+    {% if i == current_page %}
+    <span class="current">{{i}}</span> |
+    {% else %}
+    <span><a href="{% url lurkerfaqs.views.show_board board.alias %}?page={{i}}">{{i}}</a></span> |
+    {% endif %}
 {% endfor %}
 {% endblock %}
