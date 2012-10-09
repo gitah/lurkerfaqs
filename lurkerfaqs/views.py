@@ -25,20 +25,59 @@ TOPIC_STATUS_TO_IMG = {
 }
 
 # -- Utils -- #
-def get_qs_paged(qs, window_size, page):
+def get_qs_paged(request, qs, window_size):
     """ page the qs to the given (page, window_size)
         NOTE:
             - page is 1-indexed
             - if page is invalid, qs will be executed with page=1
 
-        returns (paged_qs, total_count)
+        returns (paged_qs, current_page, page_guide)
     """
+    page = get_page_from_request(request)
     paginator = Paginator(qs, window_size)
     try:
         paged_qs = paginator.page(page)
     except (PageNotAnInteger, EmptyPage):
         raise Http404
-    return (paged_qs, paginator.count)
+
+    num_pages = paginator.num_pages
+    pages_to_display = settings.LURKERFAQS_PAGES_TO_DISPLAY
+
+    page_guide = create_page_guide(paginator.num_pages, 
+        settings.LURKERFAQS_PAGES_TO_DISPLAY, page)
+
+    return (paged_qs, page, page_guide)
+
+def create_page_guide(total_pages, pages_to_display, curr_page):
+    """ returns a list that the template will use to create the pagination bar """
+    def insert_division(lst):
+        new_lst = []
+        for el in lst:
+            new_lst.append(el)
+            new_lst.append("|")
+        new_lst.pop()
+        return new_lst
+
+    page_guide = []
+    if total_pages == 1:
+        return []
+    elif total_pages <= pages_to_display:
+        page_guide = insert_division(range(1,total_pages+1))
+    elif curr_page < pages_to_display:
+       #1 2 **3** 4 5...
+       page_guide = insert_division(range(1, pages_to_display+1))
+       page_guide.append("...")
+    else:
+       page_guide.append(1)
+       page_guide.append("...")
+       m = pages_to_display/2
+       beg = max(curr_page - m, 1)
+       end = min(curr_page+m, total_pages)
+       page_guide += insert_division(range(beg, end+1))
+       if end < total_pages:
+           page_guide.append("...")
+
+    return page_guide
 
 def get_page_from_request(req):
     """ returns the page parameter from the query string of the request
@@ -54,7 +93,6 @@ def get_page_from_request(req):
 
 def build_context(request, **kwargs):
     """ returns a RequestContext for a template """
-    kwargs["pages_to_display"] = range(1, settings.LURKERFAQS_PAGES_TO_DISPLAY+1)
     context = RequestContext(request, kwargs)
     return context
 
@@ -80,8 +118,8 @@ def show_board(request, board_alias):
         raise Http404
 
     qs = models.Topic.objects.filter(board=board)
-    page = get_page_from_request(request)
-    topics,total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    topics, current_page, page_guide = get_qs_paged(
+        request, qs, settings.LURKERFAQS_TOPICS_PER_PAGE)
 
     # map topic status to icons
     for tp in topics:
@@ -90,7 +128,7 @@ def show_board(request, board_alias):
 
     t = loader.get_template('topics.html')
     c = build_context(request, board=board, topics=topics,
-            total_topics=total, current_page=page)
+            current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
@@ -104,12 +142,12 @@ def show_topic(request, board_alias, topic_num):
         raise Http404
 
     qs = models.Post.objects.filter(topic=topic)
-    page = get_page_from_request(request)
-    posts, total = get_qs_paged(qs, settings.LURKERFAQS_POSTS_PER_PAGE, page)
+    posts, current_page, page_guide = get_qs_paged(
+        request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
     t = loader.get_template('posts.html')
     c = build_context(request, board=topic.board, topic=topic,
-            posts=posts, total_posts=total, current_page=page)
+            posts=posts, current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 def search_topic(request, board_alias, query):
@@ -160,12 +198,12 @@ def show_user_topics(request, username):
     user = get_user(username)
 
     qs = models.Topic.objects.filter(creator=user)
-    page = get_page_from_request(request)
-    topics, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    topics, current_page, page_guide = get_qs_paged(
+        request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
     t = loader.get_template('user_topics.html')
     c = build_context(request, user=user, topics=topics,
-        total_topics=total, current_page=page)
+        current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 def show_user_posts(request, username):
@@ -173,12 +211,12 @@ def show_user_posts(request, username):
     user = get_user(username)
 
     qs = models.Post.objects.filter(creator=user)
-    page = get_page_from_request(request)
-    posts, total = get_qs_paged(qs, settings.LURKERFAQS_TOPICS_PER_PAGE, page)
+    posts, current_page, page_guide = get_qs_paged(
+        request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
     t = loader.get_template('user_posts.html')
     c = build_context(request, user=user, posts=posts,
-        total_topics=total, current_page=page)
+        current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 def search_user(request):

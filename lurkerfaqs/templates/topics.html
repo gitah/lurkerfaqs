@@ -50,14 +50,6 @@
 {% endfor %}
 {% endblock %}
 
-
-{% block pagination %}
-Jump to page: 
-{% for i in pages_to_display %}
-    {% if i == current_page %}
-    <span class="current">{{i}}</span> |
-    {% else %}
-    <span><a href="{% url lurkerfaqs.views.show_board board.alias %}?page={{i}}">{{i}}</a></span> |
-    {% endif %}
-{% endfor %}
+{% block page_url %}
+    {% url lurkerfaqs.views.show_board board.alias %}
 {% endblock %}

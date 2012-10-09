@@ -15,7 +15,17 @@
 </table>
 
 <div class="pagination">
-    {% block pagination %}
-    {% endblock %}
+{% if page_guide %}
+    Jump to page: 
+    {% for i in page_guide %}
+        {% if i == "..." or i == '|'%}
+          <span>{{i}}</span>
+        {% elif i == current_page %}
+          <span class="current">{{i}}</span>
+        {% else %}
+            <span><a href="{% block page_url %}{% endblock %}?page={{i}}">{{i}}</a></span>
+        {% endif %}
+    {% endfor %}
+{% endif %}
 </div>
 {% endblock %}
