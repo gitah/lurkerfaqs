@@ -1,29 +1,33 @@
 {% extends "base.html" %}
 
-{% block title }Top Users{% endblock %}
+{% block title %}Top Users{% endblock %}
 
+{% block main %}
 <table class="board small">
   <tr>
       <th>Username</th>
       <th>Total Topics</th>
   </tr>
-  {% for user in user_topic_counts%}
+  {% for user in top_user_topics%}
   <tr>
     <td>{{user.username}}</td>
     <td>{{user.count}}</td>
   </tr>
   {% endfor %}
 </table>
+
+<br/><br/>
 
 <table class="board small">
   <tr>
       <th>Username</th>
       <th>Total Posts</th>
   </tr>
-  {% for user in user_post_counts%}
+  {% for user in top_user_posts%}
   <tr>
     <td>{{user.username}}</td>
     <td>{{user.count}}</td>
   </tr>
   {% endfor %}
 </table>
+{% endblock %}

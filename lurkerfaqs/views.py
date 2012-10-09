@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import connection, transaction
 
 import gfaqs.models as models
+from batch.models import TopUsersTopic, TopUsersPost
 
 """
 URL paths were designed to mimic the url paths on gamefaqs
@@ -196,7 +197,14 @@ def search_user(request):
 
 # -- Misc -- #
 def top_users(request):
-    pass
+    t = loader.get_template('top_users.html')
+    top_user_posts = TopUsersPost.objects.all()
+    top_user_topics = TopUsersTopic.objects.all()
+    c = RequestContext(request, {
+        "top_user_posts": top_user_posts,
+        "top_user_topics": top_user_topics
+    })
+    return HttpResponse(t.render(c))
 
 def show_home(request):
     t = loader.get_template('home.html')

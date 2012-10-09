@@ -12,6 +12,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = patterns('lurkerfaqs.views',
     url(r'^$', 'show_home'),
     url(r'^faq/$', 'show_faq'),
+    url(r'^top_users/$', 'top_users'),
 
     url(r'^boards/$', 'show_boards'),
     url(r'^boards/(?P<board_alias>[\w-]+)/$', 'show_board'),

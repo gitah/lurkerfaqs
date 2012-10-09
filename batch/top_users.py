@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db import connection, transaction
 from django.db.models import Count
 
-from batch.models import TopUsersTopic, TopUsersPost, TopUsersBatch
+from batch.models import TopUsersTopic, TopUsersPost
 from gfaqs.models import User, Topic, Post
 
 
@@ -18,19 +18,21 @@ class Batch(object):
 class TopUsersBatch(Batch):
     @transaction.commit_on_success
     def start(self):
+        self.clear_table()
         top_users_posts = self.get_top_users_posts()
         top_users_topics = self.get_top_users_topics()
 
-        batch = TopUsersBatch(date=datetime.now())
         for user in top_users_topics:
-            tut = TopUserTopic(batch=batch,
-                username=user.username, count=user.num_topics)
+            tut = TopUsersTopic(username=user.username, count=user.num_topics)
             tut.save()
 
-        for user in top_users_topics:
-            tup = TopUserPost(batch=batch,
-                username=user.username, count=user.num_posts)
+        for user in top_users_posts:
+            tup = TopUsersPost(username=user.username, count=user.num_posts)
             tup.save()
+
+    def clear_table(self):
+        TopUsersPost.objects.all().delete()
+        TopUsersTopic.objects.all().delete()
 
     def get_top_users_posts(self):
         return User.objects.annotate(num_posts=Count("post"))[:NUM_TOP_USERS]
