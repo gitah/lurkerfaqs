@@ -12,14 +12,13 @@ from batch.models import TopUsersTopic, TopUsersPost
 
 """ NOTE: URL paths were designed to mimic the url paths on gamefaqs """
 
-#TODO: add missing icons for topic status
 TOPIC_STATUS_TO_IMG = {
     models.Topic.NORMAL: "topic_normal.gif",
-    #models.Topic.CLOSED: "topic_closed.gif",
+    models.Topic.CLOSED: "topic_closed.gif",
     models.Topic.ARCHIVED: "topic_archived.gif",
-    #models.Topic.STICKY: "topic_sticky.gif",
-    #models.Topic.STICKY_CLOSED: "topic_sticky_closed.gif",
-    #models.Topic.PURGED: "topic_purged.gif",
+    models.Topic.STICKY: "sticky.gif",
+    models.Topic.STICKY_CLOSED: "sticky_closed.gif",
+    models.Topic.PURGED: "topic_closed.gif",
     "default": "topic_normal.gif"
 }
 
@@ -162,7 +161,7 @@ def search_topic(request, board_alias, query):
 
     #TODO: use a proper search server for this rather than full table sweep
     topics = models.Topic.objects.filter(
-        board_id=board.id).filter(title__contains=query).all()
+        board=board).filter(title__contains=query).all()
 
     t = loader.get_template('topic_search.html')
     c = build_context(request, topics=topics, board=board, query=query)

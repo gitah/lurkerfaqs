@@ -13,13 +13,13 @@ class User(models.Model):
         (ADMIN,"admin"),
         (HIDDEN,"hidden")
     )
-    username = models.CharField(max_length=25)
+    username = models.CharField(max_length=25, db_index=True, unique=True)
     status = models.CharField(max_length=2, choices=USER_STATUS, default=NORMAL)
 
 class Board(models.Model):
     url = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
-    alias = models.CharField(max_length=200)
+    alias = models.CharField(max_length=200, db_index=True, unique=True)
     #TODO: figureout what to do with these:
     #next_update	datetime			No			 	 	 	 	 	 	
     #last_topic_date	datetime			No			 	 	 	 	 	 	
@@ -39,7 +39,7 @@ class Topic(models.Model):
     )
     board = models.ForeignKey(Board)
     creator = models.ForeignKey(User)
-    gfaqs_id = models.CharField(max_length=15)
+    gfaqs_id = models.CharField(max_length=15, db_index=True, unique=True)
     title = models.CharField(max_length=200)
     number_of_posts = models.IntegerField()
     last_post_date = models.DateTimeField()
