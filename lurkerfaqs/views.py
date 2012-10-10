@@ -3,15 +3,14 @@ from django.http import HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import loader, RequestContext
+from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.db import connection, transaction
 
 import gfaqs.models as models
 from batch.models import TopUsersTopic, TopUsersPost
 
-"""
-URL paths were designed to mimic the url paths on gamefaqs
-"""
+""" NOTE: URL paths were designed to mimic the url paths on gamefaqs """
 
 #TODO: add missing icons for topic status
 TOPIC_STATUS_TO_IMG = {
@@ -97,6 +96,7 @@ def build_context(request, **kwargs):
     return context
 
 # -- Boards -- #
+@cache_page(settings.CACHE_STORAGE_TIME)
 def show_boards(request):
     # /boards
     boards = models.Board.objects.all()
@@ -107,6 +107,7 @@ def show_boards(request):
     return HttpResponse(t.render(c))
 
 # -- Topics -- #
+@cache_page(settings.CACHE_STORAGE_TIME)
 def show_board(request, board_alias):
     # /boards/<board_alias>?page=2
     if request.GET.get("search"):
@@ -132,6 +133,7 @@ def show_board(request, board_alias):
     return HttpResponse(t.render(c))
 
 # -- Posts -- #
+@cache_page(settings.CACHE_STORAGE_TIME)
 def show_topic(request, board_alias, topic_num):
     # /boards/<board_alias>/<topic_num>?page=2
     #TODO: make a version that does not need board_alias
@@ -150,6 +152,7 @@ def show_topic(request, board_alias, topic_num):
             posts=posts, current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
+@cache_page(settings.CACHE_STORAGE_TIME)
 def search_topic(request, board_alias, query):
     cursor = connection.cursor()
     try:
@@ -174,6 +177,7 @@ def get_user(username):
         raise Http404
     return user
 
+@cache_page(settings.CACHE_STORAGE_TIME)
 def show_user(request, username):
     # /users/<username>
     user = get_user(username)
@@ -193,6 +197,7 @@ def show_user(request, username):
             total_posts=total_posts)
     return HttpResponse(t.render(c))
 
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_user_topics(request, username):
     # /users/<username>/topics?page=2
     user = get_user(username)
@@ -206,6 +211,7 @@ def show_user_topics(request, username):
         current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_user_posts(request, username):
     # /users/<username>/posts?page=2
     user = get_user(username)
@@ -234,6 +240,7 @@ def search_user(request):
 
 
 # -- Misc -- #
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def top_users(request):
     t = loader.get_template('top_users.html')
     top_user_posts = TopUsersPost.objects.all()
@@ -244,11 +251,13 @@ def top_users(request):
     })
     return HttpResponse(t.render(c))
 
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_home(request):
     t = loader.get_template('home.html')
     c = RequestContext(request, {})
     return HttpResponse(t.render(c))
 
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_faq(request):
     t = loader.get_template('faq.html')
     c = RequestContext(request, {})

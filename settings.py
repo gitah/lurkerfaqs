@@ -94,9 +94,9 @@ TEMPLATE_DIRS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -111,6 +111,17 @@ INSTALLED_APPS = (
     'batch',
     'lurkerfaqs',
 )
+
+#-- Caching --#
+#TODO: configure memcached
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+CACHE_STORAGE_TIME = 1800 # 30 min
+CACHE_STORAGE_TIME_LONG = 86400 # 1 day
 
 #-- LurkerFAQs General vars ---#
 LURKERFAQS_LOG_DIR = "/var/log/lurkerfaqs"
