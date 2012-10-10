@@ -14,8 +14,8 @@
   {% block table_contents %}<tr><td> <td></tr>{% endblock %}
 </table>
 
-<div class="pagination">
 {% if page_guide %}
+<div class="pagination">
     Jump to page: 
     {% for i in page_guide %}
         {% if i == "..." or i == '|'%}
@@ -26,6 +26,6 @@
             <span><a href="{% block page_url %}{% endblock %}?page={{i}}">{{i}}</a></span>
         {% endif %}
     {% endfor %}
-{% endif %}
 </div>
+{% endif %}
 {% endblock %}
