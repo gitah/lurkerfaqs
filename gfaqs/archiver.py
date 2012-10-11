@@ -5,6 +5,7 @@ from threading import Thread
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection, transaction
 
 from utils.daemon import Daemon
 from utils.threadpool import ThreadPool
@@ -45,12 +46,13 @@ class Archiver(Daemon):
         for alias,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url, alias)
             # create board if not in db
-            try:
-                board = Board.objects.get(url=board_url)
-            except ObjectDoesNotExist:
-                board = Board(url=board_url, name=name, alias=alias)
-                board.save()
-            self.pool.add_task(archive_board_task, board, refresh)
+            with transaction.commit_on_success():
+                try:
+                    board = Board.objects.get(url=board_url)
+                except ObjectDoesNotExist:
+                    board = Board(url=board_url, name=name, alias=alias)
+                    board.save()
+                self.pool.add_task(archive_board_task, board, refresh)
 
         # hang thread, so daemon keeps running
         while True:
@@ -76,8 +78,9 @@ class Archiver(Daemon):
                 t.pk = None
 
             try:
-                t.creator = self.add_user(t.creator)
-                t.save()
+                with transaction.commit_on_success():
+                    t.creator = self.add_user(t.creator)
+                    t.save()
             except Exception, e:
                 logger.error(e)
                 continue
@@ -104,8 +107,9 @@ class Archiver(Daemon):
             except ObjectDoesNotExist:
                 p.pk = None
             try:
-                p.creator = self.add_user(p.creator)
-                p.save()
+                with transaction.commit_on_success():
+                    p.creator = self.add_user(p.creator)
+                    p.save()
             except Exception, e:
                 logger.error(e)
                 continue
