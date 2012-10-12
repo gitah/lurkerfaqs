@@ -124,8 +124,7 @@ CACHE_STORAGE_TIME = 1800 # 30 min
 CACHE_STORAGE_TIME_LONG = 86400 # 1 day
 
 #-- LurkerFAQs General vars ---#
-LURKERFAQS_LOG_DIR = "/var/log/lurkerfaqs"
-LURKERFAQS_RUN_DIR = "/var/run/lurkerfaqs"
+LURKERFAQS_RUN_DIR = "%s/run" % PROJECT_ROOT
 
 LURKERFAQS_TOPICS_PER_PAGE = 3
 LURKERFAQS_POSTS_PER_PAGE = 3
@@ -164,7 +163,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR', 
             'class': 'logging.FileHandler',
-            'filename': '%s/gfaqs_archiver_error.log' % LURKERFAQS_LOG_DIR
+            'filename': '%s/gfaqs_archiver_error.log' % LURKERFAQS_RUN_DIR
         }
     },
     'loggers': {

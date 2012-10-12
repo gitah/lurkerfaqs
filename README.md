@@ -8,3 +8,13 @@ database. There is a front end to access the archived material.
 
 [LurkerFAQs was originally written in PHP](http://www.lurkerfaqs.com). This is a rewrite of LurkerFAQs using
 Python and Django.
+
+
+Installation
+============
+To install and run LurkerFAQs, go to the project root directory and
+execute
+
+    ./setup.sh
+
+NOTE: this script assumes that you are using Ubuntu 12.04 Server Edition
