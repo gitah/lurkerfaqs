@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect 
+from django.http import HttpResponse, HttpResponseRedirect
 from django.http import HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
@@ -41,7 +41,7 @@ def get_qs_paged(request, qs, window_size):
     num_pages = paginator.num_pages
     pages_to_display = settings.LURKERFAQS_PAGES_TO_DISPLAY
 
-    page_guide = create_page_guide(paginator.num_pages, 
+    page_guide = create_page_guide(paginator.num_pages,
         settings.LURKERFAQS_PAGES_TO_DISPLAY, page)
 
     return (paged_qs, page, page_guide)
@@ -226,8 +226,7 @@ def show_user_posts(request, username):
 
 def search_user(request):
     if not request.GET.get("search"):
-       return HttpResponseRedirect("/") 
-        
+       return HttpResponseRedirect("/")
     query = request.GET.get("search")
     users = models.User.objects.filter(username__startswith=query).all()
 

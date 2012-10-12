@@ -22,15 +22,15 @@ urlpatterns = patterns('lurkerfaqs.views',
 # These map the URLs for the old lurkerfaqs site to the new urls
 
 urlpatterns += patterns('lurkerfaqs.old_views',
-    url(r'^/users/topUsers', 'top_users'),
-    url(r'^/pages/faq', 'show_faqs'),
+    url(r'^users/topUsers/$', 'top_users'),
+    url(r'^pages/faq/$', 'show_faq'),
 
-    url(r'/topics/view/(?P<board_id>\d+)(/page:(P<page>\d+))?', 'show_board'),
-    url(r'/posts/view/(?P<topic_id>\d+)(/page:(P<page>\d+))?', 'show_topic'),
+    url(r'topics/view/(?P<board_id>\d+)(/page:(?P<page>\d+))?/$', 'show_board'),
+    url(r'posts/view/(?P<topic_id>\d+)(/page:(?P<page>\d+))?/$', 'show_topic'),
 
-    url(r'/users/view/(?P<user_id>\d+)', 'show_user'),
-    url(r'/topics/viewUserTopics/(?P<user_id>\d+)(/page:(P<page>\d+))?', 'show_user_topics'),
-    url(r'/posts/viewUserPosts/(?P<user_id>\d+)(/page:(P<page>\d+))?', 'show_user_posts'),
+    url(r'users/view/(?P<user_id>\d+)', 'show_user'),
+    url(r'topics/viewUserTopics/(?P<user_id>\d+)(/page:(?P<page>\d+))?/$', 'show_user_topics'),
+    url(r'posts/viewUserPosts/(?P<user_id>\d+)(/page:(?P<page>\d+))?/$', 'show_user_posts'),
 )
 
 urlpatterns += staticfiles_urlpatterns()
