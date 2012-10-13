@@ -13,7 +13,10 @@ then
 fi
 
 # install apache, mysql
-cat <<PACKAGES | xargs apt-get install $APTITUDE_OPTIONS
+export DEBIAN_FRONTEND=noninteractive
+apt-get -q -y install mysql-server
+apt-get update -q
+cat <<PACKAGES | xargs apt-get install -q -y
 git-core
 
 python
@@ -42,7 +45,7 @@ Options Indexes FollowSymLinks
 HTTPDCONF
 
 # mysql
-mysqladmin create lurkerfaqs
+mysqladmin -uroot create lurkerfaqs
 
 # cronjob
 if [ ! -f /etc/cron.d/lurkerfaqs ]; then
@@ -52,8 +55,8 @@ CRON
 
 
 #-- Services --#
-service apache2 start
-service mysql start
+service apache2 restart
+service mysql restart
 
 python manage.py syncdb
 python manage.py archiver start
