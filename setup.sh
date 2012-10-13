@@ -34,7 +34,7 @@ PACKAGES
 #-- Configuration --#
 
 # apache
-cat > /etc/apache2/httpd.conf <<HTTPDCONF
+cat <<HTTPDCONF > /etc/apache2/httpd.conf
 WSGIScriptAlias / $PROJECT_ROOT/wsgi.py
 WSGIPythonPath $PROJECT_ROOT
 
@@ -47,7 +47,7 @@ HTTPDCONF
 
 # cronjob
 if [ ! -f /etc/cron.d/lurkerfaqs ]; then
-    cat > /etc/cron.d/lurkerfaqs <<CRON
+    cat <<CRON > /etc/cron.d/lurkerfaqs
 0 0 * * 01 root python $PROJECT_ROOT/manage.py runbatch top_users
 CRON
 
