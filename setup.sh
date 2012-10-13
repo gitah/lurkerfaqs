@@ -21,6 +21,7 @@ git-core
 
 python
 python-django
+python-mysqldb
 python-bs4
 
 apache2
@@ -44,9 +45,6 @@ Options Indexes FollowSymLinks
 </Directory>
 HTTPDCONF
 
-# mysql
-mysqladmin -uroot create lurkerfaqs
-
 # cronjob
 if [ ! -f /etc/cron.d/lurkerfaqs ]; then
     cat > /etc/cron.d/lurkerfaqs <<CRON
@@ -58,8 +56,10 @@ CRON
 service apache2 restart
 service mysql restart
 
+set +e; mysqladmin -uroot create lurkerfaqs; set -e
 python manage.py syncdb
 python manage.py archiver start
+
 
 cat <<CONCLUSION
 LurkerFAQs is now installed and running :)
