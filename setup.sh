@@ -50,6 +50,7 @@ if [ ! -f /etc/cron.d/lurkerfaqs ]; then
     cat <<CRON > /etc/cron.d/lurkerfaqs
 0 0 * * 01 root python $PROJECT_ROOT/manage.py runbatch top_users
 CRON
+fi
 
 
 #-- Services --#
@@ -66,6 +67,6 @@ LurkerFAQs is now installed and running :)
 
 To access it go to <ip>:<port>
 
-Your database password is $DB_PASSWORD. Please change your database password and
+Your database password is BLANK. Please change your database password and
 update settings.py with the new one.
 CONCLUSION

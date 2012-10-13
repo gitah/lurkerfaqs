@@ -16,7 +16,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lurkerfaqs',
         'USER': 'root',
-        'PASSWORD': 'qwerty',
+        'PASSWORD': '',
         'HOST': '',
         'PORT': '',
     }

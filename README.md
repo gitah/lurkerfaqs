@@ -18,3 +18,9 @@ execute
     ./setup.sh
 
 NOTE: this script assumes that you are using Ubuntu 12.04 Server Edition
+
+Change your MySQL database password via
+
+    mysqladmin -uroot password <new_pass>
+
+and then change the db password in settings.py to `<new_pass>`
