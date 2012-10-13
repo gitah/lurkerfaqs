@@ -1,10 +1,16 @@
-#!/bin/bash
-PROJECT_ROOT=`dirname $0`
+#!/bin/bash -e
+set -e
+
+PROJECT_ROOT="$( cd "$( dirname "$0" )" && pwd )"
 cd $PROJECT_ROOT
 
 # make LURKERFAQS_RUN_DIR
-mkdir run
-chmod 777 run
+RUN_DIR=$PWD/run
+if [ ! -d $RUN_DIR ]; 
+then
+    mkdir $RUN_DIR
+    chmod 777 $RUN_DIR
+fi
 
 # install apache, mysql
 cat <<PACKAGES | xargs apt-get install $APTITUDE_OPTIONS
@@ -12,7 +18,7 @@ git-core
 
 python
 python-django
-python-beautifulsoup4
+python-bs4
 
 apache2
 libapache2-mod-wsgi
@@ -23,7 +29,7 @@ PACKAGES
 
 #-- Configuration --#
 
-# httpd
+# apache
 cat > /etc/apache2/httpd.conf <<HTTPDCONF
 WSGIScriptAlias / $PROJECT_ROOT/wsgi.py
 WSGIPythonPath $PROJECT_ROOT
@@ -36,8 +42,21 @@ Options Indexes FollowSymLinks
 HTTPDCONF
 
 # mysql
+mysqladmin create lurkerfaqs
 
-# run crons
+# cronjob
+if [ ! -f /etc/cron.d/lurkerfaqs ]; then
+    cat > /etc/cron.d/lurkerfaqs <<CRON
+0 0 * * 01 root python $PROJECT_ROOT/manage.py runbatch top_users
+CRON
+
+
+#-- Services --#
+service apache2 start
+service mysql start
+
+python manage.py syncdb
+python manage.py archiver start
 
 cat <<CONCLUSION
 LurkerFAQs is now installed and running :)
