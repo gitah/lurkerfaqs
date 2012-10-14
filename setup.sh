@@ -10,7 +10,15 @@ if [ ! -d $RUN_DIR ];
 then
     mkdir $RUN_DIR
     chmod 777 $RUN_DIR
+
 fi
+
+$ARCHIVER_LOG=$RUN_DIR/archiver.log
+if [ -f $ARCHIVER_LOG ];
+then
+    touch $ARCHIVER_LOG
+fi
+chmod 777 $ARCHIVER_LOG
 
 # install apache, mysql
 export DEBIAN_FRONTEND=noninteractive
@@ -20,7 +28,6 @@ cat <<PACKAGES | xargs apt-get install -q -y
 git-core
 
 python
-python-django
 python-mysqldb
 python-bs4
 
@@ -31,11 +38,23 @@ mysql-server
 mysql-client
 PACKAGES
 
+# Install django-1.4 since ubuntu repos only have django-1.3
+python -c "import django"
+if [ $? != 1 ];
+then
+    cd /tmp
+    wget "http://www.djangoproject.com/download/1.4/tarball/" -O "django.tar.gz"
+    tar xzvf "django.tar.gz"
+    cd Django-1.4
+    python setup.py install
+    cd $PROJECT_ROOT
+fi
+
 #-- Configuration --#
 
 # apache
 cat <<HTTPDCONF > /etc/apache2/httpd.conf
-WSGIScriptAlias / $PROJECT_ROOT/wsgi.py
+WSGIScriptAlias / $PROJECT_ROOT/lurkerfaqs/wsgi.py
 WSGIPythonPath $PROJECT_ROOT
 
 <Directory $PROJECT_ROOT>

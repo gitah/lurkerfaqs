@@ -163,7 +163,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR', 
             'class': 'logging.FileHandler',
-            'filename': '%s/gfaqs_archiver_error.log' % LURKERFAQS_RUN_DIR
+            'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR
         }
     },
     'loggers': {
