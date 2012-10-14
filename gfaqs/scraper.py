@@ -47,11 +47,8 @@ class Scraper(object):
         while True:
             try:
                 html = self.get_page(opener,pg)
-                try:
-                    for topic in self.parse_page(html):
-                        yield topic
-                except Exception, e:
-                    logger.error(e)
+                for topic in self.parse_page(html):
+                    yield topic
                 pg += 1
             except ValueError:
                 break
@@ -161,7 +158,7 @@ class TopicScraper(Scraper):
         posts = []
         post_tags = soup.find_all("tr")
         if not post_tags:
-            raise ValueError("Page contains no topics")
+            raise ValueError("Page contains no posts")
 
         for tr in post_tags:
             tds = tr.find_all("td")
