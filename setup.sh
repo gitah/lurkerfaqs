@@ -29,7 +29,7 @@ git-core
 
 python
 python-mysqldb
-python-bs4
+python-setuptools
 
 apache2
 libapache2-mod-wsgi
@@ -37,6 +37,9 @@ libapache2-mod-wsgi
 mysql-server
 mysql-client
 PACKAGES
+
+# Install beautifulsoup4 since ubuntu repo does not have newest version
+easy-install beautifulsoup4
 
 # Install django-1.4 since ubuntu repos only have django-1.3
 python -c "import django"
