@@ -1,7 +1,9 @@
 import time
 import urllib2
 import logging
+import traceback
 from threading import Thread
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,7 +20,6 @@ from login import authenticate
 WORKERS_PER_BOARD = 10
 
 logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
-
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
@@ -39,8 +40,13 @@ class Archiver(Daemon):
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
         self.pool = ThreadPool(num_workers)
         def archive_board_task(board, refresh):
+            print "ALKSJFLKSDJFKLSDJF"
             while True:
-                self.archive_board(board)
+                try:
+                    self.archive_board(board)
+                except:
+                    log_error(e)
+
                 time.sleep(refresh*60)
 
         for alias,name,refresh in self.board_info:
@@ -77,13 +83,9 @@ class Archiver(Daemon):
             except ObjectDoesNotExist:
                 t.pk = None
 
-            try:
-                with transaction.commit_on_success():
-                    t.creator = self.add_user(t.creator)
-                    t.save()
-            except Exception, e:
-                logger.error(e)
-                continue
+            with transaction.commit_on_success():
+                t.creator = self.add_user(t.creator)
+                t.save()
 
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
@@ -106,13 +108,19 @@ class Archiver(Daemon):
                 continue
             except ObjectDoesNotExist:
                 p.pk = None
-            try:
-                with transaction.commit_on_success():
-                    p.creator = self.add_user(p.creator)
+
+            with transaction.commit_on_success():
+                p.creator = self.add_user(p.creator)
+                try:
                     p.save()
-            except Exception, e:
-                logger.error(e)
-                continue
+                except Exception, e:
+                    print "======"
+                    print "EXCEPTION!!!: %s" % e
+                    print p.topic.title, p.topic.gfaqs_id, p.topic.board.alias
+                    print p.creator.username
+                    print "======"
+                    print ""
+                    raise Exception("FOOOOBARRRR")
 
     def add_user(self, user):
         """ Check if user exists already in db, if not add it """
@@ -123,3 +131,12 @@ class Archiver(Daemon):
         except ObjectDoesNotExist:
             user.save()
         return user
+
+def log_error(e):
+    error_msg = ["== Error ==", 
+        "Time: %s" % str(datetime.now()),
+        "%s: %s" % (e.__class__.__name__, e),
+    ]
+    error_msg.extend(traceback.format_stack())
+    error_msg.extend(["========", ''])
+    logger.error('\n'.join(error_msg))

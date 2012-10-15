@@ -13,7 +13,7 @@ then
 
 fi
 
-$ARCHIVER_LOG=$RUN_DIR/archiver.log
+ARCHIVER_LOG=$RUN_DIR/archiver.log
 if [ -f $ARCHIVER_LOG ];
 then
     touch $ARCHIVER_LOG
@@ -39,7 +39,7 @@ mysql-client
 PACKAGES
 
 # Install beautifulsoup4 since ubuntu repo does not have newest version
-easy-install beautifulsoup4
+easy_install beautifulsoup4
 
 # Install django-1.4 since ubuntu repos only have django-1.3
 python -c "import django"

@@ -1,5 +1,4 @@
 import urllib2
-import logging
 from urlparse import urlparse
 from datetime import datetime
 
@@ -22,7 +21,8 @@ TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
-logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
+# This is needed because gfaqs is backwards as fuck and doesn't use UTF-8
+GFAQS_ENCODING="ISO-8859-1"
 
 class Scraper(object):
     def get_page(self, opener, pg):
@@ -86,7 +86,7 @@ class BoardScraper(Scraper):
             </table>
         """
         # TODO: handle exceptions for badly formatted pages; write archiver first
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         topics = []
         topic_tags = soup.find_all("tr")
         if not topic_tags:
@@ -99,7 +99,7 @@ class BoardScraper(Scraper):
 
             status_img = tds[0].img["src"].split("/")[-1]
             topic_status = TOPIC_STATUS_MAP.get(status_img, None)
-            assert topic_status!=None, "Board Parser Error: status image not found"
+            assert topic_status != None, "Board Parser Error: status image not found"
 
             topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
             topic_title = tds[1].a.text
@@ -154,7 +154,8 @@ class TopicScraper(Scraper):
                </td>
             </tr> 
         """
-        soup = BeautifulSoup(html)
+        import ipdb; ipdb.set_trace()
+        soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         posts = []
         post_tags = soup.find_all("tr")
         if not post_tags:
