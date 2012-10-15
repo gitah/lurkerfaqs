@@ -21,8 +21,15 @@ TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
-# This is needed because gfaqs is backwards as fuck and doesn't use UTF-8
-GFAQS_ENCODING="ISO-8859-1"
+# <rage>
+# The code below took me 3 hours to debug all because all because gfaqs is
+# backwards as fuck. Yes I'm mad.
+#
+# Modern sites basically all use UTF-8 encoding, but no not gfaqs: the header
+# and HTML says the page uses ISO-8859-1. This would be alright, but guess what?
+# It turns out this is a big fat lie...
+#</rage>
+GFAQS_ENCODING="windows-1252"
 
 class Scraper(object):
     def get_page(self, opener, pg):
@@ -154,7 +161,6 @@ class TopicScraper(Scraper):
                </td>
             </tr> 
         """
-        import ipdb; ipdb.set_trace()
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         posts = []
         post_tags = soup.find_all("tr")
