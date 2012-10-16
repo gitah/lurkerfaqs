@@ -4,6 +4,7 @@ import logging
 import traceback
 from threading import Thread
 from datetime import datetime
+from functools import wraps
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -19,7 +20,31 @@ from login import authenticate
 #TODO: transactions
 WORKERS_PER_BOARD = 10
 
+#TODO: move Logging stuff to seperate module
 logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
+def log_on_error(fn, explode=False):
+    """Decorator that logs the stack trace when an error occurs in the function"""
+    def log_error(e):
+        print "FOIOIU"
+        error_msg = ["== Error ==", 
+            "Time: %s" % str(datetime.now()),
+            "%s: %s" % (e.__class__.__name__, e),
+        ]
+        #error_msg.extend(traceback.format_stack())
+        error_msg.extend(["========", ''])
+        logger.error('\n'.join(error_msg))
+        if explode:
+            raise e
+
+    @wraps(fn)
+    def logged_fn(*args, **kwargs):
+        try:
+            fn(*args, **kwargs)
+        except Exception, e:
+            log_error(e)
+
+    return logged_fn
+
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
@@ -40,13 +65,8 @@ class Archiver(Daemon):
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
         self.pool = ThreadPool(num_workers)
         def archive_board_task(board, refresh):
-            print "ALKSJFLKSDJFKLSDJF"
             while True:
-                try:
-                    self.archive_board(board)
-                except:
-                    log_error(e)
-
+                self.archive_board(board)
                 time.sleep(refresh*60)
 
         for alias,name,refresh in self.board_info:
@@ -64,6 +84,7 @@ class Archiver(Daemon):
         while True:
             time.sleep(10)
 
+    @log_on_error
     def archive_board(self, b, recursive=True):
         """ scrapes and saves the topics of a board to the db 
         
@@ -90,6 +111,7 @@ class Archiver(Daemon):
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
 
+    @log_on_error
     def archive_topic(self, t):
         """
         TODO:
@@ -111,16 +133,7 @@ class Archiver(Daemon):
 
             with transaction.commit_on_success():
                 p.creator = self.add_user(p.creator)
-                try:
-                    p.save()
-                except Exception, e:
-                    print "======"
-                    print "EXCEPTION!!!: %s" % e
-                    print p.topic.title, p.topic.gfaqs_id, p.topic.board.alias
-                    print p.creator.username
-                    print "======"
-                    print ""
-                    raise Exception("FOOOOBARRRR")
+                p.save()
 
     def add_user(self, user):
         """ Check if user exists already in db, if not add it """
@@ -131,12 +144,3 @@ class Archiver(Daemon):
         except ObjectDoesNotExist:
             user.save()
         return user
-
-def log_error(e):
-    error_msg = ["== Error ==", 
-        "Time: %s" % str(datetime.now()),
-        "%s: %s" % (e.__class__.__name__, e),
-    ]
-    error_msg.extend(traceback.format_stack())
-    error_msg.extend(["========", ''])
-    logger.error('\n'.join(error_msg))
