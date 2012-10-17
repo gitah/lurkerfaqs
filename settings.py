@@ -19,6 +19,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+        "init_command": "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ",
     }
 }
 
@@ -141,7 +142,7 @@ GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_URL
 
 # List of boards to scrape
 # Each board is represented as a 2-tuple:
-# (<board_path>,<board_name>, <refresh_time_in_minutes>) 
+# (<board_path>,<board_name>, <refresh_time_in_minutes>)
 GFAQS_BOARDS = [
     ("2000121-anime-and-manga-other-titles", "Anime and Manga - Other Titles", 5),
     ("8-gamefaqs-contests", "GameFAQs Contests", 5)
@@ -153,23 +154,35 @@ GFAQS_LOGIN_PASSWORD=""
 
 
 #-- Logging Settings --#
+GFAQS_INFO_LOGGER = 'gfaqs.info'
 GFAQS_ERROR_LOGGER = 'gfaqs.errors'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s: %(asctime)s] %(message)s'
+        }
+    },
     'filters': {
     },
     'handlers': {
         'file': {
-            'level': 'ERROR', 
+            'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR
+            'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
+            'formatter': 'verbose'
         }
     },
     'loggers': {
         GFAQS_ERROR_LOGGER: {
             'handlers': ['file'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        GFAQS_INFO_LOGGER: {
+            'handlers': ['file'],
+            'level': 'INFO',
             'propagate': True,
         },
     }

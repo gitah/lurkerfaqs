@@ -8,6 +8,7 @@ from functools import wraps
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from django.db import connection, transaction
 
 from utils.daemon import Daemon
@@ -21,18 +22,19 @@ from login import authenticate
 WORKERS_PER_BOARD = 10
 
 #TODO: move Logging stuff to seperate module
-logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
+err_logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
+info_logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
+
 def log_on_error(fn, explode=False):
     """Decorator that logs the stack trace when an error occurs in the function"""
     def log_error(e):
-        print "FOIOIU"
-        error_msg = ["== Error ==", 
+        error_msg = ["== Error ==",
             "Time: %s" % str(datetime.now()),
             "%s: %s" % (e.__class__.__name__, e),
         ]
         #error_msg.extend(traceback.format_stack())
         error_msg.extend(["========", ''])
-        logger.error('\n'.join(error_msg))
+        err_logger.error('\n'.join(error_msg))
         if explode:
             raise e
 
@@ -44,6 +46,9 @@ def log_on_error(fn, explode=False):
             log_error(e)
 
     return logged_fn
+
+def log_info(msg):
+    info_logger.info(msg)
 
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
@@ -92,8 +97,11 @@ class Archiver(Daemon):
             recursive: archives the posts of each topic as well
         """
         bs = BoardScraper(b)
+        log_info("Archiving Board (%s) started" % b.url)
+        topics_examined, topics_saved = 0, 0
 
         for t in bs.retrieve(self.opener):
+            topics_examined += 1
             try:
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
                 t.pk = t_db.pk
@@ -107,9 +115,13 @@ class Archiver(Daemon):
             with transaction.commit_on_success():
                 t.creator = self.add_user(t.creator)
                 t.save()
+                topics_saved += 1
 
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
+
+        log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
+                (b.url, topics_examined, topics_saved))
 
     @log_on_error
     def archive_topic(self, t):
@@ -120,20 +132,25 @@ class Archiver(Daemon):
             - multiple results errors for *.get() calls
         """
         ts = TopicScraper(t)
+        log_info("Archiving Topic (%s) started" % t.gfaqs_id)
+        posts_examined, posts_saved = 0, 0
 
         for p in ts.retrieve(self.opener):
+            posts_examined += 1
             # Check of post exists already in db to determine update or add
-            try:
-                p_db = Post.objects.filter(topic=t).get(
-                    post_num=p.post_num)
-                # TODO: update post instead of ignore for edited ones
-                continue
-            except ObjectDoesNotExist:
-                p.pk = None
-
             with transaction.commit_on_success():
-                p.creator = self.add_user(p.creator)
-                p.save()
+                try:
+                    Post.objects.filter(topic=t).get(post_num=p.post_num)
+                    # TODO: update post instead of ignore for edited ones
+                    continue
+                except ObjectDoesNotExist:
+                    p.pk = None
+                    p.creator = self.add_user(p.creator)
+                    p.save()
+                    posts_saved += 1
+
+        log_info("Archiving Topic (%s) finished; %s posts examined, %s new" % \
+            (t.gfaqs_id, posts_examined, posts_saved))
 
     def add_user(self, user):
         """ Check if user exists already in db, if not add it """
@@ -142,5 +159,13 @@ class Archiver(Daemon):
         try:
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
-            user.save()
-        return user
+            try:
+                user.save()
+                log_info("User added (%s)" % user.username)
+                return user
+            except IntegrityError:
+                # I need this since txns are not working :( :(
+                # sometimes a different thread will save the user before this
+                # one, so I get an IntegrityError
+                # this is way t
+                return User.objects.get(username=user.username)
