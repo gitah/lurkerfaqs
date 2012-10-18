@@ -18,8 +18,8 @@ from models import User, Board, Topic, Post
 from login import authenticate
 
 
-#TODO: transactions
-WORKERS_PER_BOARD = 10
+WORKERS_PER_BOARD = 10  # number of worker thread created for each board
+THROTTLE_TIME=0.1       # sleep time in seconds
 
 #TODO: move Logging stuff to seperate module
 err_logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
@@ -46,6 +46,9 @@ def log_on_error(fn, explode=False):
 
 def log_info(msg):
     info_logger.info(msg)
+
+def throttle_thread(throttle_time=THROTTLE_TIME):
+    time.sleep(throttle_time)
 
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
@@ -94,7 +97,7 @@ class Archiver(Daemon):
             recursive: archives the posts of each topic as well
         """
         bs = BoardScraper(b)
-        log_info("Archiving Board (%s) started" % b.url)
+        log_info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
 
         for t in bs.retrieve(self.opener):
@@ -116,9 +119,10 @@ class Archiver(Daemon):
 
             if recursive:
                 self.pool.add_task(self.archive_topic,t)
+            throttle_thread()
 
         log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
-                (b.url, topics_examined, topics_saved))
+                (b.alias, topics_examined, topics_saved))
 
     @log_on_error
     def archive_topic(self, t):
@@ -146,6 +150,7 @@ class Archiver(Daemon):
                     p.creator = self.add_user(p.creator)
                     p.save()
                     posts_saved += 1
+            throttle_thread()
 
         log_info("Archiving Topic (%s) finished; %s posts examined, %s new" % \
             (t.gfaqs_id, posts_examined, posts_saved))
