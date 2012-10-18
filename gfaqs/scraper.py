@@ -194,7 +194,7 @@ class TopicScraper(Scraper):
             while i < len(comps):
                 comp = comps[i]
                 # parse until we reach signature
-                if hasattr(comp,"name") and comp.name == "br" and i+1 < len(comps):
+                if hasattr(comp,"name") and comp.name == "br" and i+2 < len(comps):
                     if comps[i+1] == "---":
                         break 
                 else:
@@ -202,7 +202,7 @@ class TopicScraper(Scraper):
                 i += 1
 
             signature = []
-            i += 2
+            i += 3
             while i < len(comps):
                 signature.append(comps[i])
                 i += 1

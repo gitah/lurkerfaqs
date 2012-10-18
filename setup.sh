@@ -79,7 +79,8 @@ fi
 service apache2 restart
 service mysql restart
 
-set +e; mysqladmin -uroot create lurkerfaqs; set -e
+DBNAME=lurkerfaqs
+set +e; mysqladmin -uroot "CREATE DATABASE $DBNAME CHARACTER SET utf8;" set -e
 python manage.py syncdb
 python manage.py archiver start
 

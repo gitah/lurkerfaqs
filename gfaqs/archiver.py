@@ -28,11 +28,8 @@ info_logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
 def log_on_error(fn, explode=False):
     """Decorator that logs the stack trace when an error occurs in the function"""
     def log_error(e):
-        error_msg = ["== Error ==",
-            "Time: %s" % str(datetime.now()),
-            "%s: %s" % (e.__class__.__name__, e),
-        ]
-        #error_msg.extend(traceback.format_stack())
+        error_msg = ["== Error =="]
+        error_msg.extend([traceback.format_exc()])
         error_msg.extend(["========", ''])
         err_logger.error('\n'.join(error_msg))
         if explode:
@@ -142,6 +139,7 @@ class Archiver(Daemon):
                 try:
                     Post.objects.filter(topic=t).get(post_num=p.post_num)
                     # TODO: update post instead of ignore for edited ones
+                    # TODO: or simply skip until newest topic so less db queries needed
                     continue
                 except ObjectDoesNotExist:
                     p.pk = None
@@ -159,13 +157,6 @@ class Archiver(Daemon):
         try:
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
-            try:
-                user.save()
-                log_info("User added (%s)" % user.username)
-                return user
-            except IntegrityError:
-                # I need this since txns are not working :( :(
-                # sometimes a different thread will save the user before this
-                # one, so I get an IntegrityError
-                # this is way t
-                return User.objects.get(username=user.username)
+            user.save()
+            log_info("User added (%s)" % user.username)
+            return user
