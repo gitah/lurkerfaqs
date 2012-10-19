@@ -1,4 +1,5 @@
 import urllib2
+from urllib import urlencode
 from urlparse import urlparse
 from datetime import datetime
 
@@ -31,12 +32,20 @@ POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 #</rage>
 GFAQS_ENCODING="windows-1252"
 
+def generate_query_string(page):
+    query = {
+        "page": page,
+        "results": 1,  #display poll results
+    }
+    return urlencode(query)
+
 class Scraper(object):
     def get_page(self, opener, pg):
         base = self.base_url()
         parts = urlparse(base)
         if parts.scheme == "http":
-            page_url = "%s?page=%s" % (base,pg)
+            qs = generate_query_string(pg)
+            page_url = "%s?%s" % (base, qs)
         else:
             raise ValueError("URL scheme %s not recognized") % parts.scheme
 
@@ -92,7 +101,6 @@ class BoardScraper(Scraper):
                 ...
             </table>
         """
-        # TODO: handle exceptions for badly formatted pages; write archiver first
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         topics = []
         topic_tags = soup.find_all("tr")
