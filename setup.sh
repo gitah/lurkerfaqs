@@ -14,7 +14,7 @@ then
 fi
 
 ARCHIVER_LOG=$RUN_DIR/archiver.log
-if [ -f $ARCHIVER_LOG ];
+if [ ! -f $ARCHIVER_LOG ];
 then
     touch $ARCHIVER_LOG
 fi
@@ -42,8 +42,9 @@ PACKAGES
 easy_install beautifulsoup4
 
 # Install django-1.4 since ubuntu repos only have django-1.3
+set +e
 python -c "import django"
-if [ $? != 1 ];
+if [ $? == 1 ];
 then
     cd /tmp
     wget "http://www.djangoproject.com/download/1.4/tarball/" -O "django.tar.gz"
@@ -52,6 +53,7 @@ then
     python setup.py install
     cd $PROJECT_ROOT
 fi
+set -e
 
 #-- Configuration --#
 
@@ -80,10 +82,10 @@ service apache2 restart
 service mysql restart
 
 DBNAME=lurkerfaqs
-set +e; mysqladmin -uroot "CREATE DATABASE $DBNAME CHARACTER SET utf8;" set -e
+set +e 
+mysql -uroot -e "CREATE DATABASE $DBNAME CHARACTER SET utf8;" 
+set -e
 python manage.py syncdb
-python manage.py archiver start
-
 
 cat <<CONCLUSION
 LurkerFAQs is now installed and running :)
