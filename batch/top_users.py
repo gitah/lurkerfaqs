@@ -5,15 +5,10 @@ from django.db.models import Count
 
 from batch.models import TopUsersTopic, TopUsersPost
 from gfaqs.models import User, Topic, Post
+from batch.batch_base import Batch
 
 
 NUM_TOP_USERS=50
-
-class Batch(object):
-    """ Abstract class for batches """
-    def start(self):
-        """ Entry point to batch; override this method in subclass """
-        pass
 
 class TopUsersBatch(Batch):
     @transaction.commit_on_success
