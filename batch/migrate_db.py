@@ -1,6 +1,6 @@
 import argparse
 
-import MySQLdb
+from MySQLdb import connect
 
 from gfaqs.models import Board, User, Topic, Post
 from batch.batch_base import Batch
@@ -46,7 +46,38 @@ users:
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
     current one"""
+    def __init__(self):
+        parser = argparse.ArgumentParser(description='migrates old lurkerfaqs db')
+        parser.add_argument('host', type=str, nargs='1',
+           help='hostname of mysql db to migrate')
+        parser.add_argument('--user', dest=user, type=str, nargs='1',
+           help='username of mysql db')
+        parser.add_argument('--password', dest=password, type=str, nargs='1',
+           help='password of mysql db')
+
+        args = parser.parse_args()
+        self.src_db_host = args.host
+        self.src_db_port = args.port
+        self.db_user = args.user
+        self.db_password = args.password
+
+    def start(self):
+        # parse args
+        conn = connect(host=self.host, user=self.db_user, passwd=self.db_password)
+        conn.cursor()
 
     @transaction.commit_on_success
-    def start(self):
+    def migrate_boards(self):
+        pass
+
+    @transaction.commit_on_success
+    def migrate_users(self):
+        pass
+
+    @transaction.commit_on_success
+    def migrate_topics(self):
+        pass
+
+    @transaction.commit_on_success
+    def migrate_posts(self):
         pass
