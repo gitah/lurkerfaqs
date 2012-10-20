@@ -1,4 +1,5 @@
 import sys
+import os
 import logging
 
 from django.core.management.base import BaseCommand, CommandError
@@ -17,6 +18,14 @@ def log_start():
 
 def log_end():
     logger.info("Stopping archiver daemon")
+
+def show_status():
+    if os.path.isfile(PIDFILE):
+        with open(PIDFILE) as fp:
+            pid = fp.readlines()[0].strip()
+            print "archiver running, process %s" % pid
+    else:
+        print "archiver stopped"
 
 class Command(BaseCommand):
     args = '<poll_id poll_id ...>'
@@ -43,6 +52,9 @@ class Command(BaseCommand):
 
         elif args[0] == "restart":
             daemon.restart()
+
+        elif args[0] == "status":
+            show_status()
 
         else:
             print "unknown command"
