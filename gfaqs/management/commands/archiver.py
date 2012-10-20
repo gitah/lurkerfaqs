@@ -11,7 +11,7 @@ PIDFILE=settings.GFAQS_ARCHIVER_PID_FILE
 logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
 
 def help():
-    return "usage: python manage.py archiver [start|stop|restart]\n"
+    return "usage: python manage.py archiver [start|stop|restart|status]\n"
 
 def log_start():
     logger.info("Starting archiver daemon")
