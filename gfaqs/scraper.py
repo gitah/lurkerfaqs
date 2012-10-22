@@ -12,7 +12,8 @@ TOPIC_STATUS_MAP = {
     "topic.gif": Topic.NORMAL,
     "lock.gif": Topic.CLOSED,
     "topic_poll.gif": Topic.POLL,
-    "topic_archived.gif": Topic.ARCHIVED
+    "topic_archived.gif": Topic.ARCHIVED,
+    "topic_closed.gif": Topic.CLOSED
 }
 STRING_EDITED = "(edited)";
 STRING_MODDED = "[This message was deleted at the request of a moderator or administrator]";
@@ -110,11 +111,11 @@ class BoardScraper(Scraper):
             tds = topic_tag.find_all("td")
             if not tds:
                 continue
-            assert len(tds) == 5, "Board Parser Error: topic html invalid format"
+            assert len(tds) == 5, "Topic html invalid format (%s)" % self.base_url()
 
             status_img = tds[0].img["src"].split("/")[-1]
             topic_status = TOPIC_STATUS_MAP.get(status_img, None)
-            assert topic_status != None, "Board Parser Error: status image not found"
+            assert topic_status != None, "status image %s not found (%s)" % (status_img, self.base_url())
 
             topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
             topic_title = tds[1].a.text
@@ -179,7 +180,7 @@ class TopicScraper(Scraper):
             tds = tr.find_all("td")
             if not tds:
                 continue
-            assert len(tds) == 2, "Board Parser Error: post html invalid format"
+            assert len(tds) == 2, "post html invalid format (%s)" % self.base_url()
 
             postinfo = list(tds[0].div.children)
             post_status = Post.NORMAL
