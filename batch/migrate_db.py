@@ -1,4 +1,5 @@
 import argparse
+import traceback
 
 from MySQLdb import connect
 
@@ -81,6 +82,7 @@ class MigrateDB(Batch):
 
 
 class ForEach(object):
+
     def get_chunk_generator(self, sql_query):
         """returns a generator that chunks the sql query using LIMIT 
 
@@ -94,29 +96,56 @@ class ForEach(object):
             start = 0
             while True:
                 limit = "LIMIT %s, %s" % (start, start+CHUNK_SIZE)
-                yield "%s %s" % (sql_query, limit)
+                yield (start, "%s %s" % (sql_query, limit))
                 start += CHUNK_SIZE
 
         return chunk_generator
 
+    def print_progress(self, curr, total):
+        ratio = float(curr)/float(total)
+        print "[%.2f] (curr/float) rows processed" 
+
     def start(self, conn):
         self.conn = conn
-        chunk_generator = get_chunk_generator(self.get_sql_query())
-        for sql in chunk_generator():
-            #TODO: catch exception for bad query and break
-            visit_chunk(sql)
+
+        total = get_row_count()
+
+        if self.where_clause():
+            sql_query_base = "%s %s" % (self.sql_query(), self.where_clause)
+        else:
+            sql_query_base = self.sql_query()
+
+        chunk_generator = get_chunk_generator(sql_query_base)
+        for start_index,query in chunk_generator():
+            self.print_progress(start_index, total)
+            visit_chunk(query)
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
         c.execute(sql)
         with transaction.commit_on_success():
-            for r in c.fetchone()
-                #TODO: handle exception with row?
-                self.visit_row(r)
+            for r in c.fetchone():
+                try:
+                    self.visit_row(r)
+                except:
+                    traceback.print_exc()
 
-    def get_sql_query(self):
+    def get_row_count(self):
+        c = self.conn.cursor()
+        c.execute(self.row_count_query())
+        return int(c.fetchone())
+
+    def sql_query(self):
+        assert self.table_name
+        return "SELECT * FROM %s" % self.table_name
+
+    def row_count_query(self):
+        assert self.table_name
+        return "SELECT COUNT(*) FROM %s" % self.table_name
+
+    def where_clause(self):
         """override this"""
-        pass
+        return ''
     
     def visit_row(self):
         """override this"""
@@ -124,25 +153,25 @@ class ForEach(object):
 
 class ForEachBoard(ForEach):
 
+    table_name = "boards"
+
     def visit_row(r):
         board_id, url, name, _, _, _ = r
-        #TODO: parse alias from board url
-        b = Board(pk=board_id, url=url, name=name, alias="???")
+        alias = url.split("http://www.gamefaqs.com/boards/")[1]
+        b = Board(pk=board_id, url=url, name=name, alias=alias)
         b.save()
 
-    def get_sql_query(self):
-        return "SELECT * FROM boards"
-
 class ForEachUser(ForEach):
+
+    table_name = "users"
 
     def visit_row(r):
         user_id, username, status = r
         User(pk=user_id, username=username, status=status).save()
 
-    def get_sql_query(self):
-        return "SELECT * FROM users"
-
 class ForEachTopic(ForEach):
+
+    table_name = "topics"
 
     def visit_row(r):
         topic_id, board_id, user_id, num, title, post_count, last_post_date, status = r
@@ -150,16 +179,12 @@ class ForEachTopic(ForEach):
             number_of_posts=post_count, last_post_date=last_post_date, status=status)
         t.save()
 
-    def get_sql_query(self):
-        return "SELECT * FROM topics"
-
 class ForEachPost(ForEach):
+
+    table_name = "posts"
 
     def visit_row(r):
         post_id, topic_id, user_id, date, num, contents, signature, status = r
         p = Post(pk=post_id, topic_id=topic_id, user_id=user_id, date=date,
             post_num=num, contents=contents, signature=signature, status=status)
         p.save()
-
-    def get_sql_query(self):
-        return "SELECT * FROM posts"

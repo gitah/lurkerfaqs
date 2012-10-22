@@ -1,10 +1,5 @@
 from django.db import models
 
-#TODO:
-#       make `User`.`username` unique
-#       make `Board`.`alias` unique
-#       make `Topic`.`gfaqs_id` unique
-
 class User(models.Model):
     NORMAL, MOD, ADMIN, HIDDEN= 0,1,2,9
     USER_STATUS = (
@@ -16,14 +11,16 @@ class User(models.Model):
     username = models.CharField(max_length=25, db_index=True, unique=True)
     status = models.CharField(max_length=2, choices=USER_STATUS, default=NORMAL)
 
+    def __str__(self):
+        return self.username
+
 class Board(models.Model):
     url = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
     alias = models.CharField(max_length=200, db_index=True, unique=True)
-    #TODO: figureout what to do with these:
-    #next_update	datetime			No			 	 	 	 	 	 	
-    #last_topic_date	datetime			No			 	 	 	 	 	 	
-    #scrape_period	int(11)
+
+    def __str__(self):
+        return self.alias
     
 class Topic(models.Model):
     NORMAL, CLOSED, ARCHIVED = 0,1,2
@@ -46,7 +43,7 @@ class Topic(models.Model):
     status = models.CharField(max_length=2, choices=TOPIC_STATUS, default=NORMAL)
 
     def __str__(self):
-        return "[%s] (Creator=%s)" % (self.title, self.creator.username)
+        return "[%s] (%s, %s)" % (self.title, self.gfaqs_id, self.creator.username)
     
 class Post(models.Model):
     NORMAL, CLOSED, MODDED, EDITED = 0,1,2,3
@@ -65,5 +62,5 @@ class Post(models.Model):
     status = models.CharField(max_length=2, choices=POST_STATUS, default=NORMAL)
 
     def __str__(self):
-        return "[%s] (Creator=%s)\n %s \n---\n %s" % (self.topic.title,
-                self.creator.username, self.contents, self.signature)
+        return "%s\n %s \n---\n %s" % (self.topic,
+            self.contents, self.signature)
