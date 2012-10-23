@@ -1,51 +1,23 @@
 import time
 import urllib2
-import logging
-import traceback
 from threading import Thread
 from datetime import datetime
-from functools import wraps
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from utils.daemon import Daemon
-from utils.threadpool import ThreadPool
-from scraper import BoardScraper, TopicScraper
-from models import User, Board, Topic, Post
-from login import authenticate
+from gfaqs.utils import log_on_error, log_info
+from gfaqs.utils.daemon import Daemon
+from gfaqs.utils.threadpool import ThreadPool
+from gfaqs.scraper import BoardScraper, TopicScraper
+from gfaqs.models import User, Board, Topic, Post
+from gfaqs.login import authenticate
 
 
 WORKERS_PER_BOARD = 10  # number of worker thread created for each board
 THROTTLE_TIME=0.1       # sleep time in seconds
-
-#TODO: move Logging stuff to seperate module
-err_logger = logging.getLogger(settings.GFAQS_ERROR_LOGGER)
-info_logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
-
-def log_on_error(fn, explode=False):
-    """Decorator that logs the stack trace when an error occurs in the function"""
-    def log_error(e):
-        error_msg = ["== Error =="]
-        error_msg.extend([traceback.format_exc()])
-        error_msg.extend(["========", ''])
-        err_logger.error('\n'.join(error_msg))
-        if explode:
-            raise e
-
-    @wraps(fn)
-    def logged_fn(*args, **kwargs):
-        try:
-            fn(*args, **kwargs)
-        except Exception, e:
-            log_error(e)
-
-    return logged_fn
-
-def log_info(msg):
-    info_logger.info(msg)
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
     time.sleep(throttle_time)

@@ -6,6 +6,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, element
 from django.conf import settings
 
+from gfaqs.utils import strptime
 from gfaqs.models import User, Board, Topic, Post
 
 TOPIC_STATUS_MAP = {
@@ -128,14 +129,14 @@ class BoardScraper(Scraper):
 
             try:
                 date_raw = tds[4].a.text
-                dt = datetime.strptime(date_raw,TOPIC_DATE_FORMAT_STR)
+                dt = strptime(date_raw, TOPIC_DATE_FORMAT_STR)
                 # the year is not sepcified on gfaqs, 
                 # so I'll set it to the current year
                 curr_year = datetime.now().year
                 dt = datetime(curr_year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
             except ValueError:
                 # archived topic, use alternative format str
-                dt = datetime.strptime(date_raw,TOPIC_DATE_ALT_FORMAT_STR)
+                dt = strptime(date_raw, TOPIC_DATE_ALT_FORMAT_STR)
 
             topic = Topic(board=self.board, creator=creator, 
                     gfaqs_id=topic_gfaqs_id, title=topic_title,
@@ -193,7 +194,7 @@ class TopicScraper(Scraper):
                     if el.string.startswith("Posted"):
                         date_raw = " ".join(el.string.split())
                         #TODO: set year on dt obj
-                        dt = datetime.strptime(date_raw,POST_DATE_FORMAT_STR)
+                        dt = strptime(date_raw,POST_DATE_FORMAT_STR)
                     elif el.string == STRING_EDITED:
                         post_status = Post.EDITED
                 elif el.get("name"):
