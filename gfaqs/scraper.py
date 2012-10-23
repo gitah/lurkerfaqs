@@ -104,9 +104,12 @@ class BoardScraper(Scraper):
         """
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         topics = []
-        topic_tags = soup.find_all("tr")
-        if not topic_tags:
-            raise ValueError("Page contains no topics")
+
+        topic_table = soup.find("table", class_="board topics")
+        if not topic_table:
+            raise ValueError("Page contains no posts")
+        topic_tags = topic_table.find_all("tr")
+
         for topic_tag in topic_tags:
             tds = topic_tag.find_all("td")
             if not tds:
@@ -172,10 +175,11 @@ class TopicScraper(Scraper):
         """
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         posts = []
-        post_tags = soup.find_all("tr")
-        if not post_tags:
+        post_table = soup.find("table", class_="board message")
+        if not post_table:
             raise ValueError("Page contains no posts")
 
+        post_tags = post_table.find_all("tr")
         for tr in post_tags:
             tds = tr.find_all("td")
             if not tds:
