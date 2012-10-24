@@ -34,6 +34,7 @@ class Archiver(Daemon):
         # login to gamefaqs
         if settings.GFAQS_LOGIN_AS_USER:
             self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+            log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
         else:
             self.opener = urllib2.build_opener()
 

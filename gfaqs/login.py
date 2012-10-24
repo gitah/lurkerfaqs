@@ -37,8 +37,8 @@ def _get_login_key():
     fp = urllib2.urlopen(settings.GFAQS_URL)
     html = "".join(fp.readlines())
     soup = BeautifulSoup(html)
-    soup.find(id="login").find_all("input", name="hidden")
-    f.find(attrs={"name": "key"}).get['value']
+    login_tag = soup.find(id="login")
+    return login_tag.find_all("input")[1]['value']
 
 def _validate_login(resp):
     """ Inspects the response from a login attempt and returns true if login
