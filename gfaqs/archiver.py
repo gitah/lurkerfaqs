@@ -16,8 +16,9 @@ from gfaqs.models import User, Board, Topic, Post
 from gfaqs.login import authenticate
 
 
-WORKERS_PER_BOARD = 10  # number of worker thread created for each board
-THROTTLE_TIME=0.1       # sleep time in seconds
+WORKERS_PER_BOARD = 10      # number of worker thread created for each board
+THROTTLE_TIME = 0.1         # time in secs between performing gfaqs IO operations
+BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
     time.sleep(throttle_time)
@@ -30,15 +31,17 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
+        self.opener = None
 
-        # login to gamefaqs
+    def run(self):
+        # Login to gamefaqs
         if settings.GFAQS_LOGIN_AS_USER:
             self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
             log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
         else:
             self.opener = urllib2.build_opener()
 
-    def run(self):
+        # Initialize threadpool
         # we need at least one thread for each board
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
         self.pool = ThreadPool(num_workers)
@@ -57,6 +60,8 @@ class Archiver(Daemon):
                     board = Board(url=board_url, name=name, alias=alias)
                     board.save()
                 self.pool.add_task(archive_board_task, board, refresh)
+                # we want boards to start at different times to spread out load
+                time.sleep(BOARD_STAGGER_TIME)
 
         # hang thread, so daemon keeps running
         while True:
@@ -91,7 +96,7 @@ class Archiver(Daemon):
                 topics_saved += 1
 
             if recursive:
-                self.pool.add_task(self.archive_topic,t)
+                self.pool.add_task(self.archive_topic, t)
             throttle_thread()
 
         log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
@@ -99,12 +104,7 @@ class Archiver(Daemon):
 
     @log_on_error
     def archive_topic(self, t):
-        """
-        TODO:
-        handle exceptions
-            - t not in db
-            - multiple results errors for *.get() calls
-        """
+        """Scrapes the given topic and saves its posts"""
         ts = TopicScraper(t)
         log_info("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
