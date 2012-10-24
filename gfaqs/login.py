@@ -14,38 +14,36 @@ def authenticate(email, password):
         AuthenticationError if not
     """
     login_url = settings.GFAQS_LOGIN_URL
+    cj = cookielib.CookieJar()
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
     post_data = {
         "EMAILADDR": email,
         "PASSWORD": password,
         "path": settings.GFAQS_URL,
-        "key": _get_login_key()
+        "key": _get_login_key(opener)
     }
-    cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 
     # attempt login
     resp = opener.open(login_url, urlencode(post_data))
-
-    if not _validate_login(resp):
-        raise AuthenticationError("Invalid password/username")
-
+    _validate_login(cj)
     return opener
 
-def _get_login_key():
+def _get_login_key(opener):
     """ GameFAQs requires a 'key' field when logging in
         This method makes url request to main page and gets the key """
-    fp = urllib2.urlopen(settings.GFAQS_URL)
+    fp = opener.open(settings.GFAQS_URL)
     html = "".join(fp.readlines())
     soup = BeautifulSoup(html)
     login_tag = soup.find(id="login")
     return login_tag.find_all("input")[1]['value']
 
-def _validate_login(resp):
+def _validate_login(cj):
     """ Inspects the response from a login attempt and returns true if login
         successful
     """
-    fp = urllib2.urlopen(settings.GFAQS_URL)
-    html = "".join(fp.readlines())
-    soup = BeautifulSoup(html)
-
-    return bool(soup.find(id="mast_user"))
+    #TODO, perhaps check cookie char instead
+    try:
+        cj._cookies['.gamefaqs.com']['/']['MDAAuth']
+    except KeyError:
+        raise AuthenticationError("Invalid password/username")

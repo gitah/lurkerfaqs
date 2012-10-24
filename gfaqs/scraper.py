@@ -58,7 +58,7 @@ class Scraper(object):
 
     def retrieve(self, opener=None):
         """ generator that returns the next object the scraper will scrape """
-        if not None:
+        if opener is None:
             opener=urllib2.build_opener()
 
         pg = 0
