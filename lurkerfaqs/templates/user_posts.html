@@ -20,7 +20,7 @@
       <a href="{% url lurkerfaqs.views.show_topic post.topic.board.alias post.topic.gfaqs_id %}">{{post.topic.title}}</a> ({{post.topic.number_of_posts}}) | Posted on {{post.topic.last_post_date}}
     </td></tr>
 
-    <tr class="even"><td>{{post.contents}}</td></tr>
+    <tr class="even"><td>{{post.contents|safe}}</td></tr>
 {% endfor %}
 {% endblock %}
 

@@ -7,7 +7,7 @@ html,body {
 
 body {
 	font: 11px arial,helvetica,sans-serif;
-    margin: 0px;	
+    margin: 0px;
 	padding: 0px;
 }
 
@@ -17,7 +17,7 @@ a {
 	text-decoration: none;
 }
 
-a:hover{text-decoration: underline;}
+a:hover {text-decoration: underline;}
 
 #container {
    min-height:100%;
@@ -60,8 +60,8 @@ a:hover{text-decoration: underline;}
 /*footer*/
 #footer {
 	position:absolute;
-	bottom:0;  
-	width: 100%;   
+	bottom:0;
+	width: 100%;
 }
 
 #footerBar {
@@ -72,7 +72,7 @@ a:hover{text-decoration: underline;}
 	background: none;
 	padding-top: 3px;
 	font: 9px/16px tahoma,arial,helvetica,sans-serif;
-	text-align: center;		
+	text-align: center;
 }
 
 #footer a {
@@ -82,8 +82,8 @@ a:hover{text-decoration: underline;}
 	margin: 3px 0 3px 0;
 }
 
-#logo { 
-	width: 980px; 
+#logo {
+	width: 980px;
 	padding-top: 10px;
 }
 
@@ -147,7 +147,7 @@ p.text{width:70%; font-size:12px}
 	line-height: 16px;
 }
 
-.colorVisitedLink a:visited{ color: #6666cc; }
+.colorVisitedLink a:visited { color: #6666cc; }
 .small{ width: 70% }
 
 
@@ -155,7 +155,7 @@ p.text{width:70%; font-size:12px}
 table.board{
 	border-collapse: collapse;
 	width: 100%;
-	text-align: left;	
+	text-align: left;
 }
 
 table.board th{
@@ -178,7 +178,7 @@ table.board tr.even{
 table.board p{ margin: 0px; }
 
 
-/* -- Post List --*/
+/* -- Post List -- */
 table.message{
 	border: 0 solid #999;
 	border-width: 2px 0 0;
@@ -192,3 +192,27 @@ table.message td{
 	vertical-align: top;
 }
 
+
+/* -- Poll -- */
+.table {width:100%;display:table;padding:2px;table-layout:fixed;}
+.table_row {display:table-row;}
+.table_row_bottom {display:table-row;border-top:1px dotted black}
+.table_col_20 {display:table-cell;width:5%;text-align:center;padding:1px}
+.table_col_10 {display:table-cell;width:10%;text-align:center;padding:1px}
+.table_col_5 {display:table-cell;width:20%;text-align:center;padding:1px}
+.table_col_3 {display:table-cell;width:33%;text-align:center;padding:1px}
+.table_col_auto {display:table-cell;width:auto;text-align:left;padding:1px}
+.bar .table_col_5, .bar .table_col_auto, .bar .table_col_3, .bar .table_col_20{padding:1px 1px 10px 1px;border-bottom:1px dotted black}
+.board_poll {display: block; border: 1px black solid; width: auto; border-radius: 5px; padding: 5px; margin: 5px;}
+.board_poll .poll_head {font-weight: bold; font-size: 14px; padding: 2px;}
+.board_poll .poll_body {padding: 3px;}
+.board_poll .poll_foot_left {display: inline-block; float:left; padding: 2px;}
+.board_poll .poll_foot_right {display: inline-block; float:right; padding: 10px 10px 2px 0px; }
+.board_poll .poll_foot {display: block; clear:both;}
+.board_poll .poll_bar {background:#00f;float:left;text-align:right; margin-bottom: -1px; height:12px;}
+.board_poll .table .table_row{border-bottom:1px solid #ddd;}
+.board_poll .table .table_row:last-child{border-bottom:0;}
+
+/* -- Quotes -- */
+blockquote{border-style:dotted;border-width:1px;padding:2px 6px 2px 6px;margin:0;}
+cite{font-weight:bold; font-style: italic}

@@ -22,9 +22,9 @@
         <a href={% url lurkerfaqs.views.show_user post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
     </td></tr>
     <tr class="even"><td>
-        {{post.contents}}
+        {{post.contents|safe}}
         <br>--<br>
-        {{post.signature}}
+        {{post.signature|safe}}
     </td></tr>
     {% endfor %}
 {% endblock %}
