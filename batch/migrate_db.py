@@ -1,4 +1,3 @@
-import argparse
 import traceback
 
 from MySQLdb import connect
@@ -49,24 +48,20 @@ users:
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
     current one"""
-    def __init__(self):
-        parser = argparse.ArgumentParser(description='migrates old lurkerfaqs db')
-        parser.add_argument('host', type=str, nargs='1',
-           help='hostname of mysql db to migrate')
-        parser.add_argument('--user', dest=user, type=str, nargs='1',
-           help='username of mysql db')
-        parser.add_argument('--password', dest=password, type=str, nargs='1',
-           help='password of mysql db')
-
-        args = parser.parse_args()
-        self.src_db_host = args.host
-        self.src_db_port = args.port
-        self.db_user = args.user
-        self.db_password = args.password
+    def __init__(self, hostname, user, password='', port='3306' ):
+        self.host = hostname
+        self.port = user
+        self.user = password
+        self.password = port
 
     def start(self):
-        # parse args
-        self.conn = connect(host=self.host, user=self.db_user, passwd=self.db_password)
+        self.conn = connect(host=self.host, port=self.port,
+            user=self.user, passwd=self.password)
+        # order is important here
+        self.migrate_boards()
+        self.migrate_users()
+        self.migrate_topics()
+        self.migrate_posts()
 
     def migrate_boards(self):
         ForEachBoard().start(self.conn)
