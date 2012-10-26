@@ -48,11 +48,11 @@ users:
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
     current one"""
-    def __init__(self, hostname, user, password='', port='3306' ):
-        self.host = hostname
-        self.port = user
-        self.user = password
-        self.password = port
+    def __init__(self, host='', port=3306, user='', password=''):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
 
     def start(self):
         self.conn = connect(host=self.host, port=self.port,
