@@ -8,11 +8,11 @@ from batch.migrate_db import MigrateDB
 
 
 class Command(BaseCommand):
-    args = "<host> <port> <user> <password>"
+    args = "<host> <port> <user> <password> <db>"
     help = "migrates a db"
 
     def handle(self, *args, **options):
-        if len(args) != 4:
+        if len(args) != 5:
             self.print_usage()
             exit(1)
 
@@ -20,7 +20,8 @@ class Command(BaseCommand):
         port = int(args[1])
         user = args[2]
         password = args[3]
-        MigrateDB(host=host, port=port, user=user, password=password).start()
+        db = args[4]
+        MigrateDB(host=host, port=port, user=user, password=password, db=db).start()
 
     def print_usage(self):
         print "usage: batch_migrate_db %s \n" % self.args

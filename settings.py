@@ -20,6 +20,16 @@ DATABASES = {
         'HOST': '',
         'PORT': '',
         "init_command": "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ",
+    },
+
+    'lurkerfaqs_test': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lurkerfaqs_test',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        "init_command": "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ",
     }
 }
 
@@ -121,14 +131,15 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
 CACHE_STORAGE_TIME = 1800 # 30 min
 CACHE_STORAGE_TIME_LONG = 86400 # 1 day
 
 #-- LurkerFAQs General vars ---#
 LURKERFAQS_RUN_DIR = "%s/run" % PROJECT_ROOT
 
-LURKERFAQS_TOPICS_PER_PAGE = 3
-LURKERFAQS_POSTS_PER_PAGE = 3
+LURKERFAQS_TOPICS_PER_PAGE = 30
+LURKERFAQS_POSTS_PER_PAGE = 30
 LURKERFAQS_PAGES_TO_DISPLAY = 10
 
 #-- GFAQs Archiver Settings --#
@@ -142,15 +153,15 @@ GFAQS_LOGIN_URL = "%s/user/login.html" % GFAQS_URL
 
 # List of boards to scrape
 # Each board is represented as a 2-tuple:
-# (<board_path>,<board_name>, <refresh_time_in_minutes>)
+# (<alias>,<board_name>, <refresh_time_in_minutes>)
 GFAQS_BOARDS = [
     ("2000121-anime-and-manga-other-titles", "Anime and Manga - Other Titles", 5),
     ("8-gamefaqs-contests", "GameFAQs Contests", 5)
 ]
 
-GFAQS_LOGIN_AS_USER=False
-GFAQS_LOGIN_EMAIL=""
-GFAQS_LOGIN_PASSWORD=""
+GFAQS_LOGIN_AS_USER = False
+GFAQS_LOGIN_EMAIL = ""
+GFAQS_LOGIN_PASSWORD = ""
 
 
 #-- Logging Settings --#

@@ -1,6 +1,7 @@
 import traceback
 
 from MySQLdb import connect
+from django.db import connection, transaction
 
 from gfaqs.models import Board, User, Topic, Post
 from batch.batch_base import Batch
@@ -44,19 +45,22 @@ users:
 	status	tinyint(3)
 """
 
+TARGET_DB='lurkerfaqs_test'
+CHUNK_SIZE=5
 
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
     current one"""
-    def __init__(self, host='', port=3306, user='', password=''):
+    def __init__(self, host='', port=3306, user='', password='', db=''):
         self.host = host
         self.port = port
         self.user = user
         self.password = password
+        self.db = db
 
     def start(self):
         self.conn = connect(host=self.host, port=self.port,
-            user=self.user, passwd=self.password)
+            user=self.user, passwd=self.password, db=self.db)
         # order is important here
         self.migrate_boards()
         self.migrate_users()
@@ -78,7 +82,7 @@ class MigrateDB(Batch):
 
 class ForEach(object):
 
-    def get_chunk_generator(self, sql_query):
+    def get_chunk_generator(self, sql_query, total):
         """returns a generator that chunks the sql query using LIMIT 
 
         ex. sql_query = "select * from boards" 
@@ -86,49 +90,51 @@ class ForEach(object):
                 2 => "select * from boards limit CHUNK_SIZE, 2*CHUNK_SIZE"
                 ...
         """
-        CHUNK_SIZE=100
         def chunk_generator():
             start = 0
             while True:
                 limit = "LIMIT %s, %s" % (start, start+CHUNK_SIZE)
                 yield (start, "%s %s" % (sql_query, limit))
                 start += CHUNK_SIZE
-
+                if start > total:
+                    break
         return chunk_generator
 
     def print_progress(self, curr, total):
         ratio = float(curr)/float(total)
-        print "[%.2f] (curr/float) rows processed" 
+        print "[%.2f] (%d / %d) rows processed"  % (ratio, curr, total)
 
     def start(self, conn):
         self.conn = conn
 
-        total = get_row_count()
+        total = self.get_row_count()
 
         if self.where_clause():
             sql_query_base = "%s %s" % (self.sql_query(), self.where_clause)
         else:
             sql_query_base = self.sql_query()
 
-        chunk_generator = get_chunk_generator(sql_query_base)
+        chunk_generator = self.get_chunk_generator(sql_query_base, total)
         for start_index,query in chunk_generator():
             self.print_progress(start_index, total)
-            visit_chunk(query)
+            self.visit_chunk(query)
+            break;
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
         c.execute(sql)
         with transaction.commit_on_success():
-            for r in c.fetchone():
+            for r in c.fetchall():
                 try:
                     self.visit_row(r)
-                except:
+                except Exception, e:
                     traceback.print_exc()
 
     def get_row_count(self):
         c = self.conn.cursor()
         c.execute(self.row_count_query())
-        return int(c.fetchone())
+        count, = c.fetchone()
+        return int(count)
 
     def sql_query(self):
         assert self.table_name
@@ -142,7 +148,7 @@ class ForEach(object):
         """override this"""
         return ''
     
-    def visit_row(self):
+    def visit_row(self, r):
         """override this"""
         pass
 
@@ -150,36 +156,36 @@ class ForEachBoard(ForEach):
 
     table_name = "boards"
 
-    def visit_row(r):
+    def visit_row(self, r):
         board_id, url, name, _, _, _ = r
         alias = url.split("http://www.gamefaqs.com/boards/")[1]
         b = Board(pk=board_id, url=url, name=name, alias=alias)
-        b.save()
+        b.save(using=TARGET_DB)
 
 class ForEachUser(ForEach):
 
     table_name = "users"
 
-    def visit_row(r):
+    def visit_row(self, r):
         user_id, username, status = r
-        User(pk=user_id, username=username, status=status).save()
+        User(pk=user_id, username=username, status=status).save(using=TARGET_DB)
 
 class ForEachTopic(ForEach):
 
     table_name = "topics"
 
-    def visit_row(r):
+    def visit_row(self, r):
         topic_id, board_id, user_id, num, title, post_count, last_post_date, status = r
-        t = Topic(pk=topic_id, board_id=board_id, user_id=user_id, gfaqs_id=num,
+        t = Topic(pk=topic_id, board_id=board_id, creator_id=user_id, gfaqs_id=num,
             number_of_posts=post_count, last_post_date=last_post_date, status=status)
-        t.save()
+        t.save(using=TARGET_DB)
 
 class ForEachPost(ForEach):
 
     table_name = "posts"
 
-    def visit_row(r):
+    def visit_row(self, r):
         post_id, topic_id, user_id, date, num, contents, signature, status = r
-        p = Post(pk=post_id, topic_id=topic_id, user_id=user_id, date=date,
+        p = Post(pk=post_id, topic_id=topic_id, creator_id=user_id, date=date,
             post_num=num, contents=contents, signature=signature, status=status)
-        p.save()
+        p.save(using=TARGET_DB)
