@@ -46,7 +46,7 @@ users:
 """
 
 TARGET_DB='lurkerfaqs_test'
-CHUNK_SIZE=5
+CHUNK_SIZE=10000
 
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
@@ -118,7 +118,6 @@ class ForEach(object):
         for start_index,query in chunk_generator():
             self.print_progress(start_index, total)
             self.visit_chunk(query)
-            break;
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
