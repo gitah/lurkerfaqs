@@ -80,6 +80,9 @@ class Archiver(Daemon):
 
         for t in bs.retrieve(self.opener):
             topics_examined += 1
+            if t.status == Topic.ARCHIVED:
+                # we reached archived topics; don't continue
+                break
             try:
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
                 t.pk = t_db.pk

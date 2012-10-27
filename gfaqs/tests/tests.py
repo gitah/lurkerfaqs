@@ -155,6 +155,7 @@ class ArchiverTest(TestCase):
 
         path = "http://localhost:%s" % ArchiverTest.server_port
         board_list = [("boards/ce", "CE", 5)]
+        settings.GFAQS_LOGIN_AS_USER = False
         cls.archiver = Archiver(board_info=board_list,base=path)
         cls.archiver_th = ArchiverTest.DaemonRunnerThread(cls.archiver)
 
