@@ -1,5 +1,8 @@
-#A threadpool implementation
-#see http://en.wikipedia.org/wiki/Thread_pool_pattern
+# -*- coding: utf-8 -*-
+"""
+A threadpool implementation
+http://en.wikipedia.org/wiki/Thread_pool_pattern
+"""
 import threading
 from Queue import Queue
 

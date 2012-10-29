@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class Batch(object):
     """ Abstract class for batches """
     def start(self):

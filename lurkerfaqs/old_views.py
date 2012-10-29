@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http import HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.exceptions import ObjectDoesNotExist
@@ -5,6 +6,10 @@ from django.core.urlresolvers import reverse
 
 from gfaqs.models import Board, Topic, Post, User
 import lurkerfaqs.views
+
+"""
+This file defines redirects for old lurkerfaqs URLs to the new ones
+"""
 
 
 def top_users(request):

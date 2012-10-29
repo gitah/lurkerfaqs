@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import urllib2
 from threading import Thread
@@ -21,6 +22,7 @@ THROTTLE_TIME = 0.1         # time in secs between performing gfaqs IO operation
 BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
+    """Halts one of the archiver thread for a bit, to not overwhelm gamefaqs"""
     time.sleep(throttle_time)
 
 class Archiver(Daemon):

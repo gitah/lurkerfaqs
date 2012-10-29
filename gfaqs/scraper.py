@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import urllib2
 from urllib import urlencode
 from urlparse import urlparse
@@ -35,6 +36,7 @@ POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 GFAQS_ENCODING="windows-1252"
 
 def generate_query_string(page):
+    """Returns a query string for a URL to a board or topic"""
     query = {
         "page": page,
         "results": 1,  #display poll results
@@ -43,6 +45,7 @@ def generate_query_string(page):
 
 class Scraper(object):
     def get_page(self, opener, pg):
+        """Fetches the given page associated with the scraper"""
         base = self.base_url()
         parts = urlparse(base)
         if parts.scheme == "http":

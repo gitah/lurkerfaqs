@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from urllib import urlencode
 import urllib2
 import cookielib
@@ -42,7 +43,6 @@ def _validate_login(cj):
     """ Inspects the response from a login attempt and returns true if login
         successful
     """
-    #TODO, perhaps check cookie char instead
     try:
         cj._cookies['.gamefaqs.com']['/']['MDAAuth']
     except KeyError:

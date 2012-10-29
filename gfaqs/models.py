@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 
 class User(models.Model):
+    """Represents a gamefaqs user"""
     NORMAL, MOD, ADMIN, HIDDEN= 0,1,2,9
     USER_STATUS = (
         (NORMAL,"normal"),
@@ -15,6 +17,7 @@ class User(models.Model):
         return self.username
 
 class Board(models.Model):
+    """Represents a gamefaqs board (ex. CE)"""
     url = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
     alias = models.CharField(max_length=200, db_index=True, unique=True)
@@ -23,6 +26,7 @@ class Board(models.Model):
         return self.alias
     
 class Topic(models.Model):
+    """Represents a topic made on gameefaqs"""
     NORMAL, CLOSED, ARCHIVED = 0,1,2
     STICKY, STICKY_CLOSED,PURGED,POLL = 3,4,5,6
     TOPIC_STATUS = (
@@ -46,6 +50,7 @@ class Topic(models.Model):
         return "[%s] (%s, %s)" % (self.title, self.gfaqs_id, self.creator.username)
     
 class Post(models.Model):
+    """Represents a post made on gameefaqs"""
     NORMAL, CLOSED, MODDED, EDITED = 0,1,2,3
     POST_STATUS = (
         (NORMAL,"normal"),
