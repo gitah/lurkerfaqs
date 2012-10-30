@@ -196,7 +196,6 @@ class TopicScraper(Scraper):
                 if type(el) == element.NavigableString:
                     if el.string.startswith("Posted"):
                         date_raw = " ".join(el.string.split())
-                        #TODO: set year on dt obj
                         dt = strptime(date_raw,POST_DATE_FORMAT_STR)
                     elif el.string == STRING_EDITED:
                         post_status = Post.EDITED

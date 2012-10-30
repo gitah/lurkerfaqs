@@ -63,10 +63,10 @@ class MigrateDB(Batch):
         self.conn = connect(host=self.host, port=self.port,
             user=self.user, passwd=self.password, db=self.db)
         # order is important here
-        self.migrate_boards()
-        self.migrate_users()
+        #self.migrate_boards()
+        #self.migrate_users()
         self.migrate_topics()
-        self.migrate_posts()
+        #self.migrate_posts()
 
     def migrate_boards(self):
         ForEachBoard().start(self.conn)
@@ -94,7 +94,7 @@ class ForEach(object):
         def chunk_generator():
             start = 0
             while True:
-                limit = "LIMIT %s, %s" % (start, start+CHUNK_SIZE)
+                limit = "LIMIT %s, %s" % (start, CHUNK_SIZE)
                 yield (start, "%s %s" % (sql_query, limit))
                 start += CHUNK_SIZE
                 if start > total:
@@ -119,16 +119,22 @@ class ForEach(object):
         for start_index,query in chunk_generator():
             self.print_progress(start_index, total)
             self.visit_chunk(query)
+        self.print_progress(total, total)
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
         c.execute(sql)
+
+        db_models = []
+        for r in c.fetchall():
+            try:
+                model = self.visit_row(r)
+                db_models.append(model)
+            except Exception, e:
+                traceback.print_exc()
+
         with transaction.commit_on_success():
-            for r in c.fetchall():
-                try:
-                    self.visit_row(r)
-                except Exception, e:
-                    traceback.print_exc()
+            self.table_class.objects.using(TARGET_DB).bulk_create(db_models)
 
     def get_row_count(self):
         c = self.conn.cursor()
@@ -155,37 +161,38 @@ class ForEach(object):
 class ForEachBoard(ForEach):
 
     table_name = "boards"
+    table_class = Board
 
     def visit_row(self, r):
         board_id, url, name, _, _, _ = r
         alias = url.split("http://www.gamefaqs.com/boards/")[1]
-        b = Board(pk=board_id, url=url, name=name, alias=alias)
-        b.save(using=TARGET_DB)
+        return Board(pk=board_id, url=url, name=name, alias=alias)
 
 class ForEachUser(ForEach):
 
     table_name = "users"
+    table_class = User
 
     def visit_row(self, r):
         user_id, username, status = r
-        User(pk=user_id, username=username, status=status).save(using=TARGET_DB)
+        return User(pk=user_id, username=username, status=status)
 
 class ForEachTopic(ForEach):
 
     table_name = "topics"
+    table_class = Topic
 
     def visit_row(self, r):
         topic_id, board_id, user_id, num, title, post_count, last_post_date, status = r
-        t = Topic(pk=topic_id, board_id=board_id, creator_id=user_id, gfaqs_id=num,
+        return Topic(pk=topic_id, board_id=board_id, creator_id=user_id, gfaqs_id=num,
             number_of_posts=post_count, last_post_date=last_post_date, status=status)
-        t.save(using=TARGET_DB)
 
 class ForEachPost(ForEach):
 
     table_name = "posts"
+    table_class = Post
 
     def visit_row(self, r):
         post_id, topic_id, user_id, date, num, contents, signature, status = r
-        p = Post(pk=post_id, topic_id=topic_id, creator_id=user_id, date=date,
+        return Post(pk=post_id, topic_id=topic_id, creator_id=user_id, date=date,
             post_num=num, contents=contents, signature=signature, status=status)
-        p.save(using=TARGET_DB)
