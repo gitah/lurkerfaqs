@@ -22,7 +22,7 @@
 {% for topic in topics %}
     <tr class="{% cycle 'even' 'odd' %}">
         <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
-        <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td> <!-- TODO: alt. url -->
+        <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
         <td>{{topic.number_of_posts}}</td>
         <td>{{topic.last_post_date}}</td>
     </tr>

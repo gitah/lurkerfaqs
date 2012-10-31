@@ -136,7 +136,6 @@ def show_board(request, board_alias):
 @cache_page(settings.CACHE_STORAGE_TIME)
 def show_topic(request, board_alias, topic_num):
     # /boards/<board_alias>/<topic_num>?page=2
-    #TODO: make a version that does not need board_alias
     try:
         board = models.Board.objects.get(alias=board_alias)
         topic = models.Topic.objects.get(gfaqs_id=topic_num)
@@ -187,10 +186,6 @@ def show_user(request, username):
 
     total_topics = len(topics_qs)
     total_posts = len(posts_qs)
-
-    #TODO how to query active, even include it ???
-    #active_topics = len(last_post_date)
-    #total_topics = len(posts_qs.filter())
 
     t = loader.get_template('user_profile.html')
     c = build_context(request, user=user, total_topics=total_topics,

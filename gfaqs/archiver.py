@@ -114,17 +114,16 @@ class Archiver(Daemon):
         log_info("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
-        for p in ts.retrieve(self.opener):
+        posts = list(ts.retrieve(self.opener))
+        for p in reversed(posts):
             posts_examined += 1
-            # Check of post exists already in db to determine update or add
+            # Check if post exists already in db to determine update or add
             with transaction.commit_on_success():
                 try:
                     Post.objects.filter(topic=t).get(post_num=p.post_num)
-                    # TODO: update post instead of ignore for edited ones
-                    # TODO: or simply skip until newest topic so less db queries needed
-                    continue
+                    # we already have the rest of the posts in the db
+                    break
                 except ObjectDoesNotExist:
-                    p.pk = None
                     p.creator = self.add_user(p.creator)
                     p.save()
                     posts_saved += 1

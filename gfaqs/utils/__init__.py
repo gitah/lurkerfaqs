@@ -31,7 +31,8 @@ def log_on_error(fn, explode=False):
     return logged_fn
 
 def log_info(msg):
-    info_logger.info(msg)
+    if settings.DEBUG:
+        info_logger.info(msg)
 
 
 #--- Threading ---#
