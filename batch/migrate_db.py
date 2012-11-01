@@ -83,19 +83,21 @@ class MigrateDB(Batch):
 
 class ForEach(object):
 
+    table_pk = "id"
+
     def get_chunk_generator(self, sql_query, total):
-        """returns a generator that chunks the sql query using LIMIT 
+        """returns a generator that chunks the sql query using BETWEEN 
 
         ex. sql_query = "select * from boards" 
-                1 => "select * from boards limit 0,CHUNK_SIZE"
-                2 => "select * from boards limit CHUNK_SIZE, 2*CHUNK_SIZE"
+                1 => "SELECT * FROM boards BETWEEN 0,CHUNK_SIZE"
+                2 => "SELECT * FROM boards BETWEEN CHUNK_SIZE, 2*CHUNK_SIZE"
                 ...
         """
         def chunk_generator():
             start = 0
             while True:
-                limit = "LIMIT %s, %s" % (start, CHUNK_SIZE)
-                yield (start, "%s %s" % (sql_query, limit))
+                between = "%s BETWEEN %s AND %s" % (self.table_pk, self.start, start+CHUNK_SIZE)
+                yield (start, "%s WHERE %s" % (sql_query, limit))
                 start += CHUNK_SIZE
                 if start > total:
                     break
@@ -150,16 +152,13 @@ class ForEach(object):
         assert self.table_name
         return "SELECT COUNT(*) FROM %s" % self.table_name
 
-    def where_clause(self):
-        """override this"""
-        return ''
-    
     def visit_row(self, r):
         """override this"""
         pass
 
 class ForEachBoard(ForEach):
 
+    table_pk = "board_id"
     table_name = "boards"
     table_class = Board
 
@@ -171,6 +170,7 @@ class ForEachBoard(ForEach):
 class ForEachUser(ForEach):
 
     table_name = "users"
+    table_pk = "user_id"
     table_class = User
 
     def visit_row(self, r):
@@ -180,6 +180,7 @@ class ForEachUser(ForEach):
 class ForEachTopic(ForEach):
 
     table_name = "topics"
+    table_pk = "topic_id"
     table_class = Topic
 
     def visit_row(self, r):
@@ -190,6 +191,7 @@ class ForEachTopic(ForEach):
 class ForEachPost(ForEach):
 
     table_name = "posts"
+    table_pk = "post_id"
     table_class = Post
 
     def visit_row(self, r):
