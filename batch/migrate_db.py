@@ -65,8 +65,8 @@ class MigrateDB(Batch):
         # order is important here
         #self.migrate_boards()
         #self.migrate_users()
-        self.migrate_topics()
-        #self.migrate_posts()
+        #self.migrate_topics()
+        self.migrate_posts()
 
     def migrate_boards(self):
         ForEachBoard().start(self.conn)
