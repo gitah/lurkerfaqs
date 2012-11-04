@@ -10,6 +10,7 @@ from django.db import connection, transaction
 
 import gfaqs.models as models
 from batch.models import TopUsersTopic, TopUsersPost
+from search.solr import SolrSearcher
 
 """ NOTE: URL paths were designed to mimic the url paths on gamefaqs """
 
@@ -159,9 +160,10 @@ def search_topic(request, board_alias, query):
     except ObjectDoesNotExist:
         raise Http404
 
-    #TODO: use a proper search server for this rather than full table sweep
-    topics = models.Topic.objects.filter(
-        board=board).filter(title__contains=query).all()
+    page  = get_page_from_request(request)
+    start = (page-1) * settings.LURKERFAQS_TOPICS_PER_PAGE
+    count = settings.LURKERFAQS_TOPICS_PER_PAGE
+    topics = SolrSearcher.search_topic(query, start, count)
 
     t = loader.get_template('topic_search.html')
     c = build_context(request, topics=topics, board=board, query=query)
