@@ -47,7 +47,7 @@ users:
 """
 
 TARGET_DB='lurkerfaqs_test'
-CHUNK_SIZE=50000
+CHUNK_SIZE=10000
 
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
@@ -63,10 +63,10 @@ class MigrateDB(Batch):
         self.conn = connect(host=self.host, port=self.port,
             user=self.user, passwd=self.password, db=self.db)
         # order is important here
-        #self.migrate_boards()
-        #self.migrate_users()
+        self.migrate_boards()
+        self.migrate_users()
         self.migrate_topics()
-        #self.migrate_posts()
+        self.migrate_posts()
 
     def migrate_boards(self):
         ForEachBoard().start(self.conn)
