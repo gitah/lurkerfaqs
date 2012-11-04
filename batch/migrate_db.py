@@ -125,6 +125,7 @@ class ForEach(object):
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
+        c.execute("SET foreign_key_checks=0")
         c.execute(sql)
 
         db_models = []
