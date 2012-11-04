@@ -109,13 +109,8 @@ class ForEach(object):
 
     def start(self, conn):
         self.conn = conn
-
         total = self.get_row_count()
-
-        if self.where_clause():
-            sql_query_base = "%s %s" % (self.sql_query(), self.where_clause)
-        else:
-            sql_query_base = self.sql_query()
+        sql_query_base = self.sql_query()
 
         chunk_generator = self.get_chunk_generator(sql_query_base, total)
         for start_index,query in chunk_generator():
