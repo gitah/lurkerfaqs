@@ -63,9 +63,9 @@ class MigrateDB(Batch):
         self.conn = connect(host=self.host, port=self.port,
             user=self.user, passwd=self.password, db=self.db)
         # order is important here
-        #self.migrate_boards()
-        #self.migrate_users()
-        #self.migrate_topics()
+        self.migrate_boards()
+        self.migrate_users()
+        self.migrate_topics()
         self.migrate_posts()
 
     def migrate_boards(self):
@@ -186,8 +186,9 @@ class ForEachTopic(ForEach):
 
     def visit_row(self, r):
         topic_id, board_id, user_id, num, title, post_count, last_post_date, status = r
-        return Topic(pk=topic_id, board_id=board_id, creator_id=user_id, gfaqs_id=num,
-            number_of_posts=post_count, last_post_date=last_post_date, status=status)
+        return Topic(pk=topic_id, board_id=board_id, creator_id=user_id,
+            gfaqs_id=num, title=title, number_of_posts=post_count,
+            last_post_date=last_post_date, status=status)
 
 class ForEachPost(ForEach):
 
@@ -197,5 +198,6 @@ class ForEachPost(ForEach):
 
     def visit_row(self, r):
         post_id, topic_id, user_id, date, num, contents, signature, status = r
-        return Post(pk=post_id, topic_id=topic_id, creator_id=user_id, date=date,
-            post_num=num, contents=contents, signature=signature, status=status)
+        return Post(pk=post_id, topic_id=topic_id, creator_id=user_id,
+            date=date, post_num=num, contents=contents, signature=signature,
+            status=status)

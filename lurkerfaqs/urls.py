@@ -21,7 +21,6 @@ urlpatterns = patterns('lurkerfaqs.views',
 )
 
 # These map the URLs for the old lurkerfaqs site to the new urls
-
 urlpatterns += patterns('lurkerfaqs.old_views',
     url(r'^users/topUsers/$', 'top_users'),
     url(r'^pages/faq/$', 'show_faq'),
