@@ -28,32 +28,26 @@ cat <<PACKAGES | xargs apt-get install -q -y
 git-core
 
 python
-python-mysqldb
+python-dev
 python-setuptools
 
 apache2
 libapache2-mod-wsgi
 
+solr-jetty
+libxslt-dev
+
 mysql-server
 mysql-client
 PACKAGES
 
-# Install beautifulsoup4 since ubuntu repo does not have newest version
-easy_install beautifulsoup4
-
-# Install django-1.4 since ubuntu repos only have django-1.3
-set +e
-python -c "import django"
-if [ $? == 1 ];
-then
-    cd /tmp
-    wget "http://www.djangoproject.com/download/1.4/tarball/" -O "django.tar.gz"
-    tar xzvf "django.tar.gz"
-    cd Django-1.4
-    python setup.py install
-    cd $PROJECT_ROOT
-fi
-set -e
+# Install python libraries
+easy_install pip
+pip install MySQL-python        # mysql driver
+pip install beautifulsoup4      # website scraping
+pip install lxml                # sunburnt dependency
+pip install sunburnt            # solr
+pip install django              # web framework
 
 #-- Configuration --#
 

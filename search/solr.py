@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import sunburnt
+from httplib2 import socket
+
 from django.conf import settings
 
 """
@@ -18,11 +20,14 @@ schema.xml
 
 </schema>
 """
-solr_interface = SolrInterface(settings.SOLR_URL)
+try:
+    solr_interface = sunburnt.SolrInterface(settings.SOLR_URL)
+except socket.error:
+    solr_interface = None
 
 def topic_to_doc(topic):
     doc = {
-        "topic_id" = topic.pk,
+        "topic_id": topic.pk,
         "title": topic.title,
         "creator": topic.creator.username,
         "last_post_date": topic.last_post_date,
