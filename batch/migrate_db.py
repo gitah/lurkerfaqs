@@ -47,7 +47,7 @@ users:
 """
 
 TARGET_DB='lurkerfaqs_test'
-CHUNK_SIZE=10000
+CHUNK_SIZE=50000
 
 class MigrateDB(Batch):
     """ Migrates data from the old lurkerfaqs database (different schema) to the
@@ -63,10 +63,10 @@ class MigrateDB(Batch):
         self.conn = connect(host=self.host, port=self.port,
             user=self.user, passwd=self.password, db=self.db)
         # order is important here
-        self.migrate_boards()
-        self.migrate_users()
+        #self.migrate_boards()
+        #self.migrate_users()
         self.migrate_topics()
-        self.migrate_posts()
+        #self.migrate_posts()
 
     def migrate_boards(self):
         ForEachBoard().start(self.conn)
@@ -96,9 +96,11 @@ class ForEach(object):
         def chunk_generator():
             start = 0
             while True:
-                between = "%s BETWEEN %s AND %s" % (self.table_pk, self.start, start+CHUNK_SIZE)
-                yield (start, "%s WHERE %s" % (sql_query, limit))
+                # NOTE: mysql between is inclusive
+                between = "%s BETWEEN %s AND %s" % (self.table_pk, start, start+CHUNK_SIZE-1)
+                yield (start, "%s WHERE %s" % (sql_query, between))
                 start += CHUNK_SIZE
+                print (start, total)
                 if start > total:
                     break
         return chunk_generator
@@ -120,7 +122,7 @@ class ForEach(object):
 
     def visit_chunk(self, sql):
         c = self.conn.cursor()
-        c.execute("SET foreign_key_checks=0")
+        c.execute("SET foreign_key_checks = 0")
         c.execute(sql)
 
         db_models = []
