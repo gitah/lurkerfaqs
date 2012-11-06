@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'gfaqs',
     'batch',
     'lurkerfaqs',
+    'search',
 )
 
 #-- Caching --#
@@ -142,6 +143,7 @@ LURKERFAQS_RUN_DIR = "%s/run" % PROJECT_ROOT
 LURKERFAQS_TOPICS_PER_PAGE = 30
 LURKERFAQS_POSTS_PER_PAGE = 30
 LURKERFAQS_PAGES_TO_DISPLAY = 10
+LURKERFAQS_TOP_USERS_TO_SHOW = 50
 
 #-- GFAQs Archiver Settings --#
 # path of PID file for gfaqs-archiver daemon
@@ -199,3 +201,6 @@ LOGGING = {
         },
     }
 }
+
+#-- Search --#
+SOLR_URL = "http://localhost:8983/solr/master/"

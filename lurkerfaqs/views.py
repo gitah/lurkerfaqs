@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import connection, transaction
 
 import gfaqs.models as models
-from batch.models import TopUsersTopic, TopUsersPost
+from batch.models import UserTopicCount, UserPostCount
 from search.solr import SolrSearcher
 
 """ NOTE: URL paths were designed to mimic the url paths on gamefaqs """
@@ -178,20 +178,22 @@ def get_user(username):
         raise Http404
     return user
 
-@cache_page(settings.CACHE_STORAGE_TIME)
+@cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_user(request, username):
     # /users/<username>
     user = get_user(username)
-
-    topics_qs = models.Topic.objects.filter(creator=user)
-    posts_qs = models.Post.objects.filter(creator=user)
-
-    total_topics = len(topics_qs)
-    total_posts = len(posts_qs)
+    try:
+        total_topics = UserTopicCount.get('username'=user.username).count
+    except ObjectDoesNotExist:
+        total_topics = 0
+    try:
+        total_posts = UserPostCount.get('username'=user.username).count
+    except ObjectDoesNotExist:
+        topic_count = 0
 
     t = loader.get_template('user_profile.html')
-    c = build_context(request, user=user, total_topics=total_topics,
-            total_posts=total_posts)
+    c = build_context(request, user=user,
+        total_topics=total_topics, total_posts=total_posts)
     return HttpResponse(t.render(c))
 
 @cache_page(settings.CACHE_STORAGE_TIME_LONG)
@@ -239,8 +241,9 @@ def search_user(request):
 @cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def top_users(request):
     t = loader.get_template('top_users.html')
-    top_user_posts = TopUsersPost.objects.all()
-    top_user_topics = TopUsersTopic.objects.all()
+    limit = settings.LURKERFAQS_TOP_USERS_TO_SHOW
+    top_user_posts = UserPostCount.objects.all().order_by('-count')[:limit]
+    top_user_topics = UserTopicCount.objects.all().order_by('-count')[:limit]
     c = RequestContext(request, {
         "top_user_posts": top_user_posts,
         "top_user_topics": top_user_topics

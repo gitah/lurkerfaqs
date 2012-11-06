@@ -24,7 +24,7 @@ class Board(models.Model):
 
     def __str__(self):
         return self.alias
-    
+
 class Topic(models.Model):
     """Represents a topic made on gameefaqs"""
     NORMAL, CLOSED, ARCHIVED = 0,1,2
@@ -48,7 +48,7 @@ class Topic(models.Model):
 
     def __str__(self):
         return "[%s] (%s, %s)" % (self.title, self.gfaqs_id, self.creator.username)
-    
+
 class Post(models.Model):
     """Represents a post made on gameefaqs"""
     NORMAL, CLOSED, MODDED, EDITED = 0,1,2,3
