@@ -6,7 +6,7 @@
 {% block table_header %} <tr><th>Boards</th></tr> {% endblock %}
 {% block table_contents %}
     {% for board in boards %}
-    <tr class="{% cycle odd even %}"><td>
+    <tr class="{% cycle 'odd' 'even' %}"><td>
         <a href="{% url lurkerfaqs.views.show_board board.alias %}">{{board.name}}</a>
     </td></tr>
     {% endfor %}

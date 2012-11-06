@@ -226,7 +226,7 @@ def search_user(request):
     if not request.GET.get("search"):
        return HttpResponseRedirect("/")
     query = request.GET.get("search")
-    users = models.User.objects.filter(username__startswith=query).all()
+    users = models.User.objects.filter(username__istartswith=query).all()
 
     t = loader.get_template('user_search.html')
     c = RequestContext(request, {

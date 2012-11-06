@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 
 from gfaqs.models import Topic
 from batch.batch_base import Batch
-from search import Searcher
+from search.solr import SolrSearcher
 
 
-CHUNK_SIZE=10000
-
+CHUNK_SIZE=1000
 class IndexTopics(Batch):
-    def start(self):
-        all_topics = Topic.objects.all()
-        paginator = Paginator(all_topics, 10000)
+    """Indexes all topics in db into solr"""
 
-        for i in range(1, paginator.num_pages+1):
-            topics = paginator.get_page(i)
-            Searcher.index_topics(topics)
+    def start(self):
+        qs = Topic.objects.all()
+        paginator = Paginator(qs, CHUNK_SIZE)
+
+        for i in range(1, paginator.num_pages):
+            topics = paginator.page(i)
+            SolrSearcher.index_topics(topics)
