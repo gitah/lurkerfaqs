@@ -119,7 +119,7 @@ def show_board(request, board_alias):
     except ObjectDoesNotExist:
         raise Http404
 
-    qs = models.Topic.objects.filter(board=board)
+    qs = models.Topic.objects.filter(board=board).order_by('-last_post_date')
     topics, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_TOPICS_PER_PAGE)
 
@@ -183,11 +183,11 @@ def show_user(request, username):
     # /users/<username>
     user = get_user(username)
     try:
-        total_topics = UserTopicCount.get('username'=user.username).count
+        total_topics = UserTopicCount.objects.get(username=user.username).count
     except ObjectDoesNotExist:
         total_topics = 0
     try:
-        total_posts = UserPostCount.get('username'=user.username).count
+        total_posts = UserPostCount.objects.get(username=user.username).count
     except ObjectDoesNotExist:
         topic_count = 0
 

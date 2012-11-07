@@ -43,7 +43,7 @@ class Topic(models.Model):
     gfaqs_id = models.CharField(max_length=15, db_index=True, unique=True)
     title = models.CharField(max_length=200)
     number_of_posts = models.IntegerField()
-    last_post_date = models.DateTimeField()
+    last_post_date = models.DateTimeField(db_index=True)
     status = models.CharField(max_length=2, choices=TOPIC_STATUS, default=NORMAL)
 
     def __str__(self):
