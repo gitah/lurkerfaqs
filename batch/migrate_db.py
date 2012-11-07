@@ -46,7 +46,6 @@ users:
 	status	tinyint(3)
 """
 
-TARGET_DB='lurkerfaqs_test'
 CHUNK_SIZE=10000
 
 class MigrateDB(Batch):
@@ -134,7 +133,7 @@ class ForEach(object):
                 traceback.print_exc()
 
         with transaction.commit_on_success():
-            self.table_class.objects.using(TARGET_DB).bulk_create(db_models)
+            self.table_class.objects.bulk_create(db_models)
 
     def get_row_count(self):
         c = self.conn.cursor()

@@ -22,16 +22,6 @@ DATABASES = {
         'PORT': '',
         "init_command": "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ",
     },
-
-    'lurkerfaqs_test': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'lurkerfaqs_test',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        "init_command": "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ",
-    }
 }
 
 TIME_ZONE = 'America/Vancouver'

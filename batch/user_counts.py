@@ -21,15 +21,21 @@ class UserCountBatch(Batch):
     def start(self):
         self.clear_table()
 
-        user_post_count = self.get_user_post_count()
-        for user in user_post_count:
-            tut = TopUsersTopic(username=user.username, count=user.num_topics)
-            tut.save()
-
         user_topic_count = self.get_user_topic_count()
+        topic_count_models = []
         for user in user_topic_count:
-            tup = TopUsersPost(username=user.username, count=user.num_posts)
-            tup.save()
+            topic_count_models.append(
+                UserTopicCount(username=user.username, count=user.num_topics)
+            )
+        UserTopicCount.objects.bulk_create(topic_count_models)
+
+        user_post_count = self.get_user_post_count()
+        post_count_models = []
+        for user in user_post_count:
+            post_count_models.append(
+                UserPostCount(username=user.username, count=user.num_posts)
+            )
+        UserPostCount.objects.bulk_create(post_count_models)
 
     def clear_table(self):
         UserTopicCount.objects.all().delete()
