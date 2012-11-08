@@ -43,7 +43,11 @@ class Topic(models.Model):
     gfaqs_id = models.CharField(max_length=15, db_index=True, unique=True)
     title = models.CharField(max_length=200)
     number_of_posts = models.IntegerField()
-    last_post_date = models.DateTimeField(db_index=True)
+
+    # For db optimizaton, I need a composite index on this + board
+    # Unfortuantely django does not support this, so I made a custom initi sql
+    # file (/sql/create_index) for this
+    last_post_date = models.DateTimeField()
     status = models.CharField(max_length=2, choices=TOPIC_STATUS, default=NORMAL)
 
     def __str__(self):
@@ -60,7 +64,10 @@ class Post(models.Model):
     )
     topic = models.ForeignKey(Topic)
     creator = models.ForeignKey(User)
+
+    # composite index (creator, date) in /sql/create_index
     date = models.DateTimeField()
+
     post_num = models.CharField(max_length=15)
     contents = models.TextField()
     signature = models.TextField()

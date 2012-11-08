@@ -201,7 +201,7 @@ def show_user_topics(request, username):
     # /users/<username>/topics?page=2
     user = get_user(username)
 
-    qs = models.Topic.objects.filter(creator=user)
+    qs = models.Topic.objects.filter(creator=user).order_by('-last_post_date')
     topics, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
@@ -215,7 +215,7 @@ def show_user_posts(request, username):
     # /users/<username>/posts?page=2
     user = get_user(username)
 
-    qs = models.Post.objects.filter(creator=user)
+    qs = models.Post.objects.filter(creator=user).order_by('-date')
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
