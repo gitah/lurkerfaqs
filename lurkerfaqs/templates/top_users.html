@@ -9,7 +9,7 @@
       <th>Total Topics</th>
   </tr>
   {% for user in top_user_topics%}
-  <tr>
+  <tr class="{% cycle 'even' 'odd' %}">
     <td>{{user.username}}</td>
     <td>{{user.count}}</td>
   </tr>
@@ -24,7 +24,7 @@
       <th>Total Posts</th>
   </tr>
   {% for user in top_user_posts%}
-  <tr>
+  <tr class="{% cycle 'even' 'odd' %}">
     <td>{{user.username}}</td>
     <td>{{user.count}}</td>
   </tr>
