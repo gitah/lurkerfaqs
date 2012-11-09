@@ -64,12 +64,11 @@ Options Indexes FollowSymLinks
 HTTPDCONF
 
 # cronjob
-if [ ! -f /etc/cron.d/lurkerfaqs ]; then
-    cat <<CRON > /etc/cron.d/lurkerfaqs
-0 0 * * 01 root python $PROJECT_ROOT/manage.py runbatch top_users
+cat <<CRON > /etc/cron.daily/lurkerfaqs
+#!/bin/sh
+cd $PROJECT_ROOT
+./manage.py batch_user_counts
 CRON
-fi
-
 
 #-- Services --#
 service apache2 restart
