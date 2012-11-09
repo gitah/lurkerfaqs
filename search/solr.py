@@ -4,22 +4,6 @@ from httplib2 import socket
 
 from django.conf import settings
 
-"""
-schema.xml
-===========
-<schema name="lurkerfaqs" version="1.5">
-    <fields>
-       <field name="title" type="text" indexed="true" stored="true" required="true"/>
-       <field name="creator" type="string" indexed="true" stored="true" required="true"/>
-       <field name="last_post_date" type="date" indexed="true" stored="true" required="true"/>
-       <field name="number_of_posts" type="int" indexed="true" stored="true" required="true"/>
-
-       <field name="topic_id" type="string" indexed="false" stored="true" required="true"/>
-
-    </fields>
-
-</schema>
-"""
 try:
     solr_interface = sunburnt.SolrInterface(settings.SOLR_URL)
 except socket.error:
