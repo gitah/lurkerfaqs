@@ -34,6 +34,7 @@ python-setuptools
 apache2
 libapache2-mod-wsgi
 
+default-jdk
 solr-jetty
 libxslt-dev
 
@@ -66,13 +67,24 @@ HTTPDCONF
 # cronjob
 cat <<CRON > /etc/cron.daily/lurkerfaqs
 #!/bin/sh
-cd $PROJECT_ROOT
-./manage.py batch_user_counts
+$PROJECT_ROOT/manage.py batch_user_counts
 CRON
+
+# solr
+mv $PROJECT_ROOT/search/schema.xml /etc/solr/conf/schema.xml
+cat <<JETTYCONF > /etc/default/jetty
+NO_START=0
+JETTY_HOST=0.0.0.0
+JETTY_PORT=8983
+JAVA_HOME=/usr/lib/jvm/default-java
+JAVA_OPTIONS="-Xmx256m -Djava.awt.headless=true"
+VERBOSE=yes
+JETTYCONF
 
 #-- Services --#
 service apache2 restart
 service mysql restart
+service jetty restart
 
 DBNAME=lurkerfaqs
 set +e 
