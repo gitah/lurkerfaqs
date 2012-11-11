@@ -193,4 +193,4 @@ LOGGING = {
 }
 
 #-- Search --#
-SOLR_URL = "http://localhost:8983/solr/master/"
+SOLR_URL = "http://localhost:8983/solr"

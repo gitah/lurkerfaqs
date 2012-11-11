@@ -26,7 +26,7 @@ class SolrSearcher(object):
 
     def search_topic(self, query, start, count):
         return solr_interface.query(title=query) \
-            .sortby("-last_post_date") \
+            .sort_by("-last_post_date") \
             .paginate(start=start, rows=count)
 
 # create singleton class

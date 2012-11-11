@@ -1,11 +1,34 @@
-<schema name="lurkerfaqs" version="1.5">
-    <fields>
-       <field name="title" type="text" indexed="true" stored="true" required="true"/>
-       <field name="creator" type="string" indexed="true" stored="true" required="true"/>
-       <field name="last_post_date" type="date" indexed="true" stored="true" required="true"/>
-       <field name="number_of_posts" type="int" indexed="true" stored="true" required="true"/>
+<?xml version="1.0" encoding="UTF-8" ?>
 
-       <field name="topic_id" type="string" indexed="false" stored="true" required="true"/>
+<schema name="lurkerfaqs" version="1.0">
+  <types>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+    <fieldtype name="binary" class="solr.BinaryField"/>
 
-    </fields>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
+
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+    <analyzer>
+    <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+    </analyzer>
+    </fieldType>
+  </types>
+
+  <fields>
+    <field name="topic_id" type="string" indexed="true" stored="true" required="true"/>
+    <field name="title" type="text" indexed="true" stored="true" required="true"/>
+    <field name="creator" type="string" indexed="true" stored="true" required="true"/>
+    <field name="last_post_date" type="date" indexed="true" stored="true" required="true"/>
+    <field name="number_of_posts" type="int" indexed="true" stored="true" required="true"/>
+  </fields>
+
+  <uniqueKey>topic_id</uniqueKey>
+  <solrQueryParser defaultOperator="OR"/>
+
 </schema>
