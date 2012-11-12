@@ -101,7 +101,8 @@ def build_context(request, **kwargs):
 @cache_page(settings.CACHE_STORAGE_TIME)
 def show_boards(request):
     # /boards
-    boards = models.Board.objects.all()
+    boards = models.Board.objects.all().order_by('name')
+
     t = loader.get_template('boards.html')
     c = RequestContext(request, {
         "boards": boards

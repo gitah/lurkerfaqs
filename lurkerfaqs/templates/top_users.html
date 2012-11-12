@@ -10,7 +10,7 @@
   </tr>
   {% for user in top_user_topics%}
   <tr class="{% cycle 'even' 'odd' %}">
-    <td>{{user.username}}</td>
+    <td><a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a></td>
     <td>{{user.count}}</td>
   </tr>
   {% endfor %}
@@ -25,7 +25,7 @@
   </tr>
   {% for user in top_user_posts%}
   <tr class="{% cycle 'even' 'odd' %}">
-    <td>{{user.username}}</td>
+    <td><a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a></td>
     <td>{{user.count}}</td>
   </tr>
   {% endfor %}
