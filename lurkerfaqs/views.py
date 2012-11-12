@@ -21,6 +21,7 @@ TOPIC_STATUS_TO_IMG = {
     models.Topic.STICKY: "sticky.gif",
     models.Topic.STICKY_CLOSED: "sticky_closed.gif",
     models.Topic.PURGED: "topic_closed.gif",
+    models.Topic.POLL: "topic_poll.gif",
     "default": "topic_normal.gif"
 }
 

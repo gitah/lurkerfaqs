@@ -14,9 +14,12 @@ TOPIC_STATUS_MAP = {
     "topic.gif": Topic.NORMAL,
     "lock.gif": Topic.CLOSED,
     "topic_poll.gif": Topic.POLL,
+    "topic_poll_closed.gif": Topic.POLL_CLOSED,
     "topic_archived.gif": Topic.ARCHIVED,
-    "topic_closed.gif": Topic.CLOSED
+    "topic_closed.gif": Topic.CLOSED,
+    "sticky.gif": Topic.STICKY,
 }
+
 STRING_EDITED = "(edited)";
 STRING_MODDED = "[This message was deleted at the request of a moderator or administrator]";
 STRING_CLOSED = "[This message was deleted at the request of the original poster]";
