@@ -1,6 +1,7 @@
 {% extends "base_table.html" %}
 
-{% block header_main %}  {{board.title}} {% endblock %}
+{% block title %}{{board.name}} - {{query}}{% endblock %}
+{% block header_main %} {{board.name}} {% endblock %}
 
 {% block nav %}
 <div class="navLinks">
