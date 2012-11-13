@@ -8,20 +8,20 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.db import connection, transaction
 
-import gfaqs.models as models
+from gfaqs.models import Board, User, Topic, Post
 from batch.models import UserTopicCount, UserPostCount
 from search.solr import SolrSearcher
 
 """ NOTE: URL paths were designed to mimic the url paths on gamefaqs """
 
 TOPIC_STATUS_TO_IMG = {
-    models.Topic.NORMAL: "topic_normal.gif",
-    models.Topic.CLOSED: "topic_closed.gif",
-    models.Topic.ARCHIVED: "topic_archived.gif",
-    models.Topic.STICKY: "sticky.gif",
-    models.Topic.STICKY_CLOSED: "sticky_closed.gif",
-    models.Topic.PURGED: "topic_closed.gif",
-    models.Topic.POLL: "topic_poll.gif",
+    Topic.NORMAL: "topic_normal.gif",
+    Topic.CLOSED: "topic_closed.gif",
+    Topic.ARCHIVED: "topic_archived.gif",
+    Topic.STICKY: "sticky.gif",
+    Topic.STICKY_CLOSED: "sticky_closed.gif",
+    Topic.PURGED: "topic_closed.gif",
+    Topic.POLL: "topic_poll.gif",
     "default": "topic_normal.gif"
 }
 
@@ -101,7 +101,7 @@ def build_context(request, **kwargs):
 @cache_page(settings.CACHE_STORAGE_TIME)
 def show_boards(request):
     # /boards
-    boards = models.Board.objects.all().order_by('name')
+    boards = Board.objects.all().order_by('name')
 
     t = loader.get_template('boards.html')
     c = RequestContext(request, {
@@ -117,11 +117,11 @@ def show_board(request, board_alias):
         return search_topic(request, board_alias, request.GET.get("search"))
 
     try:
-        board = models.Board.objects.get(alias=board_alias)
+        board = Board.objects.get(alias=board_alias)
     except ObjectDoesNotExist:
         raise Http404
 
-    qs = models.Topic.objects.filter(board=board).order_by('-last_post_date')
+    qs = Topic.objects.filter(board=board).order_by('-last_post_date')
     topics, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_TOPICS_PER_PAGE)
 
@@ -140,12 +140,12 @@ def show_board(request, board_alias):
 def show_topic(request, board_alias, topic_num):
     # /boards/<board_alias>/<topic_num>?page=2
     try:
-        board = models.Board.objects.get(alias=board_alias)
-        topic = models.Topic.objects.get(gfaqs_id=topic_num)
+        board = Board.objects.get(alias=board_alias)
+        topic = Topic.objects.get(gfaqs_id=topic_num)
     except ObjectDoesNotExist:
         raise Http404
 
-    qs = models.Post.objects.filter(topic=topic)
+    qs = Post.objects.filter(topic=topic)
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
@@ -158,14 +158,16 @@ def show_topic(request, board_alias, topic_num):
 def search_topic(request, board_alias, query):
     cursor = connection.cursor()
     try:
-        board = models.Board.objects.get(alias=board_alias)
+        board = Board.objects.get(alias=board_alias)
     except ObjectDoesNotExist:
         raise Http404
 
     page  = get_page_from_request(request)
     start = (page-1) * settings.LURKERFAQS_TOPICS_PER_PAGE
     count = settings.LURKERFAQS_TOPICS_PER_PAGE
-    topics = SolrSearcher.search_topic(query, start, count)
+
+    topic_gfaqs_ids = SolrSearcher.search_topic(query, board_alias, start, count)
+    topics = list(Topic.objects.filter(gfaqs_id__in=topic_gfaqs_ids))
 
     t = loader.get_template('topic_search.html')
     c = build_context(request, topics=topics, board=board, query=query)
@@ -175,7 +177,7 @@ def search_topic(request, board_alias, query):
 def get_user(username):
     """ returns user with given username; raises Http404 if no user found"""
     try:
-        user = models.User.objects.get(username=username)
+        user = User.objects.get(username=username)
     except ObjectDoesNotExist:
         raise Http404
     return user
@@ -203,7 +205,7 @@ def show_user_topics(request, username):
     # /users/<username>/topics?page=2
     user = get_user(username)
 
-    qs = models.Topic.objects.filter(creator=user).order_by('-last_post_date')
+    qs = Topic.objects.filter(creator=user).order_by('-last_post_date')
     topics, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
@@ -217,7 +219,7 @@ def show_user_posts(request, username):
     # /users/<username>/posts?page=2
     user = get_user(username)
 
-    qs = models.Post.objects.filter(creator=user).order_by('-date')
+    qs = Post.objects.filter(creator=user).order_by('-date')
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
@@ -230,7 +232,7 @@ def search_user(request):
     if not request.GET.get("search"):
        return HttpResponseRedirect("/")
     query = request.GET.get("search")
-    users = models.User.objects.filter(username__istartswith=query).all()
+    users = User.objects.filter(username__istartswith=query).all()
 
     t = loader.get_template('user_search.html')
     c = RequestContext(request, {

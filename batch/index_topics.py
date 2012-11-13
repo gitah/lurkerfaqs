@@ -6,7 +6,7 @@ from batch.batch_base import Batch
 from search.solr import SolrSearcher
 
 
-CHUNK_SIZE=1000
+CHUNK_SIZE=10000
 class IndexTopics(Batch):
     """Indexes all topics in db into solr"""
 
@@ -17,3 +17,6 @@ class IndexTopics(Batch):
         for i in range(1, paginator.num_pages):
             topics = paginator.page(i)
             SolrSearcher.index_topics(topics)
+            for t in topics:
+                print t.title
+            break
