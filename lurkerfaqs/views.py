@@ -145,7 +145,7 @@ def show_topic(request, board_alias, topic_num):
     except ObjectDoesNotExist:
         raise Http404
 
-    qs = Post.objects.filter(topic=topic)
+    qs = Post.objects.filter(topic=topic).order_by('date')
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
