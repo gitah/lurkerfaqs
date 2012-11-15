@@ -23,7 +23,7 @@
         {% elif i == current_page %}
           <span class="current">{{i}}</span>
         {% else %}
-            <span><a href="{% block page_url %}{% endblock %}?page={{i}}">{{i}}</a></span>
+            <span><a href="{% block page_url %}{% endblock %}page={{i}}">{{i}}</a></span>
         {% endif %}
     {% endfor %}
 </div>

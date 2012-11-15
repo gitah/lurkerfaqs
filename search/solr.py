@@ -27,12 +27,16 @@ class SolrSearcher(object):
         solr_interface.add(docs)
 
     def search_topic(self, query, board_alias, start, count):
-        topics_raw = solr_interface.query(title=query) \
+        """Sends a request to solr for topics matching query
+
+        Returns a 2-tuple: (total_results, result_list)
+        """
+        resp = solr_interface.query(title=query) \
             .filter(board_alias=board_alias) \
             .sort_by("-last_post_date") \
             .paginate(start=start, rows=count) \
             .execute()
-        return [result_to_gfaqs_id(t) for t in topics_raw]
+        return (resp.result.numFound, [result_to_gfaqs_id(t) for t in resp])
 
 # create singleton class
 SolrSearcher = SolrSearcher()

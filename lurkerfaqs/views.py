@@ -166,11 +166,26 @@ def search_topic(request, board_alias, query):
     start = (page-1) * settings.LURKERFAQS_TOPICS_PER_PAGE
     count = settings.LURKERFAQS_TOPICS_PER_PAGE
 
-    topic_gfaqs_ids = SolrSearcher.search_topic(query, board_alias, start, count)
-    topics = list(Topic.objects.filter(gfaqs_id__in=topic_gfaqs_ids))
+    # topic ids should be date descending ordered
+    total_results, topic_gfaqs_ids = SolrSearcher.search_topic(query, board_alias, start, count)
+    topics_unordered = list(Topic.objects.filter(gfaqs_id__in=topic_gfaqs_ids))
+
+    # reorder topics
+    topics = []
+    for gid in topic_gfaqs_ids:
+        for t in topics_unordered:
+            if t.gfaqs_id == gid:
+                topics.append(t)
+                break
+
+    # create a page guide for pagination
+    topics_per_page = settings.LURKERFAQS_PAGES_TO_DISPLAY
+    page_guide = create_page_guide(total_results/count + 1,
+            settings.LURKERFAQS_PAGES_TO_DISPLAY, page)
 
     t = loader.get_template('topic_search.html')
-    c = build_context(request, topics=topics, board=board, query=query)
+    c = build_context(request, topics=topics, board=board, query=query,
+        current_page=page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 # -- Users -- #
