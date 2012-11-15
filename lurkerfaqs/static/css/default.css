@@ -216,3 +216,8 @@ table.message td{
 /* -- Quotes -- */
 blockquote{border-style:dotted;border-width:1px;padding:2px 6px 2px 6px;margin:0;}
 cite{font-weight:bold; font-style: italic}
+
+/* -- Spoilers */
+.fspoiler, .fspoiler a, .fspoiler blockquote{
+    background-color:#333;color:#333;
+}
