@@ -23,8 +23,10 @@
     </td></tr>
     <tr class="even"><td>
         {{post.contents|safe}}
-        <br>--<br>
-        {{post.signature|safe}}
+        {% if post.signature %}
+            <br>--<br>
+            {{post.signature|safe}}
+        {% endif %}
     </td></tr>
     {% endfor %}
 {% endblock %}
