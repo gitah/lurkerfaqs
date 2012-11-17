@@ -83,6 +83,7 @@ cat <<CRON > /etc/cron.daily/lurkerfaqs
 #!/bin/sh
 echo [`date`] 'Batch Index Topics Starting' &> $BATCH_LOG
 $PROJECT_ROOT/manage.py batch_index_topics &> $BATCH_LOG
+service jetty restart &> $BATCH_LOG
 echo [`date`] 'Batch Index Topics Ended' &> $BATCH_LOG
 CRON
 
