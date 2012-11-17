@@ -56,3 +56,11 @@ To start the archiver
     ./manage.py archvier start
 
 The error/info log for the gfaqs archiver can be found at `run/archiver.log`
+
+Search Server
+=============
+The search server is Solr contained in a Jetty server.
+
+Documents are topics. There is a batch to index topics in the database to the
+search server. Remember to restart the Jetty after indexing. By default there is
+a cronjob to index unindexed topics every day.
