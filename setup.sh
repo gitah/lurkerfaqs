@@ -79,9 +79,9 @@ touch $LURKERFAQS_CRON_USER_COUNT
 chmod 755 $LURKERFAQS_CRON_USER_COUNT
 cat <<CRON > $LURKERFAQS_CRON_USER_COUNT
 #!/bin/sh
-echo [`date`] 'Batch User Counts Starting' &> $BATCH_LOG
+echo [\`date\`] 'Batch User Counts Starting' &> $BATCH_LOG
 $PROJECT_ROOT/manage.py batch_user_counts &> $BATCH_LOG
-echo [`date`] 'Batch User Counts Ended' &> $BATCH_LOG
+echo [\`date\`] 'Batch User Counts Ended' &> $BATCH_LOG
 CRON
 
 LURKERFAQS_CRON_INDEX_TOPICS=/etc/cron.daily/lurkerfaqs_index_topics
@@ -89,10 +89,10 @@ touch $LURKERFAQS_CRON_INDEX_TOPICS
 chmod 755 $LURKERFAQS_CRON_INDEX_TOPICS
 cat <<CRON > $LURKERFAQS_CRON_INDEX_TOPICS
 #!/bin/sh
-echo [`date`] 'Batch Index Topics Starting' &> $BATCH_LOG
+echo [\`date\`] 'Batch Index Topics Starting' &> $BATCH_LOG
 $PROJECT_ROOT/manage.py batch_index_topics &> $BATCH_LOG
 service jetty restart &> $BATCH_LOG
-echo [`date`] 'Batch Index Topics Ended' &> $BATCH_LOG
+echo [\`date\`] 'Batch Index Topics Ended' &> $BATCH_LOG
 CRON
 
 # solr
