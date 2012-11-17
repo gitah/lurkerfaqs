@@ -38,5 +38,9 @@ class SolrSearcher(object):
             .execute()
         return (resp.result.numFound, [result_to_gfaqs_id(t) for t in resp])
 
+    def get_last_indexed_topic(self):
+        resp = solr_interface.query().sort_by("-last_post_date").paginate(start=0, rows=1).execute()
+        return [result_to_gfaqs_id(t) for t in resp][0]
+
 # create singleton class
 SolrSearcher = SolrSearcher()
