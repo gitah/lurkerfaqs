@@ -1,1 +1,2 @@
-from tests import BoardScraperTest, TopicScraperTest, ArchiverTest
+from tests import *
+from monitoring_tests import *
