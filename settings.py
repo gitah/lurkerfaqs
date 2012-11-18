@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     'batch',
     'lurkerfaqs',
     'search',
+    'util',
 )
 
 #-- Caching --#
