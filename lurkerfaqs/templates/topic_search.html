@@ -4,9 +4,12 @@
 {% block header_main %} {{board.name}} {% endblock %}
 
 {% block nav %}
-<div class="navLinks">
-    Results for your search using the string '{{query}}':
+<div class="navLinks right">
+    Back To:
+    <a href="{% url lurkerfaqs.views.show_boards %}">Board list</a> |
+    <a href="{% url lurkerfaqs.views.show_board board.alias %}">Topic list</a>
 </div>
+<div class="clear"></div>
 {% endblock %}
 
 {% block table_class %}board topics colorVisitedLink{% endblock %}

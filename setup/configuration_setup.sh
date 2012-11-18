@@ -11,7 +11,10 @@ BATCH_LOG=$RUN_DIR/batch.log
 cat <<HTTPDCONF > /etc/apache2/httpd.conf
 WSGIScriptAlias / $PROJECT_ROOT/lurkerfaqs/wsgi.py
 WSGIPythonPath $PROJECT_ROOT
+
 alias /static $PROJECT_ROOT/lurkerfaqs/static
+alias /robots.txt $PROJECT_ROOT/lurkerfaqs/static/robots.txt
+alias /favicon.ico $PROJECT_ROOT/lurkerfaqs/static/img/favicon.ico
 
 <Directory $PROJECT_ROOT>
 Order allow,deny
