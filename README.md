@@ -14,7 +14,7 @@ Installation
 ============
 To install and run LurkerFAQs, go to the project root directory and execute
 
-    ./setup.sh
+    ./setup/setup.sh
 
 NOTE: this script assumes that you are using Ubuntu 12.04 Server Edition
 
