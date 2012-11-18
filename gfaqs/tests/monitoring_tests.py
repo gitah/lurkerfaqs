@@ -12,10 +12,11 @@ from gfaqs.scraper import BoardScraper, TopicScraper
 CE = Board(url="%s/boards/400-current-events" % settings.GFAQS_URL, name="CE")
 OT = Board(url="%s/boards/2000121-anime-and-manga-other-titles" % settings.GFAQS_URL, name="OT")
 
-class GFAQSBoardTest(TestCase):
+class GFAQSDOMTest(TestCase):
     """Tests that the DOM of gfaqs message boards has not changed."""
 
     def test_scrape_board(self):
+        """Test that we can still scrape topics and posts"""
         # scrape board
         bs = BoardScraper(OT)
         topic = bs.retrieve().next()
@@ -30,11 +31,8 @@ class GFAQSBoardTest(TestCase):
         self.assertTrue(post.contents)
         self.assertTrue(post.creator.username)
 
-
-class GFAQSLoginTest(TestCase):
-    """Tests that we can still login to GameFAQs."""
-
     def test_login(self):
+        """Test that we can still login to GameFAQs."""
         if not settings.GFAQS_LOGIN_AS_USER:
             return
         opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)

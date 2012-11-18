@@ -95,6 +95,21 @@ service jetty restart &> $BATCH_LOG
 echo [\`date\`] 'Batch Index Topics Ended' &> $BATCH_LOG
 CRON
 
+LURKERFAQS_CRON_MONITORING=/etc/cron.weekly/lurkerfaqs_monitoring
+touch $LURKERFAQS_CRON_MONITORING
+chmod 755 $LURKERFAQS_CRON_MONITORING
+cat <<CRON > $LURKERFAQS_CRON_MONITORING
+#!/bin/sh
+echo [\`date\`] 'DOM tests started' &> $BATCH_LOG
+$PROJECT_ROOT/manage.py test gfaqs.GFAQSDOMTest &> $BATCH_LOG
+if [ $? -ne 0 ];
+then
+    echo [\`date\`] 'Test failed; sending email to admin' &> $BATCH_LOG
+    $PROJECT_ROOT/manage.py alert_admin 'gfaqs dom test failed' 'failed' &> $BATCH_LOG
+fi
+echo [\`date\`] 'DOM tests ended' &> $BATCH_LOG
+CRON
+
 # solr
 mv $PROJECT_ROOT/search/schema.xml /etc/solr/conf/schema.xml
 cat <<JETTYCONF > /etc/default/jetty
