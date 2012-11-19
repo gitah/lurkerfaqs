@@ -85,10 +85,13 @@ a cronjob to index unindexed topics every day.
 
 Backups
 =======
-LurkerFAQs has the capibility of automatically backuping the database to AWS
-S3/Glacier. This can be enabled by setting the following setting variables:
+LurkerFAQs has the capibility of automatically backuping the database to AWS S3.
+This can be enabled by setting the following setting variables:
 
     ENABLE_S3_DB_BACKUP = False
     AWS_ACCESS_KEY_ID = ''
     AWS_SECRET_ACCESS_KEY = ''
     AWS_S3_BUCKET_NAME = ''
+
+For cost reasons, it is recommended to use the lifecycle feature of S3 to
+archive these backups using AWS Glacier.
