@@ -277,6 +277,6 @@ def show_home(request):
 
 @cache_page(settings.CACHE_STORAGE_TIME_LONG)
 def show_faq(request):
-    t = loader.get_template('faq.html')
+    t = loader.get_template('faqs.html')
     c = RequestContext(request, {})
     return HttpResponse(t.render(c))
