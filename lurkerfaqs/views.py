@@ -127,7 +127,7 @@ def show_board(request, board_alias):
 
     # map topic status to icons
     for tp in topics:
-        tp.status_icon = TOPIC_STATUS_TO_IMG.get(tp.status,
+        tp.status_icon = TOPIC_STATUS_TO_IMG.get(int(tp.status),
             TOPIC_STATUS_TO_IMG["default"])
 
     t = loader.get_template('topics.html')
