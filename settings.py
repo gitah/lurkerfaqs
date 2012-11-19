@@ -207,3 +207,8 @@ LOGGING = {
 
 #-- Search --#
 SOLR_URL = "http://localhost:8983/solr"
+
+#-- Backup --#
+ENABLE_S3_DB_BACKUP = False
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
