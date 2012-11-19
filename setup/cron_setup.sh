@@ -45,3 +45,14 @@ then
 fi
 echo [\`date\`] 'DOM tests ended' &> $BATCH_LOG
 CRON
+
+# Database Backup
+LURKERFAQS_CRON_BACKUPDB=/etc/cron.weekly/lurkerfaqs_backupdb
+touch $LURKERFAQS_CRON_BACKUPDB
+chmod 755 $LURKERFAQS_CRON_BACKUPDB
+cat <<CRON > $LURKERFAQS_CRON_BACKUPDB
+#!/bin/sh
+echo [\`date\`] 'Backing up database!' &> $BATCH_LOG
+$PROJECT_ROOT/manage.py backupdb &> $BATCH_LOG
+echo [\`date\`] 'Backup database finished!' &> $BATCH_LOG
+CRON
