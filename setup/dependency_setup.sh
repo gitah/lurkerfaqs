@@ -35,4 +35,5 @@ pip install MySQL-python        # mysql driver
 pip install beautifulsoup4      # website scraping
 pip install lxml                # sunburnt dependency
 pip install sunburnt            # solr
+pip install boto                # AWS api
 pip install django              # web framework

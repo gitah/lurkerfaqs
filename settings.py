@@ -212,3 +212,4 @@ SOLR_URL = "http://localhost:8983/solr"
 ENABLE_S3_DB_BACKUP = False
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
+AWS_S3_BUCKET_NAME = ''
