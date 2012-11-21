@@ -52,6 +52,11 @@ class Topic(models.Model):
     last_post_date = models.DateTimeField()
     status = models.CharField(max_length=2, choices=TOPIC_STATUS, default=NORMAL)
 
+    def save(self, *args, **kwargs):
+        super(Topic, self).save(args, kwargs)
+        # adds topic to index queue
+        UnindexedTopic(topic=self).save()
+
     def __str__(self):
         return "[%s] (%s, %s)" % (self.title, self.gfaqs_id, self.creator.username)
 
@@ -78,3 +83,7 @@ class Post(models.Model):
     def __str__(self):
         return "%s\n %s \n---\n %s" % (self.topic,
             self.contents, self.signature)
+
+class UnindexedTopic(models.Model):
+    """ A model for the top_users batch """
+    topic = models.ForeignKey(Topic)

@@ -6,20 +6,22 @@ from django.conf import settings
 
 from batch.index_topics import IndexTopics
 
-class Command(BaseCommand):
-    args = ''
-    help = 'Runs a batch to find the number of posts and topics made by each user'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--update',
-            action='store_true',
-            dest='update',
-            default=False,
-            help='Indexes bizs that have not yet been indexed'),
-        )
+def print_help_and_exit():
+    print "./manage.py batch_index_topics (update|all)"
+    exit(2)
+
+class Command(BaseCommand):
+    args = '(update|all)'
+    help = 'Indexes topics to solr'
 
     def handle(self, *args, **options):
-        if options['update']:
+        if len(args) != 1:
+            print_help_and_exit()
+
+        if args[0] == "all":
+            IndexTopics().all()
+        if args[0] == "update":
             IndexTopics().update()
         else:
-            IndexTopics().start()
+            print_help_and_exit()

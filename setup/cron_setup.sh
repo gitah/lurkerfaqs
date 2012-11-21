@@ -25,7 +25,7 @@ chmod 755 $LURKERFAQS_CRON_INDEX_TOPICS
 cat <<CRON > $LURKERFAQS_CRON_INDEX_TOPICS
 #!/bin/sh
 echo [\`date\`] 'Batch Index Topics Starting' 1> $BATCH_LOG 2>&1
-$PROJECT_ROOT/manage.py batch_index_topics 1> $BATCH_LOG 2>&1
+$PROJECT_ROOT/manage.py batch_index_topics update 1> $BATCH_LOG 2>&1
 service jetty restart 1> $BATCH_LOG 2>&1
 echo [\`date\`] 'Batch Index Topics Ended' 1> $BATCH_LOG 2>&1
 CRON

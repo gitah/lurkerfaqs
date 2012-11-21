@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.core.paginator import Paginator, EmptyPage
+from django.db import connection, transaction
 
-from gfaqs.models import Topic
+from gfaqs.models import Topic, UnindexedTopic
 from batch.batch_base import Batch
 from search.solr import SolrSearcher
 
@@ -14,25 +15,15 @@ def print_progress(i, total):
 class IndexTopics(Batch):
     """Indexes all topics in db into solr"""
 
-    def start(self):
+    def all(self):
         qs = Topic.objects.all()
         self._index(qs)
 
+    @transaction.commit_on_success
     def update(self):
-        # get last indexed topic by date
-        last_indexed_topic_gfaqs_id = SolrSearcher.get_last_indexed_topic()
-
-        # index everything if we can't find any topics
-        if not last_indexed_topic_gfaqs_id:
-            self.start()
-            return
-        last_indexed_topic = Topic.objects.get(
-            gfaqs_id=last_indexed_topic_gfaqs_id)
-
-        # get topics > that last date
-        qs = Topic.objects.filter(
-            last_post_date__gte=last_indexed_topic.last_post_date)
-        self._index(qs)
+        qs = UnindexedTopic.objects.all()
+        self._index([ut.topic for ut in qs])
+        UnindexedTopic.objects.all().delete()
 
     def _index(self, qs):
         paginator = Paginator(qs, CHUNK_SIZE)
@@ -41,4 +32,5 @@ class IndexTopics(Batch):
         for i in range(1, total+1):
             topics = paginator.page(i)
             SolrSearcher.index_topics(topics)
+            print '\n'.join([t.title for t in topics])
             print_progress(i, total)
