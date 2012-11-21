@@ -32,5 +32,4 @@ class IndexTopics(Batch):
         for i in range(1, total+1):
             topics = paginator.page(i)
             SolrSearcher.index_topics(topics)
-            print '\n'.join([t.title for t in topics])
             print_progress(i, total)
