@@ -70,4 +70,4 @@ def show_user_posts(request, user_id, page=None):
     return HttpResponseRedirect(new_url)
 
 def append_page(url, page):
-    return "%s?page=%s" % (url,page)
+    return "%s?page=%s" % (url, int(page) + 1)
