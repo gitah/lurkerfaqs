@@ -89,9 +89,12 @@ class Archiver(Daemon):
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
                 t.pk = t_db.pk
                 if t_db.number_of_posts == t.number_of_posts:
-                    # this is the first topic that hasn't been updated 
-                    # since last archive run, so we stop
-                    break 
+                    if t.status in {Topic.STICKY, Topic.STICKY_CLOSED}:
+                        continue
+                    else:
+                        # this is the first topic that hasn't been updated since
+                        # last archive run, so we stop
+                        break
             except ObjectDoesNotExist:
                 t.pk = None
 

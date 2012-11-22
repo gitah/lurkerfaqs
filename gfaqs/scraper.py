@@ -130,7 +130,9 @@ class BoardScraper(Scraper):
             topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
             topic_title = tds[1].a.text
 
-            creator = User(username=tds[2].span.text)
+            # we split because username might have (M) at the end
+            username = tds[2].text.split()[0]
+            creator = User(username=username)
             post_count = int(tds[3].text)
 
             try:
