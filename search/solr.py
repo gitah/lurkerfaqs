@@ -31,7 +31,11 @@ class SolrSearcher(object):
 
         Returns a 2-tuple: (total_results, result_list)
         """
-        resp = solr_interface.query(title=query) \
+        solr_q =  solr_interface.query()
+        for term in query.split():
+            solr_q = solr_q.query(title=term.lower())
+
+        resp = solr_q \
             .filter(board_alias=board_alias) \
             .sort_by("-last_post_date") \
             .paginate(start=start, rows=count) \

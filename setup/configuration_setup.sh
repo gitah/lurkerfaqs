@@ -22,3 +22,14 @@ Allow from all
 Options Indexes FollowSymLinks
 </Directory>
 HTTPDCONF
+
+# solr
+cp $PROJECT_ROOT/search/schema.xml /etc/solr/conf/schema.xml
+cat <<JETTYCONF > /etc/default/jetty
+NO_START=0
+JETTY_HOST=127.0.0.1
+JETTY_PORT=8983
+JAVA_HOME=/usr/lib/jvm/default-java
+JAVA_OPTIONS="-Xmx256m -Djava.awt.headless=true"
+VERBOSE=yes
+JETTYCONF
