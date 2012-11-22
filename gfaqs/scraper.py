@@ -152,6 +152,7 @@ class BoardScraper(Scraper):
 
         return topics
 
+
 class TopicScraper(Scraper):
     def __init__(self, topic):
         self.topic = topic

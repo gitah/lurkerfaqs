@@ -208,7 +208,7 @@ def show_user(request, username):
     try:
         total_posts = UserPostCount.objects.get(username=user.username).count
     except ObjectDoesNotExist:
-        topic_count = 0
+        total_posts = 0
 
     t = loader.get_template('user_profile.html')
     c = build_context(request, user=user,
