@@ -18,7 +18,7 @@
 {% for post in posts %}
     <tr><td>
      {#TODO: Format date #}
-      <a href="{% url lurkerfaqs.views.show_topic post.topic.board.alias post.topic.gfaqs_id %}">{{post.topic.title}}</a> ({{post.topic.number_of_posts}}) | Posted on {{post.topic.last_post_date}}
+      <a href="{% url lurkerfaqs.views.show_topic post.topic.board.alias post.topic.gfaqs_id %}">{{post.topic.title}}</a> ({{post.post_num}}) | Posted on {{post.date}}
     </td></tr>
 
     <tr class="even"><td>{{post.contents|safe}}</td></tr>
