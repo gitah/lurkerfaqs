@@ -6,39 +6,24 @@ from datetime import date
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from util import s3mysqldump
+from util.s3backup import s3backup
 
-#TODO: set object archival to glacier
-
-# http://<bucket>.s3.amazonaws.com/<key>
-S3_URI_TEMPLATE = "s3://%s/%s"
-S3_OBJECT_KEY = "lurkerfaqs_db_backup.sql"
+S3_OBJECT_KEY = "lurkerfaqs_db_backup.sql.gz"
 
 class Command(BaseCommand):
-    args = 'database table_name'
-    help = 'Sends an email to the configured administrator'
+    help = 'backs up the lurkerfaqs database to s3'
 
     def handle(self, *args, **options):
         if not settings.ENABLE_S3_DB_BACKUP:
             print "Please configure S3_DB_BACKUP to enable back ups of database to AWS S3"
 
-        # generate S3 URI to store the db backup
-        s3_obj_name = "%s-%s" % (date.today(), S3_OBJECT_KEY)
-        s3_uri = S3_URI_TEMPLATE % (settings.AWS_S3_BUCKET_NAME, s3_obj_name)
-
-        # set environs for boto
-        os.environ['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
-        os.environ['AWS_SECRET_ACCESS_KEY'] = settings.AWS_SECRET_ACCESS_KEY
-
-        # run s3mysqldump script directly in python
-        # ie. s3mysqldump -v -A <db_name> <s3://emr-storage/user.sql>
         db = settings.DATABASES['default']
-        if db['PASSWORD']:
-            mysqldump_args = '-u%s -p%s' % (db['USER'], db['PASSWORD'])
-        else:
-            mysqldump_args = '-u%s' % (db['USER'])
+        db_name, db_user, db_password = db["NAME"], db['USER'], db['PASSWORD']
 
-        script_args = ['-v', '-B']
-        script_args.append("-M %s" % mysqldump_args)
-        script_args.extend([db['NAME'], s3_uri])
-        s3mysqldump.main(script_args)
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        s3bucket = settings.AWS_S3_BUCKET_NAME
+        s3object = "%s-%s" % (date.today(), S3_OBJECT_KEY)
+
+        s3backup(db_name, db_user, db_password, s3bucket, s3object,
+                aws_access_key_id, aws_secret_access_key)
