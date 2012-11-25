@@ -82,7 +82,7 @@ class Archiver(Daemon):
 
         for t in bs.retrieve(self.opener):
             topics_examined += 1
-            if t.status == Topic.ARCHIVED:
+            if t.status in {Topic.ARCHIVED, Topic.POLL_ARCHIVED}:
                 # we reached archived topics; don't continue
                 break
             try:

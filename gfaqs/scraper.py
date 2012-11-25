@@ -15,6 +15,7 @@ TOPIC_STATUS_MAP = {
     "lock.gif": Topic.CLOSED,
     "topic_poll.gif": Topic.POLL,
     "topic_poll_closed.gif": Topic.POLL_CLOSED,
+    "topic_poll_archived.gif": Topic.POLL_ARCHIVED,
     "topic_archived.gif": Topic.ARCHIVED,
     "topic_closed.gif": Topic.CLOSED,
     "sticky.gif": Topic.STICKY,
@@ -131,7 +132,10 @@ class BoardScraper(Scraper):
             topic_title = tds[1].a.text
 
             # we split because username might have (M) at the end
-            username = tds[2].text.split()[0]
+            username = tds[2].text.split()
+            if "(M)" in username[-1]:
+                username = username[:-1]
+            username = ' '.join(username)
             creator = User(username=username)
             post_count = int(tds[3].text)
 

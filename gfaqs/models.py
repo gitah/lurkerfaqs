@@ -29,7 +29,7 @@ class Topic(models.Model):
     """Represents a topic made on gameefaqs"""
     NORMAL, CLOSED, ARCHIVED = 0, 1, 2
     STICKY, STICKY_CLOSED,PURGED = 3, 4, 5
-    POLL, POLL_CLOSED = 6, 7
+    POLL, POLL_CLOSED, POLL_ARCHIVED = 6, 7, 8
     TOPIC_STATUS = (
         (NORMAL, "normal"),
         (CLOSED, "closed"),
@@ -39,6 +39,7 @@ class Topic(models.Model):
         (PURGED, "purged"),
         (POLL, "poll"),
         (POLL_CLOSED, "poll_closed"),
+        (POLL_ARCHIVED, "poll_archived"),
     )
     board = models.ForeignKey(Board)
     creator = models.ForeignKey(User)
