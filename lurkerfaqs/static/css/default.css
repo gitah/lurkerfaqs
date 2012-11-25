@@ -193,6 +193,10 @@ table.message td{
 	vertical-align: top;
 }
 
+table.message img {
+    max-width: 100%;
+}
+
 
 /* -- Poll -- */
 .table {width:100%;display:table;padding:2px;table-layout:fixed;}

@@ -8,9 +8,10 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.db import connection, transaction
 
-from gfaqs.models import Board, User, Topic, Post
 from batch.models import UserTopicCount, UserPostCount
+from gfaqs.models import Board, User, Topic, Post
 from search.solr import SolrSearcher
+from util.linkify import linkify
 
 """ NOTE: URL paths were designed to mimic the url paths on gamefaqs """
 
@@ -149,6 +150,9 @@ def show_topic(request, board_alias, topic_num):
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
+    for post in posts:
+        post.contents = linkify(post.contents)
+
     t = loader.get_template('posts.html')
     c = build_context(request, board=topic.board, topic=topic,
             posts=posts, current_page=current_page, page_guide=page_guide)
@@ -197,7 +201,7 @@ def get_user(username):
         raise Http404
     return user
 
-@cache_page(settings.CACHE_STORAGE_TIME_LONG)
+@cache_page(settings.CACHE_STORAGE_TIME)
 def show_user(request, username):
     # /users/<username>
     user = get_user(username)
@@ -238,6 +242,9 @@ def show_user_posts(request, username):
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
+    for post in posts:
+        post.contents = linkify(post.contents)
+
     t = loader.get_template('user_posts.html')
     c = build_context(request, user=user, posts=posts,
         current_page=current_page, page_guide=page_guide)
@@ -257,7 +264,7 @@ def search_user(request):
 
 
 # -- Misc -- #
-@cache_page(settings.CACHE_STORAGE_TIME_LONG)
+@cache_page(settings.CACHE_STORAGE_TIME)
 def top_users(request):
     t = loader.get_template('top_users.html')
     limit = settings.LURKERFAQS_TOP_USERS_TO_SHOW
