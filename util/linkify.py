@@ -9,10 +9,10 @@ This implementation is just using the naive approach for now.
 """
 import re
 
-HTML_RE = re.compile(r'\b(https?://|www.)[^\s<>]+|[^\s<>]+\.(com|ca|net|org)(/[^\s<>]+)?\b')
-IMAGE_EXT_RE = re.compile(r'(jpg|png|gif)$')
-YOUTUBE_VID_RE = re.compile(r'v=([^\s]{11})')
-YOUTU_VID_RE = re.compile(r'youtu.be/([^\s]{11})')
+HTML_RE = re.compile(r'\b(https?://|www.)[^\s<>]+|[^\s<>]+\.(com|ca|net|org)(/[^\s<>]+)?\b', re.IGNORECASE)
+IMAGE_EXT_RE = re.compile(r'(jpg|png|gif)$', re.IGNORECASE)
+YOUTUBE_VID_RE = re.compile(r'v=([^\s]{11})', re.IGNORECASE)
+YOUTU_VID_RE = re.compile(r'youtu.be/([^\s]{11})',  re.IGNORECASE)
 
 YOUTUBE_HTML = '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/%s?autoplay=0" frameborder="0"></iframe>'
 IMAGE_HTML = '<img src="%s" alt="external image"/>'
