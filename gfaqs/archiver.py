@@ -71,8 +71,8 @@ class Archiver(Daemon):
 
     @log_on_error
     def archive_board(self, b, recursive=True):
-        """ scrapes and saves the topics of a board to the db 
-        
+        """ scrapes and saves the topics of a board to the db
+
             b: the models.Board to archive
             recursive: archives the posts of each topic as well
         """
@@ -123,7 +123,11 @@ class Archiver(Daemon):
             # Check if post exists already in db to determine update or add
             with transaction.commit_on_success():
                 try:
-                    Post.objects.filter(topic=t).get(post_num=p.post_num)
+                    p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
+                    # update poll results if applicable
+                    if int(p_db.post_num) == 1 and t.status in Topic.POLL_STATUSES:
+                        p_db.contents = p.contents
+                        p_db.save()
                     # we already have the rest of the posts in the db
                     break
                 except ObjectDoesNotExist:

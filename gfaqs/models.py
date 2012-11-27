@@ -30,6 +30,9 @@ class Topic(models.Model):
     NORMAL, CLOSED, ARCHIVED = 0, 1, 2
     STICKY, STICKY_CLOSED,PURGED = 3, 4, 5
     POLL, POLL_CLOSED, POLL_ARCHIVED = 6, 7, 8
+
+    POLL_STATUSES = {POLL, POLL_CLOSED, POLL_ARCHIVED}
+
     TOPIC_STATUS = (
         (NORMAL, "normal"),
         (CLOSED, "closed"),
