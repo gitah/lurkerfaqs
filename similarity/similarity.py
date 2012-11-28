@@ -1,6 +1,14 @@
+import itertools
+
 from nltk import PorterStemmer
+from nltk.tokenize import wordpunct_tokenize
+from nltk.corpus import stopwords
+
 import numpy as np
 from scipy.spatial import distance
+
+from gfaqs.models import User, Topic, Post
+from batch.models import UserTopicCount, UserPostCount
 
 """ 
 Given a Document (ie. a Topic or User), this will generate Documents similar to
@@ -35,26 +43,34 @@ NOTE: steps 1 and 2 can be streamed
    
 """
 
-def create_topic_document(db_topic):
-    # aggregate words into set ???
-    # return set of words
-    pass
+def create_user_document(user_id):
+    user_topics = Topic.objects.filter(creator_id=user_id)
+    user_posts = Post.objects.filter(creator_id=user_id)
 
-def document_to_vector(pk, doc):
-    # apply porter stemmer
-    # remove stop words or apply tf-idf
-    # return vector (labeled with primary key)
-    pass
+    # TODO: Signatures ?? will have to normalize them though...
+    topic_words = [topic.title for topic in user_topics]
+    post_words = [post.contents for post in user_posts]
+    tokens = wordpunct_tokenize(' '.join(topic_words + post_words))
+    stemmer = PorterStemmer()
+    return {stemmer.stem(tok) for tok in tokens if tok \
+            not in stopwords.words('english')}
 
-def create_topic_documents(data_file):
-    # create orm request
-    # for topic in topics: doc = create_topic_documents(topic)
-    # v = document_to_vector(topic.pk, doc)
-    # write v to a output file
-    pass
+def create_user_documents(data_file):
+    # need this count information to filter users
+    UserCountBatch().start()
+
+    # clear the output file
+    with open(data_file, 'w') as fp:
+        pass
+
+    with open(data_file, 'w+') as fp:
+        for user in UserPostCount.objects.filter(count_gte=MIN_USER_POSTS):
+            doc = create_user_document(user.pk)
+            fp.write("%s\t%s" % (user.pk, ' '.join(list(vec))))
 
 def calculate_similarities(input_file, results_file):
     # load input_file into memory
+    # turn into feature vector via bag of words model
     # for each vector: run pdist with cosine distance
     # write result to result file
     pass
