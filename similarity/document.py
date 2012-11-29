@@ -1,16 +1,18 @@
+# -*- coding: utf-8 -*-
 import itertools
 
 from nltk import PorterStemmer
 from nltk.tokenize import wordpunct_tokenize
-from nltk.corpus import stopwords
 
 import numpy as np
 from scipy.spatial import distance
 
 from gfaqs.models import User, Topic, Post
 from batch.models import UserTopicCount, UserPostCount
+from batch.user_counts import UserCountBatch
+from similarity.stopwords import STOPWORDS
 
-""" 
+"""
 Given a Document (ie. a Topic or User), this will generate Documents similar to
 it via. cosine similarity.
 
@@ -21,7 +23,7 @@ Steps:
         - skip if document is too small
             - Topic => # posts < 10
             - User => # topics + # posts < 50
-        
+
     2. Turn Document into a vector
         - normalize document: porter stemmer
         - TODO: determine if I want to use tf-idf or (bag of words, remove stop words)
@@ -40,37 +42,56 @@ Steps:
 
 
 NOTE: steps 1 and 2 can be streamed
-   
 """
 
-def create_user_document(user_id):
-    user_topics = Topic.objects.filter(creator_id=user_id)
-    user_posts = Post.objects.filter(creator_id=user_id)
+MIN_USER_POSTS = 5;
+
+#TODO: strip html tags, urls
+#TODO: debug create_user_document
+def create_user_document(username):
+    creator = User.objects.get(username=username)
+    user_topics = Topic.objects.filter(creator=creator)
+    user_posts = Post.objects.filter(creator=creator)
 
     # TODO: Signatures ?? will have to normalize them though...
     topic_words = [topic.title for topic in user_topics]
     post_words = [post.contents for post in user_posts]
     tokens = wordpunct_tokenize(' '.join(topic_words + post_words))
     stemmer = PorterStemmer()
-    return {stemmer.stem(tok) for tok in tokens if tok \
-            not in stopwords.words('english')}
+    return {stemmer.stem(tok) for tok in tokens if tok not in STOPWORDS}
 
 def create_user_documents(data_file):
     # need this count information to filter users
     UserCountBatch().start()
 
+    # Create documents
+    words = set()
+    docs = []
+    for user in UserPostCount.objects.filter(count__gte=MIN_USER_POSTS):
+        doc = create_user_document(user.username)
+        words.union(doc)
+        docs.append(doc)
+
+    # Create vectors from documents
+    vecs = []
+    words = list(words)
+    for doc in docs:
+        vec = [0 if word in doc else 1 for word in words]
+        vecs.append(vec)
+
     # clear the output file
     with open(data_file, 'w') as fp:
-        pass
+        for vec in vecs:
+            fp.write("%s\t%s\n" % (user.pk, ','.join(vec)))
 
-    with open(data_file, 'w+') as fp:
-        for user in UserPostCount.objects.filter(count_gte=MIN_USER_POSTS):
-            doc = create_user_document(user.pk)
-            fp.write("%s\t%s" % (user.pk, ' '.join(list(vec))))
-
-def calculate_similarities(input_file, results_file):
+def create_feature_vectors_from_documents(data_file):
     # load input_file into memory
     # turn into feature vector via bag of words model
+    # dictionary ???
+    # output
+    pass
+
+def calculate_similarities(input_file, results_file):
     # for each vector: run pdist with cosine distance
     # write result to result file
     pass
