@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+import re
 
 from nltk import PorterStemmer
 from nltk.tokenize import wordpunct_tokenize
@@ -11,6 +12,7 @@ from gfaqs.models import User, Topic, Post
 from batch.models import UserTopicCount, UserPostCount
 from batch.user_counts import UserCountBatch
 from similarity.stopwords import STOPWORDS
+from util.linkify import HTML_RE
 
 """
 Given a Document (ie. a Topic or User), this will generate Documents similar to
@@ -46,8 +48,30 @@ NOTE: steps 1 and 2 can be streamed
 
 MIN_USER_POSTS = 5;
 
-#TODO: strip html tags, urls
-#TODO: debug create_user_document
+TAG_RE = re.compile(r'<.*?>', re.IGNORECASE)
+ALPHANUMERIC_RE = re.compile('^[a-zA-z0-9_]*$', re.IGNORECASE)
+NUM_RE = re.compile('^\d*$')
+
+stemmer = PorterStemmer()
+
+def normalize_text(text):
+    text = re.sub(HTML_RE, '', text)
+    text = re.sub(TAG_RE, '', text)
+    tokens = wordpunct_tokenize(text)
+    normalized_words = {normalize_word(tok) for tok in tokens}
+    return {word for word in normalized_words if word}
+
+def normalize_word(word):
+    if not re.match(ALPHANUMERIC_RE, word) or re.match(NUM_RE, word):
+        return ''
+    if len(word) <= 2:
+        return ''
+
+    word = word.lower()
+    if word in STOPWORDS:
+        return ''
+    return stemmer.stem(word)
+
 def create_user_document(username):
     creator = User.objects.get(username=username)
     user_topics = Topic.objects.filter(creator=creator)
@@ -56,33 +80,40 @@ def create_user_document(username):
     # TODO: Signatures ?? will have to normalize them though...
     topic_words = [topic.title for topic in user_topics]
     post_words = [post.contents for post in user_posts]
-    tokens = wordpunct_tokenize(' '.join(topic_words + post_words))
-    stemmer = PorterStemmer()
-    return {stemmer.stem(tok) for tok in tokens if tok not in STOPWORDS}
+
+    all_words = ' '.join(topic_words + post_words)
+    return normalize_text(all_words)
 
 def create_user_documents(data_file):
     # need this count information to filter users
     UserCountBatch().start()
 
     # Create documents
-    words = set()
+    words = {}
     docs = []
     for user in UserPostCount.objects.filter(count__gte=MIN_USER_POSTS):
         doc = create_user_document(user.username)
-        words.union(doc)
+        for word in doc:
+            words[word] = words.get(word, 0) + 1
         docs.append(doc)
 
     # Create vectors from documents
     vecs = []
-    words = list(words)
+
+    # normalize list of words
+    norm_words = set()
+    for w in words:
+        if words[w] > 1:
+            norm_words.add(w)
     for doc in docs:
-        vec = [0 if word in doc else 1 for word in words]
+        vec = [1 if w in doc else 0 for w in norm_words]
         vecs.append(vec)
 
     # clear the output file
     with open(data_file, 'w') as fp:
         for vec in vecs:
-            fp.write("%s\t%s\n" % (user.pk, ','.join(vec)))
+            vec_str = ','.join([str(f) for f in vec])
+            fp.write("%s,%s\n" % ('TODO', vec_str))
 
 def create_feature_vectors_from_documents(data_file):
     # load input_file into memory

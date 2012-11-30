@@ -175,5 +175,6 @@ STOPWORDS = {
     "yours",
     "yourself",
     "yourselves",
-    "|",
+    "result",
+    "vote",
 }
