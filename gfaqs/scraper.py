@@ -7,7 +7,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, element
 from django.conf import settings
 
-from gfaqs.utils import strptime
+from gfaqs.util import strptime
 from gfaqs.models import User, Board, Topic, Post
 
 TOPIC_STATUS_MAP = {

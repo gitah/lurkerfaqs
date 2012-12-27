@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import time
-import urllib2
 from threading import Thread
 from datetime import datetime
 
@@ -9,9 +8,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from gfaqs.utils import log_on_error, log_info
-from gfaqs.utils.daemon import Daemon
-from gfaqs.utils.threadpool import ThreadPool
+from gfaqs.util import log_on_error, log_info, build_opener
+from gfaqs.util.daemon import Daemon
+from gfaqs.util.threadpool import ThreadPool
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.login import authenticate
@@ -41,7 +40,7 @@ class Archiver(Daemon):
             self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
             log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
         else:
-            self.opener = urllib2.build_opener()
+            self.opener = build_opener()
 
         # Initialize threadpool
         # we need at least one thread for each board

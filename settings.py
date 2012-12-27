@@ -213,3 +213,9 @@ ENABLE_S3_DB_BACKUP = False
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
 AWS_S3_BUCKET_NAME = ''
+
+#-- Archiver Proxy --#
+# define to use a proxy server for the archiver
+HTTP_PROXY=""
+
+UA_HEADER=""

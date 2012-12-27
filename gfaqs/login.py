@@ -2,8 +2,11 @@
 from urllib import urlencode
 import urllib2
 import cookielib
+
 from django.conf import settings
 from bs4 import BeautifulSoup
+
+from gfaqs.util import build_opener
 
 class AuthenticationError(StandardError):
     pass
@@ -15,8 +18,11 @@ def authenticate(email, password):
         AuthenticationError if not
     """
     login_url = settings.GFAQS_LOGIN_URL
+
+    opener = build_opener()
     cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    opener.add_handler(urllib2.HTTPCookieProcessor(cj))
+    foo = opener.open('http://www.gamefaqs.com')
 
     post_data = {
         "EMAILADDR": email,
