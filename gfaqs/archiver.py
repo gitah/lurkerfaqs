@@ -81,14 +81,14 @@ class Archiver(Daemon):
 
         for t in bs.retrieve(self.opener):
             topics_examined += 1
-            if t.status in {Topic.ARCHIVED, Topic.POLL_ARCHIVED}:
+            if t.status in Topic.ARCHIVED_STATUSES:
                 # we reached archived topics; don't continue
                 break
             try:
                 t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
                 t.pk = t_db.pk
                 if t_db.number_of_posts == t.number_of_posts:
-                    if t.status in {Topic.STICKY, Topic.STICKY_CLOSED}:
+                    if t.status in Topic.STICKY_STATUSES:
                         continue
                     else:
                         # this is the first topic that hasn't been updated since
@@ -117,16 +117,13 @@ class Archiver(Daemon):
         posts_examined, posts_saved = 0, 0
 
         posts = list(ts.retrieve(self.opener))
+
         for p in reversed(posts):
             posts_examined += 1
             # Check if post exists already in db to determine update or add
             with transaction.commit_on_success():
                 try:
                     p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
-                    # update poll results if applicable
-                    if int(p_db.post_num) == 1 and t.status in Topic.POLL_STATUSES:
-                        p_db.contents = p.contents
-                        p_db.save()
                     # we already have the rest of the posts in the db
                     break
                 except ObjectDoesNotExist:
@@ -134,6 +131,13 @@ class Archiver(Daemon):
                     p.save()
                     posts_saved += 1
             throttle_thread()
+
+        # update poll results if applicable
+        if posts and t.status in Topic.POLL_STATUSES:
+            p = posts[0]
+            p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
+            p_db.contents = p.contents
+            p_db.save()
 
         log_info("Archiving Topic (%s) finished; %s posts examined, %s new" % \
             (t.gfaqs_id, posts_examined, posts_saved))
