@@ -19,6 +19,7 @@ TOPIC_STATUS_MAP = {
     "topic_archived.gif": Topic.ARCHIVED,
     "topic_closed.gif": Topic.CLOSED,
     "sticky.gif": Topic.STICKY,
+    "sticky_closed.gif": Topic.STICKY_CLOSED,
 }
 
 STRING_EDITED = "(edited)";
