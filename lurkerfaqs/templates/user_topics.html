@@ -5,7 +5,7 @@
 
 {% block nav %}
 <div class="navLinks left">
-    Topics created by <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+    Topics created by <a href="{% url "lurkerfaqs.views.show_user" user.username %}">{{user.username}}</a>
 </div>
 {% endblock %}
 
@@ -22,8 +22,8 @@
 {% block table_contents %}
 {% for topic in topics %}
 <tr class="{% cycle 'even' 'odd' %}">
-    <td><a href="{% url lurkerfaqs.views.show_board topic.board.alias %}">{{topic.board.name}}</a></td>
-    <td><a href="{% url lurkerfaqs.views.show_topic topic.board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
+    <td><a href="{% url "lurkerfaqs.views.show_board" topic.board.alias %}">{{topic.board.name}}</a></td>
+    <td><a href="{% url "lurkerfaqs.views.show_topic" topic.board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
     <td>{{topic.number_of_posts}}</td>
     <td>{{topic.last_post_date}}</td>
 </tr>
