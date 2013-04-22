@@ -31,10 +31,12 @@ SITE_ID = 1
 
 # SMTP settings
 EMAIL_HOST = ''
-EMAIL_PORT = 25
+EMAIL_PORT = 587
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_SUBJECT_PREFIX = '[LURKERFAQS] '
+EMAIL_USE_TLS = True
+
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
