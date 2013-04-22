@@ -8,7 +8,7 @@
 {% block table_contents %}
     {% for board in boards %}
     <tr class="{% cycle 'odd' 'even' %}"><td>
-        <a href="{% url lurkerfaqs.views.show_board board.alias %}">{{board.name}}</a>
+        <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">{{board.name}}</a>
     </td></tr>
     {% endfor %}
 {% endblock %}

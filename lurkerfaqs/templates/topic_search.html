@@ -6,8 +6,8 @@
 {% block nav %}
 <div class="navLinks right">
     Back To:
-    <a href="{% url lurkerfaqs.views.show_boards %}">Board list</a> |
-    <a href="{% url lurkerfaqs.views.show_board board.alias %}">Topic list</a>
+    <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a> |
+    <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a>
 </div>
 <div class="clear"></div>
 {% endblock %}
@@ -25,8 +25,8 @@
 {% block table_contents %}
 {% for topic in topics %}
     <tr class="{% cycle 'even' 'odd' %}">
-        <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
-        <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_user" topic.creator.username %}">{{topic.creator.username}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
         <td>{{topic.number_of_posts}}</td>
         <td>{{topic.last_post_date}}</td>
     </tr>
@@ -34,5 +34,5 @@
 {% endblock %}
 
 {% block page_url %}
-    {% url lurkerfaqs.views.show_board board.alias %}?search={{query}}&
+    {% url "lurkerfaqs.views.show_board" board.alias %}?search={{query}}&
 {% endblock %}

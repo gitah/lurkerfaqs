@@ -15,19 +15,19 @@
 
 {% block table_contents %}
   <tr>
-    <td><a href="{% url lurkerfaqs.views.show_user user.username %}">Username</a></td>
+    <td><a href="{% url "lurkerfaqs.views.show_user" user.username %}">Username</a></td>
     <td>{{user.username}}</td>
     {#<td></td>#}
   </tr>
 
   <tr class="even">
-    <td><a href="{% url lurkerfaqs.views.show_user_topics user.username %}">Topics created</a></td>
+    <td><a href="{% url "lurkerfaqs.views.show_user_topics" user.username %}">Topics created</a></td>
     {# <td>({{active_posts}}) active</td> #}
     <td>({{total_topics}}) total</td>
   </tr>
 
   <tr>
-    <td><a href="{% url lurkerfaqs.views.show_user_posts user.username %}">Posts made</a></td>
+    <td><a href="{% url "lurkerfaqs.views.show_user_posts" user.username %}">Posts made</a></td>
     {#<td>({{active_posts}}) active</td>#}
     <td>({{total_posts}}) total</td>
   </tr>

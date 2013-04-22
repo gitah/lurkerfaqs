@@ -29,14 +29,14 @@
   <div id="header">
     <div id="headerBlock">
       <div id="logo" class="center">
-          <a href="{% url lurkerfaqs.views.show_home %}"</a><img src="{{STATIC_URL}}img/logo.jpg" alt="logo" /></a>
+          <a href="{% url "lurkerfaqs.views.show_home" %}"</a><img src="{{STATIC_URL}}img/logo.jpg" alt="logo" /></a>
       </div>
     </div>
     <div id="menu">
       <div class="menuWrapper blockCenter">
-        <div class="block"><a href="{% url lurkerfaqs.views.show_boards %}">Boards</a></div>
-        <div class="block"><a href="{% url lurkerfaqs.views.top_users %}">Top Users</a> </div>
-        <div class="block"><a href="{% url lurkerfaqs.views.show_faq %}">FAQ</a></div>
+        <div class="block"><a href="{% url "lurkerfaqs.views.show_boards" %}">Boards</a></div>
+        <div class="block"><a href="{% url "lurkerfaqs.views.top_users" %}">Top Users</a> </div>
+        <div class="block"><a href="{% url "lurkerfaqs.views.show_faq" %}">FAQ</a></div>
 
         <div class="searchbar right">
             {# TODO link up#}

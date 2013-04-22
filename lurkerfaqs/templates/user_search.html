@@ -16,7 +16,7 @@
 {% for user in users %}
 <tr class="{% cycle 'even' 'odd' %}">
     <td>
-        <a href="{% url lurkerfaqs.views.show_user user.username %}">{{user.username}}</a>
+        <a href="{% url "lurkerfaqs.views.show_user" user.username %}">{{user.username}}</a>
     </td>
 </tr>
 {% endfor %}

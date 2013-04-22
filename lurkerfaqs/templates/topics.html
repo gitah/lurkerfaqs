@@ -17,7 +17,7 @@
 
 <div class="navLinks right">
     Back To:
-    <a href="{% url lurkerfaqs.views.show_boards %}">Board list</a>
+    <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a>
 </div>
 
 </div>
@@ -41,8 +41,8 @@
 {% for topic in topics %}
     <tr class="{% cycle 'even' 'odd' %}">
         <td><img src="{{STATIC_URL}}img/{{topic.status_icon}}"/></td>
-        <td><a href="{% url lurkerfaqs.views.show_topic board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
-        <td><a href="{% url lurkerfaqs.views.show_user topic.creator.username %}">{{topic.creator.username}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_user" topic.creator.username %}">{{topic.creator.username}}</a></td>
         <td>{{topic.number_of_posts}}</td>
         <td>{{topic.last_post_date}}</td>
     </tr>
@@ -50,5 +50,5 @@
 {% endblock %}
 
 {% block page_url %}
-    {% url lurkerfaqs.views.show_board board.alias %}?
+    {% url "lurkerfaqs.views.show_board" board.alias %}?
 {% endblock %}

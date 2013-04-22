@@ -31,5 +31,5 @@
 {% endblock %}
 
 {% block page_url %}
-    {% url lurkerfaqs.views.show_user_topics user.username %}?
+    {% url "lurkerfaqs.views.show_user_topics" user.username %}?
 {% endblock %}
