@@ -221,3 +221,10 @@ AWS_S3_BUCKET_NAME = ''
 HTTP_PROXY=""
 
 UA_HEADER=""
+
+# override settings, easier for dev
+try:
+    from custom_settings import *
+except ImportError:
+    pass
+
