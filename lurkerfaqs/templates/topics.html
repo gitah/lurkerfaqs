@@ -44,7 +44,7 @@
         <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}">{{topic.title}}</a></td>
         <td><a href="{% url "lurkerfaqs.views.show_user" topic.creator.username %}">{{topic.creator.username}}</a></td>
         <td>{{topic.number_of_posts}}</td>
-        <td>{{topic.last_post_date}}</td>
+        <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}#{{topic.number_of_posts}}">{{topic.last_post_date}}</a></td>
     </tr>
 {% endfor %}
 {% endblock %}
