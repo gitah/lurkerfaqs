@@ -34,7 +34,7 @@
     <field name="title" type="text" indexed="true" stored="false" required="true"/>
     <field name="creator" type="string" indexed="true" stored="false" required="true"/>
     <field name="board_alias" type="string" indexed="true" stored="false" required="true"/>
-    <field name="last_post_date" type="date" indexed="true" stored="false" required="true"/>
+    <field name="last_post_date" type="date" indexed="true" stored="false" required="true" multiValued="false"/>
     <field name="number_of_posts" type="int" indexed="true" stored="false" required="true"/>
   </fields>
 
