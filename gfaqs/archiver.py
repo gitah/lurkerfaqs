@@ -8,12 +8,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from gfaqs.util import log_on_error, log_info, build_opener
+from gfaqs.util import log_on_error, log_info
 from gfaqs.util.daemon import Daemon
 from gfaqs.util.threadpool import ThreadPool
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.models import User, Board, Topic, Post
-from gfaqs.login import authenticate
+from gfaqs.client import GFAQSClient
 
 
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
@@ -32,15 +32,14 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.opener = None
+        self.gfaqs_client = None
 
     def run(self):
-        # Login to gamefaqs
+        # Build GFAQSClient to access webpage
         if settings.GFAQS_LOGIN_AS_USER:
-            self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
-            log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
+            self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
         else:
-            self.opener = build_opener()
+            self.gfaqs_client = GFAQSClient()
 
         # Initialize threadpool
         # we need at least one thread for each board
@@ -79,7 +78,7 @@ class Archiver(Daemon):
         log_info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
 
-        for t in bs.retrieve(self.opener):
+        for t in bs.retrieve(self.gfaqs_client):
             topics_examined += 1
             if t.status in Topic.ARCHIVED_STATUSES:
                 # we reached archived topics; don't continue
@@ -116,7 +115,7 @@ class Archiver(Daemon):
         log_info("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
-        posts = list(ts.retrieve(self.opener))
+        posts = list(ts.retrieve(self.gfaqs_client))
 
         for p in reversed(posts):
             posts_examined += 1

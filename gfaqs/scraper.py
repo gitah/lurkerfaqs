@@ -9,6 +9,7 @@ from django.conf import settings
 
 from gfaqs.util import strptime
 from gfaqs.models import User, Board, Topic, Post
+from gfaqs.client import GFAQSClient
 
 TOPIC_STATUS_MAP = {
     "topic.gif": Topic.NORMAL,
@@ -49,35 +50,10 @@ def generate_query_string(page):
     return urlencode(query)
 
 class Scraper(object):
-    def get_page(self, opener, pg):
-        """Fetches the given page associated with the scraper"""
-        base = self.base_url()
-        parts = urlparse(base)
-        if parts.scheme == "http":
-            qs = generate_query_string(pg)
-            page_url = "%s?%s" % (base, qs)
-        else:
-            raise ValueError("URL scheme %s not recognized") % parts.scheme
-
-        try:
-            return "".join(opener.open(page_url).readlines())
-        except IOError:
-            raise ValueError("page not found")
-
-    def retrieve(self, opener=None):
-        """ generator that returns the next object the scraper will scrape """
-        if opener is None:
-            opener=urllib2.build_opener()
-
-        pg = 0
-        while True:
-            try:
-                html = self.get_page(opener,pg)
-                for topic in self.parse_page(html):
-                    yield topic
-                pg += 1
-            except ValueError:
-                break
+    def retrieve(self, gfaqs_client):
+        """generator that returns the next object the scraper will scrape"""
+        # implement in subclass
+        raise NotImplementedError()
 
     def parse_page(self, html):
         # implement in subclass
@@ -92,9 +68,16 @@ class BoardScraper(Scraper):
     def __init__(self, board):
         self.board = board
 
-    def base_url(self):
-        """ returns the base url (without page numbers) of the board """
-        return self.board.url
+    def retrieve(self, gfaqs_client):
+        pg = 0
+        while True:
+            try:
+                html = gfaqs_client.get_topic_list(board, pg)
+                for topic in self.parse_page(html):
+                    yield topic
+                pg += 1
+            except ValueError:
+                break
     
     def parse_page(self, html):
         """ parses the page and returns a list of Topic objects
@@ -164,10 +147,16 @@ class TopicScraper(Scraper):
     def __init__(self, topic):
         self.topic = topic
 
-    def base_url(self):
-        """ returns the base url (without page numbers) of the topic """
-        board_url = self.topic.board.url
-        return "%s/%s" % (board_url, self.topic.gfaqs_id)
+    def retrieve(self, gfaqs_client):
+        pg = 0
+        while True:
+            try:
+                html = gfaqs_client.get_post_list(self.topic, pg)
+                for topic in self.parse_page(html):
+                    yield topic
+                pg += 1
+            except ValueError:
+                break
 
     def parse_page(self, html):
         """ parses the page and returns a list of Post objects 

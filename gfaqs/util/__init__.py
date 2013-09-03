@@ -50,16 +50,3 @@ def strptime(date_str, format_str):
         return datetime.strptime(date_str, format_str)
     finally:
         strptime_mutex.release()
-
-
-#--- Connection ---#
-def build_opener():
-    """a factory to create an appropriate urllib2 opener object"""
-    handlers = []
-    if settings.HTTP_PROXY:
-        proxy_info = {"http": settings.HTTP_PROXY}
-        handlers.append(urllib2.ProxyHandler(proxy_info))
-    opener = urllib2.build_opener(*handlers)
-    if settings.UA_HEADER:
-        opener.addheaders = [('User-agent', settings.UA_HEADER)]
-    return opener
