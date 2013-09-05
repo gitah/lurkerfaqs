@@ -5,7 +5,7 @@ sure the structure is compatible with the archiver"""
 from django.conf import settings
 from django.test import TestCase
 
-from gfaqs.login import authenticate
+#from gfaqs.login import authenticate
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
 

@@ -9,19 +9,13 @@ from threading import Thread
 from django.conf import settings
 from django.test import TestCase
 from gfaqs.models import User, Board, Topic, Post
+from gfaqs.client import GFAQSClient
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.archiver import Archiver
 
 import test_server
 
-EXAMPLE_DIR = "file://%s/examples" % os.path.dirname(__file__)
-#start server
-
-def start_server(port):
-        server = test_server.create_server(port)
-        server.serve_forever()
-
-class BoardScraperTest(TestCase):
+class ServerTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.server_port = 14100
@@ -32,35 +26,54 @@ class BoardScraperTest(TestCase):
         cls.th.stop()
 
     def setUp(self):
-        path = "http://localhost:%s" % BoardScraperTest.server_port
+        path = "http://localhost:%s" % self.__class__.server_port
         self.ce = Board(url="%s/boards/ce" % path, name="Current Events")
         self.ot = Board(url="%s/boards/ot" % path, name="Other Titles")
+        self.test_topic = Topic(board=self.ce, creator=User(username="foo"),
+                title="tmp", gfaqs_id="63995827", status=0);
+        self.gfaqs_client = GFAQSClient()
 
-    def test_get_page(self):
-        bs = BoardScraper(self.ce)
-        opener = urllib2.build_opener()
+
+class GFAQsClientTestCase(ServerTestCase):
+    """ Tests that GFAQsClient fetches pages correctly """
+    # TODO: test auth
+    def test_get_topic_list(self):
         try: 
-            bs.get_page(opener,0)
-            bs.get_page(opener,1)
+            self.gfaqs_client.get_topic_list(self.ce, 0)
+            self.gfaqs_client.get_topic_list(self.ce, 1)
         except IOError:
             self.fail("page not found")
-
         try:
             # should not exist
-            bs.get_page(opener,99999)
+            gfaqs_client.get_topic_list(self.ce, 99999)
         except:
             pass
 
+    #def test_get_post_list(self):
+        #try: 
+            #gfaqs_client.get_post_list(self.test_topic, 0)
+            #gfaqs_client.get_post_list(self.test_topic, 1)
+        #except IOError:
+            #self.fail("page not found")
+        #try:
+            ## should not exist
+            #gfaqs_client.get_post_list(self.test_topic, 99999)
+        #except:
+            #pass
+
+
+class BoardScraperTest(ServerTestCase):
     def test_parse_page(self):
         bs = BoardScraper(self.ot)
-        opener = urllib2.build_opener()
-        
-        ot0_tl = bs.parse_page(bs.get_page(opener,0))
+        html = self.gfaqs_client.get_topic_list(self.ot, 0)
+        ot0_tl = bs.parse_page(html)
+
         self.assertEquals(len(ot0_tl), 10)
         t = ot0_tl[0]
         self.assertEquals(t.creator.username, "EmeralDragon23")
         self.assertEquals(t.gfaqs_id, "64019288")
         self.assertEquals(t.title, "Here's my Cage of Eden prediction *spoilers*")
+
         t = ot0_tl[-1]
         self.assertEquals(t.creator.username, "Hellcopter")
         self.assertEquals(t.gfaqs_id, "64017353")
@@ -81,27 +94,12 @@ class BoardScraperTest(TestCase):
         self.assertEquals(topics[19].title,"What were/are you the biggest fan of, Rock Band or Guitar Hero")
         self.assertEquals(topics[19].creator.username,"Purecorruption")
         
-class TopicScraperTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server_port = 14101
-        cls.th = test_server.start_server(cls.server_port)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.th.stop()
-
-    def setUp(self):
-        path = "http://localhost:%s" % TopicScraperTest.server_port
-        ce = Board(url="%s/boards/ce" % path, name="Other Titles")
-        self.test_topic = Topic(board=ce, creator=User(username="foo"),
-                title="tmp", gfaqs_id="63995827", status=0);
-
+class TopicScraperTest(ServerTestCase):
     def test_parse_page(self):
         ts = TopicScraper(self.test_topic)
-        opener = urllib2.build_opener()
-
-        posts = ts.parse_page(ts.get_page(opener,0))
+        html = self.gfaqs_client.get_post_list(self.test_topic, 0)
+        posts = ts.parse_page(html)
         self.assertEquals(len(posts),10)
 
         format_str = "%m/%d/%Y %I:%M:%S %p"
@@ -132,6 +130,7 @@ class TopicScraperTest(TestCase):
         self.assertEquals(len(posts), 53)
         self.assertEquals(posts[0].creator.username, "CoolBeansAvl")
         self.assertEquals(posts[-1].creator.username,"Xelltrix")
+
 
 class ArchiverTest(TestCase):
     class DaemonRunnerThread(Thread):
