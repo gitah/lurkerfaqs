@@ -24,7 +24,7 @@ class GFAQSClient(object):
             self.opener = build_opener()
             log_info("No login specified")
 
-    def _generate_query_string(page):
+    def _generate_query_string(self, page):
         """Returns a query string for a URL to a board or topic"""
         query = {
             "page": page,

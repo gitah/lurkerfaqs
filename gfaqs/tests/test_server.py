@@ -54,9 +54,9 @@ class TestRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         try:
             if topic_name:
-                fpath = "%s/%s/%s-%s" % (EXAMPLE_DIR,TOPICS_DIR,topic_name,page)
+                fpath = "%s/%s/%s-%s.html" % (EXAMPLE_DIR,TOPICS_DIR,topic_name,page)
             else:
-                fpath = "%s/%s/%s-%s" % (EXAMPLE_DIR,BOARDS_DIR,board_name,page)
+                fpath = "%s/%s/%s-%s.html" % (EXAMPLE_DIR,BOARDS_DIR,board_name,page)
 
             with open(fpath) as fp:
                 self.send_response(200)
