@@ -11,16 +11,18 @@ from gfaqs.util import strptime
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
 
+
 TOPIC_STATUS_MAP = {
-    "topic.gif": Topic.NORMAL,
-    "lock.gif": Topic.CLOSED,
-    "topic_poll.gif": Topic.POLL,
-    "topic_poll_closed.gif": Topic.POLL_CLOSED,
-    "topic_poll_archived.gif": Topic.POLL_ARCHIVED,
-    "topic_archived.gif": Topic.ARCHIVED,
-    "topic_closed.gif": Topic.CLOSED,
-    "sticky.gif": Topic.STICKY,
-    "sticky_closed.gif": Topic.STICKY_CLOSED,
+    "board_icon_poll": Topic.NORMAL,
+    "board_icon_closed": Topic.CLOSED,
+    "board_icon_poll": Topic.POLL,
+    # TODO: find these
+    #"topic_poll_closed.gif": Topic.POLL_CLOSED,
+    #"topic_poll_archived.gif": Topic.POLL_ARCHIVED,
+    #"topic_archived.gif": Topic.ARCHIVED,
+    #"topic_closed.gif": Topic.CLOSED,
+    #"sticky.gif": Topic.STICKY,
+    #"sticky_closed.gif": Topic.STICKY_CLOSED,
 }
 
 STRING_EDITED = "(edited)";
@@ -59,10 +61,6 @@ class Scraper(object):
         # implement in subclass
         raise NotImplementedError()
 
-    def base_url(self):
-        # implement in subclass
-        raise NotImplementedError()
-
 
 class BoardScraper(Scraper):
     def __init__(self, board):
@@ -72,7 +70,7 @@ class BoardScraper(Scraper):
         pg = 0
         while True:
             try:
-                html = gfaqs_client.get_topic_list(board, pg)
+                html = gfaqs_client.get_topic_list(self.board, pg)
                 for topic in self.parse_page(html):
                     yield topic
                 pg += 1
@@ -97,36 +95,53 @@ class BoardScraper(Scraper):
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         topics = []
 
-        topic_table = soup.find("table", class_="board topics")
+        topic_table = soup.find("table", class_="board topics tlist")
         if not topic_table:
             raise ValueError("Page contains no posts")
         topic_tags = topic_table.find_all("tr")
+        topic_tags = topic_tags[1:] # not interested in header line with <th>
 
         for topic_tag in topic_tags:
-            tds = topic_tag.find_all("td")
-            if not tds:
-                continue
-            assert len(tds) == 5, "Topic html invalid format (%s)" % self.base_url()
+            # STATUS IMAGE
+            # <td> <i class="board_icon board_icon_topic"></i> <td>
+            status_td = topic_tag.find("td", class_="board_status")
+            status_classes = status_td.i["class"]
+            status_classes.remove("board_icon")
+            status_img = status_classes[0]
+            topic_status = TOPIC_STATUS_MAP.get(status_img, Topic.NORMAL)
+            if status_img not in TOPIC_STATUS_MAP:
+                # TODO: log that we need to update status image
+                # log "status image %s not found (%s)" % (status_img)
+                pass
 
-            status_img = tds[0].img["src"].split("/")[-1]
-            topic_status = TOPIC_STATUS_MAP.get(status_img, None)
-            assert topic_status != None, "status image %s not found (%s)" % (status_img, self.base_url())
+            # TOPIC NAME
+            # <td ><a href="/boards/$BOARD_ALIAS/$TOPIC_ID">$TOPIC_NAME</a></td>
+            topic_td = topic_tag.find("td", class_="topic")
+            topic_gfaqs_id = topic_td.a["href"].split("/")[-1]
+            topic_title = topic_td.a.text
 
-            topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
-            topic_title = tds[1].a.text
-
+            # AUTHOR
+            # <td><span><a class="nobold" # href="...">$USERNAME</a></span></td>
             # we split because username might have (M) at the end
-            username = tds[2].text.split()
+            username_td = topic_tag.find("td", class_="tauthor")
+            username = username_td.text.split()
             if "(M)" in username[-1]:
                 username = username[:-1]
             username = ' '.join(username)
             creator = User(username=username)
-            post_count = int(tds[3].text)
 
+            # POST COUNT
+            # <td class="count">1</td>
+            post_count_td = topic_tag.find("td", class_="count")
+            post_count = int(post_count_td.text)
+
+            # DATE
+            # <td class="lastpost"><a href="...">${<M>/<d> <h>:<mm><am/pm>}</a></td>
             try:
-                date_raw = tds[4].a.text
+                date_td = topic_tag.find("td", class_="lastpost")
+                date_raw = date_td.a.text
                 dt = strptime(date_raw, TOPIC_DATE_FORMAT_STR)
-                # the year is not sepcified on gfaqs, 
+                # the year is not sepcified on gfaqs,
                 # so I'll set it to the current year
                 curr_year = datetime.now().year
                 dt = datetime(curr_year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
@@ -179,7 +194,7 @@ class TopicScraper(Scraper):
         """
         soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
         posts = []
-        post_table = soup.find("table", class_="board message")
+        post_table = soup.find("table", class_="board message msg")
         if not post_table:
             raise ValueError("Page contains no posts")
 

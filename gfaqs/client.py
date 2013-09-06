@@ -44,11 +44,12 @@ class GFAQSClient(object):
 
     def get_post_list(self, topic, pg):
         """Fetches the given topic list page"""
-        board_url = self.topic.board.url
+        board_url = topic.board.url
         base = "%s/%s" % (board_url, topic.gfaqs_id)
         qs = self._generate_query_string(pg)
+        page_url = "%s?%s" % (base, qs)
         try:
-            return "".join(opener.open(page_url).readlines())
+            return "".join(self.opener.open(page_url).readlines())
         except IOError:
             raise ValueError("page not found")
 

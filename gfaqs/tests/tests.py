@@ -15,7 +15,7 @@ from gfaqs.archiver import Archiver
 
 import test_server
 
-class ServerTestCase(TestCase):
+class ServerTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.server_port = 14100
@@ -30,17 +30,19 @@ class ServerTestCase(TestCase):
         self.ce = Board(url="%s/boards/ce" % path, name="Current Events")
         self.ot = Board(url="%s/boards/ot" % path, name="Other Titles")
         self.test_topic = Topic(board=self.ce, creator=User(username="foo"),
-                title="tmp", gfaqs_id="63995827", status=0);
+                title="tmp", gfaqs_id="67150473", status=0);
         self.gfaqs_client = GFAQSClient()
 
 
-class GFAQsClientTestCase(ServerTestCase):
+class GFAQsClientTest(ServerTest):
     """ Tests that GFAQsClient fetches pages correctly """
     # TODO: test auth
     def test_get_topic_list(self):
         try: 
-            self.gfaqs_client.get_topic_list(self.ce, 0)
-            self.gfaqs_client.get_topic_list(self.ce, 1)
+            assert self.gfaqs_client.get_topic_list(self.ce, 0)
+            assert self.gfaqs_client.get_topic_list(self.ce, 1)
+            assert len(html0) > 0
+            assert len(html1) > 0
         except IOError:
             self.fail("page not found")
         try:
@@ -49,53 +51,47 @@ class GFAQsClientTestCase(ServerTestCase):
         except:
             pass
 
-    #def test_get_post_list(self):
-        #try: 
-            #gfaqs_client.get_post_list(self.test_topic, 0)
-            #gfaqs_client.get_post_list(self.test_topic, 1)
-        #except IOError:
-            #self.fail("page not found")
-        #try:
-            ## should not exist
-            #gfaqs_client.get_post_list(self.test_topic, 99999)
-        #except:
-            #pass
+    def test_get_post_list(self):
+        try: 
+            assert self.gfaqs_client.get_post_list(self.test_topic, 0)
+            assert self.gfaqs_client.get_post_list(self.test_topic, 1)
+        except IOError:
+            self.fail("page not found")
+        try:
+            # should not exist
+            gfaqs_client.get_post_list(self.test_topic, 99999)
+        except:
+            pass
 
 
-class BoardScraperTest(ServerTestCase):
+class BoardScraperTest(ServerTest):
     def test_parse_page(self):
         bs = BoardScraper(self.ot)
         html = self.gfaqs_client.get_topic_list(self.ot, 0)
         ot0_tl = bs.parse_page(html)
 
-        self.assertEquals(len(ot0_tl), 10)
+        self.assertEquals(len(ot0_tl), 50)
         t = ot0_tl[0]
-        self.assertEquals(t.creator.username, "EmeralDragon23")
-        self.assertEquals(t.gfaqs_id, "64019288")
-        self.assertEquals(t.title, "Here's my Cage of Eden prediction *spoilers*")
+        self.assertEquals(t.creator.username, "PhazonDaxterII")
+        self.assertEquals(t.gfaqs_id, "67159953")
+        self.assertEquals(t.title, 'One Piece Legendary Q&A CLVIII: " Only one spot remains to be filled!!!"')
 
         t = ot0_tl[-1]
-        self.assertEquals(t.creator.username, "Hellcopter")
-        self.assertEquals(t.gfaqs_id, "64017353")
-        self.assertEquals(t.title, 'What\'s anime really got you "into" anime?')
-
-        try:
-            # this page has no topics
-            ot708_tl = bs.parse_page(bs.get_page(opener,708))
-        except ValueError:
-            pass
+        self.assertEquals(t.creator.username, "Whose_the_Man")
+        self.assertEquals(t.gfaqs_id, "67129946")
+        self.assertEquals(t.title, "A Certain Scientific Railgun Chapter 62 *Spoilers*")
 
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
-        topics = list(bs.retrieve())
-        self.assertEquals(len(topics), 20)
-        self.assertEquals(topics[0].title,"How do you keep yourself from lucid dreaming?")
-        self.assertEquals(topics[0].creator.username,"hikaru_beoulve")
-        self.assertEquals(topics[19].title,"What were/are you the biggest fan of, Rock Band or Guitar Hero")
-        self.assertEquals(topics[19].creator.username,"Purecorruption")
+        topics = list(bs.retrieve(self.gfaqs_client))
+        self.assertEquals(len(topics), 100)
+        self.assertEquals(topics[0].title,"So I have DOMS...should I go workout tomorrow if I'm still sore?")
+        self.assertEquals(topics[0].creator.username,"ToasterStrudeI")
+        self.assertEquals(topics[19].title,"Is there such thing as verbal sex?")
+        self.assertEquals(topics[19].creator.username,"BrazenMD")
         
 
-class TopicScraperTest(ServerTestCase):
+class TopicScraperTest(ServerTest):
     def test_parse_page(self):
         ts = TopicScraper(self.test_topic)
         html = self.gfaqs_client.get_post_list(self.test_topic, 0)
@@ -126,8 +122,8 @@ class TopicScraperTest(ServerTestCase):
 
     def test_retrieve(self):
         ts = TopicScraper(self.test_topic)
-        posts = list(ts.retrieve())
-        self.assertEquals(len(posts), 53)
+        posts = list(ts.retrieve(self.gfaqs_client))
+        self.assertEquals(len(posts), 100)
         self.assertEquals(posts[0].creator.username, "CoolBeansAvl")
         self.assertEquals(posts[-1].creator.username,"Xelltrix")
 
