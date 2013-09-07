@@ -33,7 +33,16 @@ TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
-GFAQS_ENCODING="ISO8559-1"
+#GFAQS_ENCODING="ISO8559-1"
+# <rage>
+# The code below took me 3 hours to debug all because all because gfaqs is
+# backwards as fuck. Yes I'm mad.
+#
+# Modern sites basically all use UTF-8 encoding, but no not gfaqs: the header
+# and HTML says the page uses ISO-8859-1. This would be alright, but guess
+# It turns out this is a big fat lie...
+#</rage>
+GFAQS_ENCODING="windows-1252"
 
 def generate_query_string(page):
     """Returns a query string for a URL to a board or topic"""

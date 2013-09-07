@@ -32,14 +32,12 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.gfaqs_client = None
+        self.gfaqs_client = GFAQSClient()
 
     def run(self):
         # Build GFAQSClient to access webpage
         if settings.GFAQS_LOGIN_AS_USER:
             self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
-        else:
-            self.gfaqs_client = GFAQSClient()
 
         # Initialize threadpool
         # we need at least one thread for each board

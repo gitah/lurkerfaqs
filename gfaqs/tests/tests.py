@@ -38,7 +38,7 @@ class GFAQsClientTest(ServerTest):
     """ Tests that GFAQsClient fetches pages correctly """
     # TODO: test auth
     def test_get_topic_list(self):
-        try: 
+        try:
             assert self.gfaqs_client.get_topic_list(self.ce, 0)
             assert self.gfaqs_client.get_topic_list(self.ce, 1)
             assert len(html0) > 0
@@ -52,7 +52,7 @@ class GFAQsClientTest(ServerTest):
             pass
 
     def test_get_post_list(self):
-        try: 
+        try:
             assert self.gfaqs_client.get_post_list(self.test_topic, 0)
             assert self.gfaqs_client.get_post_list(self.test_topic, 1)
         except IOError:
@@ -89,7 +89,7 @@ class BoardScraperTest(ServerTest):
         self.assertEquals(topics[0].creator.username,"ToasterStrudeI")
         self.assertEquals(topics[19].title,"Is there such thing as verbal sex?")
         self.assertEquals(topics[19].creator.username,"BrazenMD")
-        
+
 
 class TopicScraperTest(ServerTest):
     def test_parse_page(self):
@@ -167,31 +167,40 @@ class ArchiverTest(TestCase):
 
         archiver = ArchiverTest.archiver
         archiver.archive_board(ce, recursive=False)
-        self.assertEquals(len(Topic.objects.all()), 20)
+        self.assertEquals(len(Topic.objects.all()), 50)
+        # run again to make sure we don't dupe
         archiver.archive_board(ce, recursive=False)
-        self.assertEquals(len(Topic.objects.all()), 20)
-    
+        self.assertEquals(len(Topic.objects.all()), 50)
+
     def test_archive_topic(self):
         path = "http://localhost:%s" % ArchiverTest.server_port
-        ot = Board(url="%s/boards/ot" % path, name="Other Titles")
-        ot.save()
+        ce = Board(url="%s/boards/ce" % path, name="CE")
+        ce.save()
+
         creator=User(username="foo")
         creator.save()
-        topic = Topic(board=ot, number_of_posts=57, creator=creator, title="tmp", 
-            gfaqs_id="64010226", last_post_date=datetime.now(), status=0); 
+        topic = Topic(
+                board=ce,
+                number_of_posts=129,
+                creator=creator,
+                title="tmp",
+                gfaqs_id="67181037",
+                last_post_date=datetime.now(),
+                status=0);
         topic.save()
 
         archiver = ArchiverTest.archiver
         archiver.archive_topic(topic)
-        self.assertEquals(len(Post.objects.all()), 57)
+        self.assertEquals(len(Post.objects.all()), 129)
+        # run again to make sure we don't dupe
         archiver.archive_topic(topic)
-        self.assertEquals(len(Post.objects.all()), 57)
+        self.assertEquals(len(Post.objects.all()), 129)
 
     def test_daemon(self):
         ArchiverTest.archiver_th.start()
 
         # wait a while for archiver to do its thing
-        time.sleep(5)
+        time.sleep(20)
         self.assertEquals(len(Board.objects.all()), 1)
         # ensure pid file present
         try:
@@ -199,7 +208,7 @@ class ArchiverTest(TestCase):
         except IOError:
             self.fail("pid file not found")
 
-        self.assertEquals(len(Topic.objects.all()), 20)
+        self.assertEquals(len(Topic.objects.all()), 50)
         self.assertTrue(len(Post.objects.all()) > 200)
         ArchiverTest.archiver_th.stop()
 
