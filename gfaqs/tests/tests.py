@@ -96,26 +96,26 @@ class TopicScraperTest(ServerTest):
         ts = TopicScraper(self.test_topic)
         html = self.gfaqs_client.get_post_list(self.test_topic, 0)
         posts = ts.parse_page(html)
-        self.assertEquals(len(posts),10)
+        self.assertEquals(len(posts), 50)
 
         format_str = "%m/%d/%Y %I:%M:%S %p"
 
         p = posts[0]
-        self.assertEquals(p.creator.username, "CoolBeansAvl")
+        self.assertEquals(p.creator.username, "Roxas_Oblivion")
         self.assertEquals(p.post_num, "1")
         self.assertTrue(len(p.contents) > 1)
         self.assertTrue(p.signature)
-        date = datetime.strptime("9/9/2012 11:36:44 AM", format_str)
+        date = datetime.strptime("9/3/2013 6:24:13 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
         self.assertEquals(p.status, Post.NORMAL)
 
         p = posts[9]
-        self.assertEquals(p.creator.username, "stepalicious")
+        self.assertEquals(p.creator.username, "aak57")
         self.assertEquals(p.post_num, "10")
         self.assertTrue(len(p.contents) > 1)
         self.assertTrue(p.signature)
-        date = datetime.strptime("9/10/2012 7:11:39 AM", format_str)
+        date = datetime.strptime("9/3/2013 7:11:15 AM", format_str)
         self.assertEquals(p.date.hour, date.hour)
         self.assertEquals(p.date.day, date.day)
         self.assertEquals(p.status, Post.NORMAL)
@@ -123,9 +123,9 @@ class TopicScraperTest(ServerTest):
     def test_retrieve(self):
         ts = TopicScraper(self.test_topic)
         posts = list(ts.retrieve(self.gfaqs_client))
-        self.assertEquals(len(posts), 100)
-        self.assertEquals(posts[0].creator.username, "CoolBeansAvl")
-        self.assertEquals(posts[-1].creator.username,"Xelltrix")
+        self.assertEquals(len(posts), 91)
+        self.assertEquals(posts[0].creator.username, "Roxas_Oblivion")
+        self.assertEquals(posts[-1].creator.username,"yamas11")
 
 
 class ArchiverTest(TestCase):

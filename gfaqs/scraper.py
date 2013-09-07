@@ -33,15 +33,7 @@ TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
-# <rage>
-# The code below took me 3 hours to debug all because all because gfaqs is
-# backwards as fuck. Yes I'm mad.
-#
-# Modern sites basically all use UTF-8 encoding, but no not gfaqs: the header
-# and HTML says the page uses ISO-8859-1. This would be alright, but guess what?
-# It turns out this is a big fat lie...
-#</rage>
-GFAQS_ENCODING="windows-1252"
+GFAQS_ENCODING="ISO8559-1"
 
 def generate_query_string(page):
     """Returns a query string for a URL to a board or topic"""
@@ -205,19 +197,30 @@ class TopicScraper(Scraper):
                 continue
             assert len(tds) == 2, "post html invalid format (%s)" % self.base_url()
 
-            postinfo = list(tds[0].div.children)
-            post_status = Post.NORMAL
-            for el in postinfo:
-                if type(el) == element.NavigableString:
-                    if el.string.startswith("Posted"):
-                        date_raw = " ".join(el.string.split())
-                        dt = strptime(date_raw,POST_DATE_FORMAT_STR)
-                    elif el.string == STRING_EDITED:
-                        post_status = Post.EDITED
-                elif el.get("name"):
-                    post_num = el["name"]
-                elif el.get("class") and el.get("class")[0] == "name":
-                    poster = el.text
+            postinfo = tr.find("td", class_="author")
+
+            """"
+            PostInfo HTML Structure:
+            0) <span class="author_data">
+                    <a name="1"></a>
+                    1) <span class="author_data"><a href="/users/Roxas_Oblivion/boards" class="name"><b>Roxas_Oblivion</b></a></span>
+                    2) <span class="author_data">Posted 9/3/2013 6:24:13&nbsp;AM</span>
+                    3) <span class="author_data"><a href="/boards/2000121-anime-and-manga-other-titles/67150473/756743427">message detail</a></span>
+                    4) <span class="author_data"><a href="/boards/post.php?board=2000121&amp;topic=67150473&amp;quote=756743427">quote</a></span>
+                    5) <span class="author_data">(edited)</span>
+               </span>
+            """
+            author_data_els = postinfo.find("span", class_="author_data")
+            post_num = author_data_els.a["name"]
+            for el in author_data_els.findAll("span", class_="author_data"):
+                if el.string and el.string.startswith("Posted"):
+                    date_raw = el.text
+                    # this gets rid of the &nsbp unicode char point (0xA0)
+                    date_split = date_raw.split()
+                    dt = strptime(" ".join(date_split), POST_DATE_FORMAT_STR)
+                elif el.find("a") and el.a["href"].startswith("/users/"):
+                    poster = el.a.text
+
 
             comps = list(tds[1].div.children)
             contents = []
@@ -243,6 +246,8 @@ class TopicScraper(Scraper):
                 post_status = Post.MODDED
             elif content_text == STRING_CLOSED:
                 post_status = Post.CLOSED
+            else:
+                post_status = Post.NORMAL
 
             creator = User(username=poster)
             p = Post(topic=self.topic, creator=creator, date=dt,
