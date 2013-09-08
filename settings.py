@@ -189,7 +189,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
             'formatter': 'verbose'

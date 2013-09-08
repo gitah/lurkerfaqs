@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from gfaqs.util import log_on_error, log_info
+from gfaqs.util import log_on_error, log_info, log_debug
 from gfaqs.util.daemon import Daemon
 from gfaqs.util.threadpool import ThreadPool
 from gfaqs.scraper import BoardScraper, TopicScraper
@@ -110,7 +110,7 @@ class Archiver(Daemon):
     def archive_topic(self, t):
         """Scrapes the given topic and saves its posts"""
         ts = TopicScraper(t)
-        log_info("Archiving Topic (%s) started" % t.gfaqs_id)
+        log_debug("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
         posts = list(ts.retrieve(self.gfaqs_client))
@@ -127,6 +127,7 @@ class Archiver(Daemon):
                     p.creator = self.add_user(p.creator)
                     p.save()
                     posts_saved += 1
+                    log_debug("Added Post %s" % t)
             throttle_thread()
 
         # update poll results if applicable
@@ -135,9 +136,9 @@ class Archiver(Daemon):
             p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
             p_db.contents = p.contents
             p_db.save()
+            log_debug("Updated Post %s for poll" % p)
 
-        log_info("Archiving Topic (%s) finished; %s posts examined, %s new" % \
-            (t.gfaqs_id, posts_examined, posts_saved))
+        log_debug("Archiving Topic (%s) finished; %s posts examined, %s new" % (t.gfaqs_id, posts_examined, posts_saved))
 
     def add_user(self, user):
         """ Check if user exists already in db, if not add it """
@@ -147,5 +148,5 @@ class Archiver(Daemon):
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
             user.save()
-            log_info("User added (%s)" % user.username)
+            log_debug("User added (%s)" % user.username)
             return user
