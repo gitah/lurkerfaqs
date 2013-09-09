@@ -17,7 +17,7 @@ from gfaqs.client import GFAQSClient
 
 
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
-THROTTLE_TIME = 0.1         # time in secs between performing gfaqs IO operations
+THROTTLE_TIME = 0.5         # time in secs between performing gfaqs IO operations
 BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
@@ -32,12 +32,14 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.gfaqs_client = GFAQSClient()
+        self.gfaqs_client = None
 
     def run(self):
         # Build GFAQSClient to access webpage
         if settings.GFAQS_LOGIN_AS_USER:
             self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+        else:
+            self.gfaqs_client = GFAQSClient()
 
         # Initialize threadpool
         # we need at least one thread for each board
@@ -46,7 +48,7 @@ class Archiver(Daemon):
         def archive_board_task(board, refresh):
             while True:
                 self.archive_board(board)
-                time.sleep(refresh*60)
+                throttle_thread(refresh*60)
 
         for alias,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url, alias)
@@ -59,11 +61,11 @@ class Archiver(Daemon):
                     board.save()
                 self.pool.add_task(archive_board_task, board, refresh)
                 # we want boards to start at different times to spread out load
-                time.sleep(BOARD_STAGGER_TIME)
+                throttle_thread(BOARD_STAGGER_TIME)
 
         # hang thread, so daemon keeps running
         while True:
-            time.sleep(10)
+            throttle_thread(10)
 
     @log_on_error
     def archive_board(self, b, recursive=True):

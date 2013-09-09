@@ -35,16 +35,15 @@ class GFAQsScrapeBoardTest(TestCase):
         self.assertTrue(post.creator.username)
 
 class GFAQSLoginTest(TestCase):
-    """ TODO """
     def test_login(self):
         """Test that we can still login to GameFAQs."""
         if not settings.GFAQS_LOGIN_AS_USER:
             return
-        opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+        gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
 
         # see that we can see topics on CE
         bs = BoardScraper(CE)
-        topic = bs.retrieve(opener).next()
+        topic = bs.retrieve(gfaqs_client).next()
         self.assertTrue(topic)
         self.assertTrue(topic.title)
         self.assertTrue(topic.creator.username)
