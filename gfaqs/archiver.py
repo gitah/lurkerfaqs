@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from gfaqs.util import log_on_error, log_info, log_debug
+from gfaqs.util import log_on_error, log_info, log_debug, log_error
 from gfaqs.util.daemon import Daemon
 from gfaqs.util.threadpool import ThreadPool
 from gfaqs.scraper import BoardScraper, TopicScraper
@@ -76,32 +76,36 @@ class Archiver(Daemon):
         log_info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
 
-        for t in bs.retrieve(self.gfaqs_client):
-            topics_examined += 1
-            if t.status in Topic.ARCHIVED_STATUSES:
-                # we reached archived topics; don't continue
-                break
-            try:
-                t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
-                t.pk = t_db.pk
-                if t_db.number_of_posts == t.number_of_posts:
-                    if t.status in Topic.STICKY_STATUSES:
-                        continue
-                    else:
-                        # this is the first topic that hasn't been updated since
-                        # last archive run, so we stop
-                        break
-            except ObjectDoesNotExist:
-                t.pk = None
+        try:
+            for t in bs.retrieve(self.gfaqs_client):
+                topics_examined += 1
+                if t.status in Topic.ARCHIVED_STATUSES:
+                    # we reached archived topics; don't continue
+                    break
+                try:
+                    t_db = Topic.objects.get(gfaqs_id=t.gfaqs_id)
+                    t.pk = t_db.pk
+                    if t_db.number_of_posts == t.number_of_posts:
+                        if t.status in Topic.STICKY_STATUSES:
+                            continue
+                        else:
+                            # this is the first topic that hasn't been updated since
+                            # last archive run, so we stop
+                            break
+                except ObjectDoesNotExist:
+                    t.pk = None
 
-            with transaction.commit_on_success():
-                t.creator = self.add_user(t.creator)
-                t.save()
-                topics_saved += 1
+                with transaction.commit_on_success():
+                    t.creator = self.add_user(t.creator)
+                    t.save()
+                    topics_saved += 1
 
-            if recursive:
-                self.pool.add_task(self.archive_topic, t)
-            throttle_thread()
+                if recursive:
+                    self.pool.add_task(self.archive_topic, t)
+                throttle_thread()
+        except Exception, e:
+            log_error("Failed to parse board %s" % b)
+            raise e
 
         log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
                 (b.alias, topics_examined, topics_saved))
@@ -113,7 +117,11 @@ class Archiver(Daemon):
         log_debug("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
-        posts = list(ts.retrieve(self.gfaqs_client))
+        try:
+            posts = list(ts.retrieve(self.gfaqs_client))
+        except Exception, e:
+            log_error("Failed to parse topic %s %" % t)
+            raise e
 
         for p in reversed(posts):
             posts_examined += 1

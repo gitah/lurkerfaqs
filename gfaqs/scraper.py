@@ -230,9 +230,6 @@ class TopicScraper(Scraper):
                 elif el.find("a") and el.a["href"].startswith("/users/"):
                     poster = el.a.text
 
-            raise Exception('foo')
-
-
             comps = list(tds[1].div.children)
             contents = []
             i = 0

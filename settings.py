@@ -175,8 +175,8 @@ GFAQS_LOGIN_PASSWORD = ""
 
 
 #-- Logging Settings --#
-GFAQS_INFO_LOGGER = 'gfaqs.info'
-GFAQS_ERROR_LOGGER = 'gfaqs.errors'
+GFAQS_ARCHIVER_LOGGER = 'gfaqs.info'
+GFAQS_ARCHIVER_DEBUG_LOGGER = 'gfaqs.debug'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -196,14 +196,14 @@ LOGGING = {
         }
     },
     'loggers': {
-        GFAQS_ERROR_LOGGER: {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        GFAQS_INFO_LOGGER: {
+        GFAQS_ARCHIVER_LOGGER: {
             'handlers': ['file'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        GFAQS_ARCHIVER_DEBUG_LOGGER: {
+            'handlers': ['file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     }

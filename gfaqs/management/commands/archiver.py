@@ -5,20 +5,19 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 from gfaqs.archiver import Archiver
+from gfaqs.util import log_info
 from django.conf import settings
 
 PIDFILE=settings.GFAQS_ARCHIVER_PID_FILE
-
-logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
 
 def help():
     return "usage: python manage.py archiver [start|stop|restart|status]\n"
 
 def log_start():
-    logger.info("Starting archiver daemon")
+    log_info("Starting archiver daemon")
 
 def log_end():
-    logger.info("Stopping archiver daemon")
+    log_info("Stopping archiver daemon")
 
 def show_status():
     if os.path.isfile(PIDFILE):
