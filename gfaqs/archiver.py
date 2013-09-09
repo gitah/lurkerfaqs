@@ -122,7 +122,7 @@ class Archiver(Daemon):
         try:
             posts = list(ts.retrieve(self.gfaqs_client))
         except Exception, e:
-            log_error("Failed to parse topic %s %" % t)
+            log_error("Failed to parse topic %s" % t)
             raise e
 
         for p in reversed(posts):
