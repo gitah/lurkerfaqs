@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from threading import Thread
+from threading import Thread, Lock
 from datetime import datetime
 
 from django.conf import settings
@@ -19,6 +19,9 @@ from gfaqs.client import GFAQSClient
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
 THROTTLE_TIME = 0.5         # time in secs between performing gfaqs IO operations
 BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
+
+# User lock: we need this when saving users with multiple threads
+user_mutex = Lock()
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
     """Halts one of the archiver thread for a bit, to not overwhelm gamefaqs"""
@@ -106,7 +109,7 @@ class Archiver(Daemon):
                     self.pool.add_task(self.archive_topic, t)
                 throttle_thread()
         except Exception, e:
-            log_error("Failed to parse board %s" % b)
+            log_error("Failed to parse board %s" % b, alert=True)
             raise e
 
         log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
@@ -122,7 +125,7 @@ class Archiver(Daemon):
         try:
             posts = list(ts.retrieve(self.gfaqs_client))
         except Exception, e:
-            log_error("Failed to parse topic %s" % t)
+            log_error("Failed to parse topic %s; board=%s" % (t, t.board), alert=True)
             raise e
 
         for p in reversed(posts):
@@ -154,9 +157,12 @@ class Archiver(Daemon):
         """ Check if user exists already in db, if not add it """
         if user.id:
             return user
+        user_mutex.acquire()
         try:
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
             user.save()
             log_debug("User added (%s)" % user.username)
             return user
+        finally:
+            user_mutex.release()
