@@ -3,7 +3,7 @@ import cookielib
 import logging
 import traceback
 import urllib2
-from threading import Lock
+from threading import Lock, current_thread
 from functools import wraps
 from datetime import datetime
 
@@ -18,6 +18,13 @@ if settings.DEBUG:
 else:
     logger = logging.getLogger(settings.GFAQS_ARCHIVER_LOGGER)
 
+def append_thread_id(msg):
+    th = current_thread()
+    if not th:
+        return msg
+    thread_id = str(th.ident)[-4:] # full thread id too long; only care 4 digits
+    return "(Thread-%s) %s" % (thread_id, msg)
+
 def log_on_error(fn, explode=False):
     """Decorator that logs the stack trace when an error occurs in the function"""
     @wraps(fn)
@@ -29,22 +36,22 @@ def log_on_error(fn, explode=False):
             error_msg.extend([traceback.format_exc()])
             error_msg.extend(["========", ''])
             error_msg = '\n'.join(error_msg)
-            log_error(error_msg, alert=True)
+            log_error(error_msg)
             if explode:
                 raise e
 
     return logged_fn
 
 def log_info(msg):
-    logger.info(msg)
+    logger.info(append_thread_id(msg))
 
 def log_debug(msg):
-    logger.debug(msg)
+    logger.debug(append_thread_id(msg))
 
 def log_error(msg, alert=False):
     if alert and settings.EMAIL_HOST:
         alert_admin("LURKERFAQS APPLICATION ERROR", msg)
-    logger.error(msg)
+    logger.error(append_thread_id(msg))
 
 
 #--- Threading ---#
