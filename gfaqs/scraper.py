@@ -13,16 +13,11 @@ from gfaqs.client import GFAQSClient
 
 
 TOPIC_STATUS_MAP = {
-    "board_icon_poll": Topic.NORMAL,
-    "board_icon_closed": Topic.CLOSED,
+    "board_icon_topic": Topic.NORMAL,
+    "board_icon_archived": Topic.ARCHIVED,
     "board_icon_poll": Topic.POLL,
-    # TODO: find these
-    #"topic_poll_closed.gif": Topic.POLL_CLOSED,
-    #"topic_poll_archived.gif": Topic.POLL_ARCHIVED,
-    #"topic_archived.gif": Topic.ARCHIVED,
-    #"topic_closed.gif": Topic.CLOSED,
-    #"sticky.gif": Topic.STICKY,
-    #"sticky_closed.gif": Topic.STICKY_CLOSED,
+    "board_icon_sticky": Topic.STICKY,
+    "board_icon_closed": Topic.CLOSED,
 }
 
 STRING_EDITED = "(edited)";
