@@ -35,7 +35,7 @@ class Archiver(Daemon):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.gfaqs_client = None
+        self.gfaqs_client = GFAQSClient()
 
     def run(self):
         # Build GFAQSClient to access webpage

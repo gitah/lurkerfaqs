@@ -36,13 +36,10 @@ class ServerTest(TestCase):
 
 class GFAQsClientTest(ServerTest):
     """ Tests that GFAQsClient fetches pages correctly """
-    # TODO: test auth
     def test_get_topic_list(self):
         try:
             assert self.gfaqs_client.get_topic_list(self.ce, 0)
             assert self.gfaqs_client.get_topic_list(self.ce, 1)
-            assert len(html0) > 0
-            assert len(html1) > 0
         except IOError:
             self.fail("page not found")
         try:
