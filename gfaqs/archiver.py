@@ -31,19 +31,21 @@ class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
     def __init__(self, board_info=settings.GFAQS_BOARDS,
             base=settings.GFAQS_BOARD_URL,
-            pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
+            pidfile=settings.GFAQS_ARCHIVER_PID_FILE,
+            gfaqs_client=None):
         super(Archiver,self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.gfaqs_client = GFAQSClient()
+        if gfaqs_client:
+            self.gfaqs_client = gfaqs_client
+        else:
+            # Build GFAQSClient to access webpage
+            if settings.GFAQS_LOGIN_AS_USER:
+                self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+            else:
+                self.gfaqs_client = GFAQSClient()
 
     def run(self):
-        # Build GFAQSClient to access webpage
-        if settings.GFAQS_LOGIN_AS_USER:
-            self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
-        else:
-            self.gfaqs_client = GFAQSClient()
-
         # Initialize threadpool
         # we need at least one thread for each board
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1

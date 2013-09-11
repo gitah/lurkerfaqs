@@ -8,60 +8,33 @@ from threading import Thread
 
 from django.conf import settings
 from django.test import TestCase
+
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.archiver import Archiver
 
-import test_server
+from mock_gfaqs_client import MockGFAQSClient
 
-class ServerTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server_port = 14100
-        cls.th = test_server.start_server(cls.server_port)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.th.stop()
-
+class GFAQsTest(TestCase):
     def setUp(self):
-        path = "http://localhost:%s" % self.__class__.server_port
-        self.ce = Board(url="%s/boards/ce" % path, name="Current Events")
-        self.ot = Board(url="%s/boards/ot" % path, name="Other Titles")
-        self.test_topic = Topic(board=self.ce, creator=User(username="foo"),
-                title="tmp", gfaqs_id="67150473", status=0);
-        self.gfaqs_client = GFAQSClient()
+        path = "http://localhost"
+        self.ce = Board(url="%s/boards/ce" % path, name="ce")
+        self.ot = Board(url="%s/boards/ot" % path, name="ot")
+        self.test_topic1 = Topic(
+            board=self.ce,
+            number_of_posts=39,
+            creator=User(username="foo"),
+            title="test_topic1",
+            gfaqs_id="67150473",
+            last_post_date=datetime.now(),
+            status=0
+        );
+
+        self.gfaqs_client = MockGFAQSClient()
 
 
-class GFAQsClientTest(ServerTest):
-    """ Tests that GFAQsClient fetches pages correctly """
-    def test_get_topic_list(self):
-        try:
-            assert self.gfaqs_client.get_topic_list(self.ce, 0)
-            assert self.gfaqs_client.get_topic_list(self.ce, 1)
-        except IOError:
-            self.fail("page not found")
-        try:
-            # should not exist
-            gfaqs_client.get_topic_list(self.ce, 99999)
-        except:
-            pass
-
-    def test_get_post_list(self):
-        try:
-            assert self.gfaqs_client.get_post_list(self.test_topic, 0)
-            assert self.gfaqs_client.get_post_list(self.test_topic, 1)
-        except IOError:
-            self.fail("page not found")
-        try:
-            # should not exist
-            gfaqs_client.get_post_list(self.test_topic, 99999)
-        except:
-            pass
-
-
-class BoardScraperTest(ServerTest):
+class BoardScraperTest(GFAQsTest):
     def test_parse_page(self):
         bs = BoardScraper(self.ot)
         html = self.gfaqs_client.get_topic_list(self.ot, 0)
@@ -88,10 +61,10 @@ class BoardScraperTest(ServerTest):
         self.assertEquals(topics[19].creator.username,"BrazenMD")
 
 
-class TopicScraperTest(ServerTest):
+class TopicScraperTest(GFAQsTest):
     def test_parse_page(self):
-        ts = TopicScraper(self.test_topic)
-        html = self.gfaqs_client.get_post_list(self.test_topic, 0)
+        ts = TopicScraper(self.test_topic1)
+        html = self.gfaqs_client.get_post_list(self.test_topic1, 0)
         posts = ts.parse_page(html)
         self.assertEquals(len(posts), 50)
 
@@ -118,86 +91,81 @@ class TopicScraperTest(ServerTest):
         self.assertEquals(p.status, Post.NORMAL)
 
     def test_retrieve(self):
-        ts = TopicScraper(self.test_topic)
+        ts = TopicScraper(self.test_topic1)
         posts = list(ts.retrieve(self.gfaqs_client))
         self.assertEquals(len(posts), 91)
         self.assertEquals(posts[0].creator.username, "Roxas_Oblivion")
         self.assertEquals(posts[-1].creator.username,"yamas11")
 
 
-class ArchiverTest(TestCase):
-    class DaemonRunnerThread(Thread):
-        def __init__(self,daemon):
-            super(ArchiverTest.DaemonRunnerThread, self).__init__()
-            self.daemon = daemon
-            self.is_running = False
+class ArchiverTest(GFAQsTest):
 
-        def run(self):
-            self.is_running = True
-            self.daemon.start()
-
-        def stop(self):
-            if self.is_running:
-                self.daemon.stop()
-                self.is_running=False
-
-    @classmethod
-    def setUpClass(cls):
-        cls.server_port = 14102
-        cls.th = test_server.start_server(cls.server_port)
-
-        path = "http://localhost:%s" % ArchiverTest.server_port
-        board_list = [("boards/ce", "CE", 5)]
+    def setUp(self):
+        super(ArchiverTest,self).setUp()
+        board_list = [(self.ce.url, self.ce.name, 5)]
         settings.GFAQS_LOGIN_AS_USER = False
-        cls.archiver = Archiver(board_info=board_list,base=path)
-        cls.archiver_th = ArchiverTest.DaemonRunnerThread(cls.archiver)
+        self.archiver = Archiver(board_info=board_list,
+                gfaqs_client=self.gfaqs_client)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.archiver_th.stop()
-        cls.th.stop()
+        class DaemonRunnerThread(Thread):
+            def __init__(self, daemon):
+                super(DaemonRunnerThread, self).__init__()
+                self.daemon = daemon
+                self.is_running = False
+
+            def run(self):
+                self.is_running = True
+                self.daemon.start()
+
+            def stop(self):
+                if self.is_running:
+                    self.daemon.stop()
+                    self.is_running=False
+        self.archiver_th = DaemonRunnerThread(self.archiver)
 
     def test_archive_board(self):
-        path = "http://localhost:%s" % ArchiverTest.server_port
-        ce = Board(url="%s/boards/ce" % path, name="CE")
-        ce.save()
-
-        archiver = ArchiverTest.archiver
-        archiver.archive_board(ce, recursive=False)
+        self.ce.save()
+        self.archiver.archive_board(self.ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 50)
         # run again to make sure we don't dupe
-        archiver.archive_board(ce, recursive=False)
+        self.archiver.archive_board(self.ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 50)
 
     def test_archive_topic(self):
-        path = "http://localhost:%s" % ArchiverTest.server_port
-        ce = Board(url="%s/boards/ce" % path, name="CE")
-        ce.save()
-
+        self.ce.save()
         creator=User(username="foo")
         creator.save()
-        topic = Topic(
-                board=ce,
-                number_of_posts=129,
-                creator=creator,
-                title="tmp",
-                gfaqs_id="67181037",
-                last_post_date=datetime.now(),
-                status=0);
-        topic.save()
+        test_topic = Topic(
+            board=self.ce,
+            number_of_posts=129,
+            creator=creator,
+            title="tmp",
+            gfaqs_id="67181037",
+            last_post_date=datetime.now(),
+        status=0);
+        test_topic.save()
 
-        archiver = ArchiverTest.archiver
-        archiver.archive_topic(topic)
+        self.archiver.archive_topic(test_topic)
         self.assertEquals(len(Post.objects.all()), 129)
         # run again to make sure we don't dupe
-        archiver.archive_topic(topic)
+        self.archiver.archive_topic(test_topic)
         self.assertEquals(len(Post.objects.all()), 129)
 
+    def tearDown(self):
+        # we need this incase test_daemon crashes in the middle
+        self.archiver_th.stop()
+
     def test_daemon(self):
-        ArchiverTest.archiver_th.start()
+        """ Test that the archiver daemon archives boards in the background
+
+        Note: this test is tricky; the daemon runs on a seperate thread forever
+            - we wait for a bit until Daemon finishes scraping and test db
+        """
+        self.archiver_th.start()
 
         # wait a while for archiver to do its thing
-        time.sleep(20)
+        time.sleep(30)
+
         self.assertEquals(len(Board.objects.all()), 1)
         # ensure pid file present
         try:
@@ -206,8 +174,9 @@ class ArchiverTest(TestCase):
             self.fail("pid file not found")
 
         self.assertEquals(len(Topic.objects.all()), 50)
-        self.assertTrue(len(Post.objects.all()) > 200)
-        ArchiverTest.archiver_th.stop()
+        self.assertTrue(len(Post.objects.all()) > 100)
+
+        self.archiver_th.stop()
 
         # ensure pid file gone
         try:
