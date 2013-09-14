@@ -193,11 +193,16 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
             'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
         }
     },
     'loggers': {
         GFAQS_ARCHIVER_LOGGER: {
-            'handlers': ['file'],
+            'handlers': ['file', 'mail_admins'],
             'level': 'INFO',
             'propagate': True,
         },

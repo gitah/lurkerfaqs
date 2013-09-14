@@ -9,9 +9,6 @@ from datetime import datetime
 
 from django.conf import settings
 
-from util.alert import alert_admin
-
-
 #--- Logging ---#
 if settings.DEBUG:
     logger = logging.getLogger(settings.GFAQS_ARCHIVER_DEBUG_LOGGER)
@@ -49,8 +46,6 @@ def log_debug(msg):
     logger.debug(append_thread_id(msg))
 
 def log_error(msg, alert=False):
-    if alert and settings.EMAIL_HOST:
-        alert_admin("LURKERFAQS APPLICATION ERROR", msg)
     logger.error(append_thread_id(msg))
 
 
