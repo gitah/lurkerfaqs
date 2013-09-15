@@ -16,6 +16,7 @@ def s3backup(db, username, password,
     sql_file_gz = run_gzip(sql_file)
     upload_s3(sql_file_gz, s3bucket, s3object,
             aws_access_key_id, aws_secret_access_key)
+    os.remove(sql_file)
 
 def run_mysqldump(db, username, password=None):
     cmd = ['mysqldump', '-u%s' % username]
