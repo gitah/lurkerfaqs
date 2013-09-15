@@ -186,6 +186,9 @@ LOGGING = {
         }
     },
     'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
     },
     'handlers': {
         'file': {
@@ -198,6 +201,7 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
+            'filters': ['require_debug_false']
         }
     },
     'loggers': {
