@@ -180,6 +180,7 @@ GFAQS_LOGIN_PASSWORD = ""
 #-- Logging Settings --#
 GFAQS_ARCHIVER_LOGGER = 'gfaqs.info'
 GFAQS_ARCHIVER_DEBUG_LOGGER = 'gfaqs.debug'
+MISC_LOGGER = 'misc.info'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -194,10 +195,16 @@ LOGGING = {
         }
     },
     'handlers': {
-        'file': {
+        'archiver_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
+            'formatter': 'verbose'
+        },
+        'misc_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '%s/misc.log' % LURKERFAQS_RUN_DIR,
             'formatter': 'verbose'
         },
         'mail_admins': {
@@ -209,13 +216,18 @@ LOGGING = {
     },
     'loggers': {
         GFAQS_ARCHIVER_LOGGER: {
-            'handlers': ['file', 'mail_admins'],
+            'handlers': ['archiver_file', 'mail_admins'],
             'level': 'INFO',
             'propagate': True,
         },
         GFAQS_ARCHIVER_DEBUG_LOGGER: {
-            'handlers': ['file'],
+            'handlers': ['archiver_file'],
             'level': 'DEBUG',
+            'propagate': True,
+        },
+        MISC_LOGGER: {
+            'handlers': ['misc_file', 'mail_admins'],
+            'level': 'INFO',
             'propagate': True,
         },
     }
