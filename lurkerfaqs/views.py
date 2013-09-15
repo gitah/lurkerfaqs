@@ -154,6 +154,8 @@ def show_topic(request, board_alias, topic_num):
 
     for post in posts:
         post.contents = linkify(post.contents)
+    op_post = posts[0]
+    posts = posts[1:]
 
     # get related topics to this one
     related_topics_gids = SolrSearcher.search_related_topics(
@@ -166,7 +168,7 @@ def show_topic(request, board_alias, topic_num):
 
     t = loader.get_template('posts.html')
     c = build_context(request, board=topic.board, topic=topic,
-            posts=posts, related_topics=related_topics,
+            posts=posts, op_post=op_post, related_topics=related_topics,
             current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 

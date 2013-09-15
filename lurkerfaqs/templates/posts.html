@@ -17,6 +17,34 @@
 {% block table_class %}board message colorVisitedLink{% endblock %}
 {% block table_header %}{% endblock %}
 {% block table_contents %}
+    <tr id="{{op_post.post_num}}"><td>
+        <a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}
+    </td></tr>
+    <tr class="even"><td>
+            {{op_post.contents|safe}}
+            {% if op_post.signature %}
+                <br>--<br>
+                {{op_post.signature|safe}}
+            {% endif %}
+    </td></tr>
+
+    <tr class="even"><td>
+        <div class="ad">
+            <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-9994272181290910";
+                /* below_ad */
+                google_ad_slot = "1382976288";
+                google_ad_width = 970;
+                google_ad_height = 90;
+                //-->
+            </script>
+            <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+            </script>
+        </div>
+    </td></tr>
+
+
     {% for post in posts %}
     <tr id="{{post.post_num}}"><td>
         <a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
