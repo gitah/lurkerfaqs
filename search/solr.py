@@ -4,6 +4,8 @@ from httplib2 import socket
 
 from django.conf import settings
 
+from search.stopwords import remove_stopwords
+
 solr_interface = sunburnt.SolrInterface(settings.SOLR_URL)
 
 def topic_to_doc(topic):
@@ -41,6 +43,23 @@ class SolrSearcher(object):
             .paginate(start=start, rows=count) \
             .execute()
         return (resp.result.numFound, [result_to_gfaqs_id(t) for t in resp])
+
+    def search_related_topics(self, topic, count):
+        """Sends a request to solr for topics related to the given topic
+        
+        Returns up to count number of related topics
+        Returns a list of topics
+        """
+        solr_q =  solr_interface.query()
+
+        query_terms = remove_stopwords(topic.title.split())
+        q_OR = solr_interface.Q(title="")
+        for term in query_terms:
+            term=term.lower()
+            q_OR |= solr_interface.Q(title=term)
+        solr_q = solr_q.query(q_OR)
+        resp = solr_q.paginate(start=0, rows=count).execute()
+        return [result_to_gfaqs_id(t) for t in resp]
 
 
 # create singleton class
