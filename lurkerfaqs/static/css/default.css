@@ -197,6 +197,10 @@ table.message img {
     max-width: 100%;
 }
 
+.related_topics {
+    width: 60%;
+}
+
 
 /* -- Poll -- */
 .table {width:100%;display:table;padding:2px;table-layout:fixed;}

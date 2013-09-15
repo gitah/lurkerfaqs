@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 
 STOPWORDS = {
     "a",
@@ -177,12 +178,35 @@ STOPWORDS = {
     "yourselves",
     "result",
     "vote",
+    "spoiler",
+    "spoilers"
 }
+
+ALPH_NUM_RE = r'[0-9a-zA-Z_]\+'
 
 def remove_stopwords(word_list):
     """ removes stop words from the given list of words 
     expects and returns a set of words
     """
+    return set(word_list) - STOPWORDS
+
+def remove_special_chars(word_list):
+    """ remove special chars at beginning and end of words """
     words = set(word_list)
-    words -= STOPWORDS
+    return {w.strip("*?()<>\"\'") for w in words}
+
+def lowercase_words(word_list):
+    words = set(word_list)
+    return {w.lower for w in words}
+
+def lowercase_words(word_list):
+    words = set(word_list)
+    return {w.lower() for w in words}
+                
+def normalize_words(word_list):
+    """ normalizes the list of words for searching """
+    words = set(word_list)
+    words = remove_special_chars(words)
+    words = lowercase_words(words)
+    words = remove_stopwords(words)
     return words

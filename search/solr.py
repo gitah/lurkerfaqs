@@ -4,7 +4,7 @@ from httplib2 import socket
 
 from django.conf import settings
 
-from search.stopwords import remove_stopwords
+from search.normalize import normalize_words
 
 solr_interface = sunburnt.SolrInterface(settings.SOLR_URL)
 
@@ -34,8 +34,8 @@ class SolrSearcher(object):
         Returns a 2-tuple: (total_results, result_list)
         """
         solr_q =  solr_interface.query()
-        for term in query.split():
-            solr_q = solr_q.query(title=term.lower())
+        for term in normalize_words(query.split()):
+            solr_q = solr_q.query(title=term)
 
         resp = solr_q \
             .filter(board_alias=board_alias) \
@@ -52,12 +52,11 @@ class SolrSearcher(object):
         """
         solr_q =  solr_interface.query()
 
-        query_terms = remove_stopwords(topic.title.split())
+        query_terms = normalize_words(topic.title.split())
         q_OR = solr_interface.Q(title="")
         for term in query_terms:
-            term=term.lower()
             q_OR |= solr_interface.Q(title=term)
-        solr_q = solr_q.query(q_OR)
+        solr_q = solr_q.query(q_OR).exclude(id=topic.gfaqs_id)
         resp = solr_q.paginate(start=0, rows=count).execute()
         return [result_to_gfaqs_id(t) for t in resp]
 
