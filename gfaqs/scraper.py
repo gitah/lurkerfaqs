@@ -14,6 +14,7 @@ from gfaqs.client import GFAQSClient
 
 TOPIC_STATUS_MAP = {
     "board_icon_topic": Topic.NORMAL,
+    "board_icon_topic_unread": Topic.NORMAL,
     "board_icon_archived": Topic.ARCHIVED,
     "board_icon_poll": Topic.POLL,
     "board_icon_sticky": Topic.STICKY,
@@ -100,8 +101,9 @@ class BoardScraper(Scraper):
         for topic_tag in topic_tags:
             # STATUS IMAGE
             # <td> <i class="board_icon board_icon_topic"></i> <td>
+            # note can also be <a class="board_icon board_icon_unread" href=".."></a>
             status_td = topic_tag.find("td", class_="board_status")
-            status_classes = status_td.i["class"]
+            status_classes = list(status_td.children)[0]["class"]
             status_classes.remove("board_icon")
             status_img = status_classes[0]
             topic_status = TOPIC_STATUS_MAP.get(status_img, Topic.NORMAL)

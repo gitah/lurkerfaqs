@@ -54,7 +54,7 @@ class BoardScraperTest(GFAQsTest):
     def test_retrieve(self):
         bs = BoardScraper(self.ce)
         topics = list(bs.retrieve(self.gfaqs_client))
-        self.assertEquals(len(topics), 100)
+        self.assertEquals(len(topics), 150)
         self.assertEquals(topics[0].title,"So I have DOMS...should I go workout tomorrow if I'm still sore?")
         self.assertEquals(topics[0].creator.username,"ToasterStrudeI")
         self.assertEquals(topics[19].title,"Is there such thing as verbal sex?")
