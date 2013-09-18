@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 import time
 from threading import Thread, Lock
 from datetime import datetime
@@ -112,7 +113,7 @@ class Archiver(Daemon):
                 throttle_thread()
         except Exception, e:
             log_error("Failed to parse board %s" % b, alert=True)
-            raise e
+            raise e, None, sys.exc_info()[2]
 
         log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
                 (b.alias, topics_examined, topics_saved))
@@ -128,7 +129,7 @@ class Archiver(Daemon):
             posts = list(ts.retrieve(self.gfaqs_client))
         except Exception, e:
             log_error("Failed to parse topic %s; board=%s" % (t, t.board), alert=True)
-            raise e
+            raise e, None, sys.exc_info()[2]
 
         for p in reversed(posts):
             posts_examined += 1
