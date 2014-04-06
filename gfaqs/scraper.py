@@ -12,15 +12,30 @@ from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
 
 TOPIC_STATUS_MAP = {
-    "topic.gif": Topic.NORMAL,
-    "lock.gif": Topic.CLOSED,
-    "topic_poll.gif": Topic.POLL,
-    "topic_poll_closed.gif": Topic.POLL_CLOSED,
-    "topic_poll_archived.gif": Topic.POLL_ARCHIVED,
-    "topic_archived.gif": Topic.ARCHIVED,
-    "topic_closed.gif": Topic.CLOSED,
-    "sticky.gif": Topic.STICKY,
-    "sticky_closed.gif": Topic.STICKY_CLOSED,
+    "board_icon_topic": Topic.NORMAL,
+    "board_icon_topic_new": Topic.NORMAL,
+    "board_icon_topic_unread": Topic.NORMAL,
+    "board_icon_topic_read": Topic.NORMAL,
+
+    "board_icon_archived": Topic.ARCHIVED,
+    "board_icon_archived_new": Topic.ARCHIVED,
+    "board_icon_archived_unread": Topic.ARCHIVED,
+    "board_icon_archived_read": Topic.ARCHIVED,
+
+    "board_icon_closed": Topic.CLOSED,
+    "board_icon_closed_new": Topic.CLOSED,
+    "board_icon_closed_unread": Topic.CLOSED,
+    "board_icon_closed_read": Topic.CLOSED,
+
+    "board_icon_poll": Topic.POLL,
+    "board_icon_poll_new": Topic.POLL,
+    "board_icon_poll_unread": Topic.POLL,
+    "board_icon_poll_read": Topic.POLL,
+
+    "board_icon_sticky": Topic.STICKY,
+    "board_icon_sticky_new": Topic.STICKY,
+    "board_icon_sticky_unread": Topic.STICKY,
+    "board_icon_sticky_read": Topic.STICKY,
 }
 
 STRING_EDITED = "(edited)";
@@ -50,12 +65,12 @@ def generate_query_string(page):
     return urlencode(query)
 
 class Scraper(object):
-    def retrieve(self, gfaqs_client):
+    def retrieve(self):
         """generator that returns the next object the scraper will scrape"""
         # implement in subclass
         raise NotImplementedError()
 
-    def parse_page(self, html):
+    def scrape_page(self, page_num):
         # implement in subclass
         raise NotImplementedError()
 
@@ -65,99 +80,146 @@ class Scraper(object):
 
 
 class BoardScraper(Scraper):
-    def __init__(self, board):
+    def __init__(self, board, gfaqs_client):
         self.board = board
+        self.gfaqs_client = gfaqs_client
 
-    def retrieve(self, gfaqs_client):
+    def base_url(self):
+        return board.url
+
+    def retrieve(self):
         pg = 0
         while True:
             try:
-                html = gfaqs_client.get_topic_list(board, pg)
-                for topic in self.parse_page(html):
-                    yield topic
-                pg += 1
-            except ValueError:
-                break
-
-    def parse_page(self, html):
-        """ parses the page and returns a list of Topic objects
-
-            DOM Layout of a board
-            <table class="board topics">
-                <tr>
-                    <td>status img</td>
-                    <td>link to topic</td>
-                    <td>creator</td>
-                    <td>post count</td>
-                    <td>last post date</td>
-                </tr>
-                ...
-            </table>
-        """
-        soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
-        topics = []
-
-        topic_table = soup.find("table", class_="board topics")
-        if not topic_table:
-            raise ValueError("Page contains no posts")
-        topic_tags = topic_table.find_all("tr")
-
-        for topic_tag in topic_tags:
-            tds = topic_tag.find_all("td")
-            if not tds:
-                continue
-            assert len(tds) == 5, "Topic html invalid format (%s)" % self.base_url()
-
-            status_img = tds[0].img["src"].split("/")[-1]
-            topic_status = TOPIC_STATUS_MAP.get(status_img, None)
-            assert topic_status != None, "status image %s not found (%s)" % (status_img, self.base_url())
-
-            topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
-            topic_title = tds[1].a.text
-
-            # we split because username might have (M) at the end
-            username = tds[2].text.split()
-            if "(M)" in username[-1]:
-                username = username[:-1]
-            username = ' '.join(username)
-            creator = User(username=username)
-            post_count = int(tds[3].text)
-
-            try:
-                date_raw = tds[4].a.text
-                dt = strptime(date_raw, TOPIC_DATE_FORMAT_STR)
-                # the year is not sepcified on gfaqs,
-                # so I'll set it to the current year
-                curr_year = datetime.now().year
-                dt = datetime(curr_year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
-            except ValueError:
-                # archived topic, use alternative format str
-                dt = strptime(date_raw, TOPIC_DATE_ALT_FORMAT_STR)
-
-            topic = Topic(board=self.board, creator=creator,
-                    gfaqs_id=topic_gfaqs_id, title=topic_title,
-                    number_of_posts=post_count, last_post_date=dt,
-                    status=topic_status)
-            topics.append(topic)
-
-        return topics
-
-
-class TopicScraper(Scraper):
-    def __init__(self, topic):
-        """ topic should be a gfaqs.models.Topic object """
-        self.topic = topic
-
-    def retrieve(self, gfaqs_client):
-        pg = 0
-        while True:
-            try:
-                html = gfaqs_client.get_post_list(self.topic, pg)
+                html = self.gfaqs_client.get_topic_list(self.board, pg)
                 for topic in self._parse_page(html):
                     yield topic
                 pg += 1
             except ValueError:
                 break
+
+    def scrape_page(self, page_num):
+        html = self.gfaqs_client.get_topic_list(self.board, page_num)
+        return self._parse_page(html)
+
+    def _parse_page(self, html):
+        """ parses the page and returns a list of Topic objects
+
+            DOM Layout of a board
+            <table class="board topics tlist">
+                <thead><tr>
+                    <th>..</th>
+                    ...
+                </tr></thead>
+                <tbody>
+                    <tr>**topic**</tr>
+                    ...
+                </tbody>
+            </table>
+        """
+        soup = BeautifulSoup(html, from_encoding=GFAQS_ENCODING)
+        topic_table = soup.find("table", class_="board topics tlist")
+        if not topic_table:
+            raise ValueError("Page contains no posts")
+
+        topics = []
+        for topic_tr in topic_table.tbody.find_all("tr"):
+            # remove the table header
+            topic = self._parse_topic(topic_tr)
+            topics.append(topic_tr)
+
+        return topics
+
+    def _parse_topic(self, topic_tr):
+        """ Parses a topic row and returns Topic object
+
+        DOM layout
+        <tr class="topics">
+          <td class="board_status">
+            <i class="board_icon board_icon_topic"></i>
+          </td>
+
+          <td class="topic">
+            <a href="**TOPIC_LINK**">**TOPIC_TITLE**</a>
+            <br><span class="pglist">..</span>
+          </td>
+
+          <td class="tauthor">
+            <span> <a>**USERNAME**</a></span>
+          </td>
+
+          <td class="count">23</td>
+
+          <td class="lastpost"><a href="">4/5 3:20PM</a> </td>
+        </tr>
+        """
+        tds = topic_tr.find_all("td")
+        assert tds
+        assert len(tds) == 5, "Topic html invalid format (%s)" % self.base_url()
+
+        # get topic icon
+        status_img = tds[0].i["class"][-1]
+        topic_status = TOPIC_STATUS_MAP.get(status_img)
+        if topic_status not in TOPIC_STATUS_MAP:
+            # TODO: log warning
+            topic_status = Topic.NORMAL
+
+        # get topic title
+        topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
+        topic_title = tds[1].a.text
+
+        # get creator username
+        username = tds[2].text.split()
+        # we split because username might have (M) at the end
+        if "(M)" in username[-1]:
+            username = username[:-1]
+        username = ' '.join(username)
+        creator = User(username=username)
+
+        # get post count of topic
+        post_count = int(tds[3].text)
+
+        # get laste post date of topic
+        try:
+            date_raw = tds[4].a.text
+            dt = strptime(date_raw, TOPIC_DATE_FORMAT_STR)
+            # the year is not sepcified on gfaqs,
+            # so I'll set it to the current year
+            curr_year = datetime.now().year
+            dt = datetime(curr_year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+        except ValueError:
+            # archived topic, use alternative format str
+            dt = strptime(date_raw, TOPIC_DATE_ALT_FORMAT_STR)
+
+        return Topic(board=self.board,
+                creator=creator,
+                gfaqs_id=topic_gfaqs_id,
+                title=topic_title,
+                number_of_posts=post_count,
+                last_post_date=dt,
+                status=topic_status)
+
+
+class TopicScraper(Scraper):
+    def __init__(self, topic, gfaqs_client):
+        """ topic should be a gfaqs.models.Topic object """
+        self.topic = topic
+        self.gfaqs_client = gfaqs_client
+
+    def retrieve(self):
+        pg = 0
+        while True:
+            try:
+                html = self.gfaqs_client.get_post_list(self.topic, pg)
+                for topic in self._parse_page(html):
+                    yield topic
+                pg += 1
+            except ValueError:
+                break
+
+    def scrape_page(self, page_num):
+        html = self.gfaqs_client.get_post_list(self.topic, page_num)
+        return self._parse_page(html)
 
     def _parse_page(self, html):
         """ parses the page and returns a list of Post objects
