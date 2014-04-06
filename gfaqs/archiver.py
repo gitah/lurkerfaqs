@@ -37,7 +37,8 @@ class Archiver(Daemon):
     def run(self):
         # Build GFAQSClient to access webpage
         if settings.GFAQS_LOGIN_AS_USER:
-            self.gfaqs_client = GFAQSClient(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
+            self.gfaqs_client = AuthenticatedGFAQSClient(
+                settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
         else:
             self.gfaqs_client = GFAQSClient()
 

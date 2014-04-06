@@ -169,9 +169,12 @@ GFAQS_BOARDS = [
     ("8-gamefaqs-contests", "GameFAQs Contests", 5)
 ]
 
+# Gamefaqs login settings for restricted boards
 GFAQS_LOGIN_AS_USER = False
 GFAQS_LOGIN_EMAIL = ""
 GFAQS_LOGIN_PASSWORD = ""
+# relogin every 10 days
+GFAQS_LOGIN_REFRESH_PERIOD_HOURS = 24 * 10
 
 
 #-- Logging Settings --#

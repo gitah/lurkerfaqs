@@ -10,6 +10,7 @@ from django.conf import settings
 from django.test import TestCase
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.scraper import BoardScraper, TopicScraper
+from gfaqs.client import GFAQSClient
 from gfaqs.archiver import Archiver
 
 import test_server
@@ -39,7 +40,7 @@ class BoardScraperTest(TestCase):
     def test_get_page(self):
         bs = BoardScraper(self.ce)
         opener = urllib2.build_opener()
-        try: 
+        try:
             bs.get_page(opener,0)
             bs.get_page(opener,1)
         except IOError:
@@ -54,7 +55,7 @@ class BoardScraperTest(TestCase):
     def test_parse_page(self):
         bs = BoardScraper(self.ot)
         opener = urllib2.build_opener()
-        
+
         ot0_tl = bs.parse_page(bs.get_page(opener,0))
         self.assertEquals(len(ot0_tl), 10)
         t = ot0_tl[0]
@@ -80,7 +81,7 @@ class BoardScraperTest(TestCase):
         self.assertEquals(topics[0].creator.username,"hikaru_beoulve")
         self.assertEquals(topics[19].title,"What were/are you the biggest fan of, Rock Band or Guitar Hero")
         self.assertEquals(topics[19].creator.username,"Purecorruption")
-        
+
 class TopicScraperTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -175,15 +176,15 @@ class ArchiverTest(TestCase):
         self.assertEquals(len(Topic.objects.all()), 20)
         archiver.archive_board(ce, recursive=False)
         self.assertEquals(len(Topic.objects.all()), 20)
-    
+
     def test_archive_topic(self):
         path = "http://localhost:%s" % ArchiverTest.server_port
         ot = Board(url="%s/boards/ot" % path, name="Other Titles")
         ot.save()
         creator=User(username="foo")
         creator.save()
-        topic = Topic(board=ot, number_of_posts=57, creator=creator, title="tmp", 
-            gfaqs_id="64010226", last_post_date=datetime.now(), status=0); 
+        topic = Topic(board=ot, number_of_posts=57, creator=creator, title="tmp",
+            gfaqs_id="64010226", last_post_date=datetime.now(), status=0);
         topic.save()
 
         archiver = ArchiverTest.archiver
@@ -214,3 +215,25 @@ class ArchiverTest(TestCase):
             self.fail("pid file still exists")
         except IOError:
             pass
+
+class NewTopicScraperTest(TestCase):
+    def setUp(self):
+        board_path = "http://www.gamefaqs.com/boards/213-nonstop-gaming-general/"
+        board_path = "http://www.gamefaqs.com/boards/2000121-anime-and-manga-other-titles"
+        gfaq_topic_id = 68960382;
+        test_board = Board(url=board_path, name="OT")
+
+        self.test_topic = Topic(
+                board=test_board,
+                creator=User(username="foo"),
+                title="tmp",
+                gfaqs_id=gfaq_topic_id,
+                status=0);
+
+        self.gfaqs_client = GFAQSClient()
+
+    def test_retrieve(self):
+        ts = TopicScraper(self.test_topic)
+        posts = list(ts.retrieve(self.gfaqs_client))
+        self.assertTrue(len(posts) > 10)
+

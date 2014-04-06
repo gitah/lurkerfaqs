@@ -7,6 +7,7 @@ Currently it is implemented using python's urlib2
 import urllib2
 import cookielib
 from urllib import urlencode
+from datetime import datetime
 
 from django.conf import settings
 from bs4 import BeautifulSoup
@@ -15,16 +16,10 @@ from gfaqs.util import log_on_error, log_info
 from gfaqs.models import User, Board, Topic, Post
 
 class GFAQSClient(object):
-    def __init__(self, email=None, password=None):
-        log_info("Creating urllib2 connection")
-        if email and password:
-            self.opener = authenticate(settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
-            log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
-        else:
-            self.opener = build_opener()
-            log_info("No login specified")
+    def __init__(self):
+        self.opener = build_opener()
 
-    def _generate_query_string(page):
+    def _generate_query_string(self, page):
         """Returns a query string for a URL to a board or topic"""
         query = {
             "page": page,
@@ -44,20 +39,50 @@ class GFAQSClient(object):
 
     def get_post_list(self, topic, pg):
         """Fetches the given topic list page"""
-        board_url = self.topic.board.url
+        board_url = topic.board.url
         base = "%s/%s" % (board_url, topic.gfaqs_id)
         qs = self._generate_query_string(pg)
+        page_url = "%s?%s" % (base, qs)
         try:
-            return "".join(opener.open(page_url).readlines())
+            return "".join(self.opener.open(page_url).readlines())
         except IOError:
             raise ValueError("page not found")
 
+class AuthenticatedGFAQSClient(GFAQSClient):
+    def __init__(self, email, password):
+        log_info("Creating Authenticated GFAQSClient with email=%s" % email)
+        self.opener = build_opener()
+        self.login()
+        log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
+
+    def login(self):
+        self.opener = authenticate(self.opener,
+                settings.GFAQS_LOGIN_EMAIL,
+                settings.GFAQS_LOGIN_PASSWORD)
+        self.login_date = datetime.now()
+    
+    def login_if_required(self):
+        """ re-login if the time since last login is too long """
+        login_period = datetime.timedelta(hours=settings.GFAQS_LOGIN_REFRESH_PERIOD)
+        time_since_last_login = datetime.now - self.login_date
+        if time_since_last_login > login_period:
+            self.login()
+
+    def get_topic_list(self, board, pg):
+        self.login_if_required()
+        super(AuthenticatedGFAQSClient, self).get_topic_list(board, pg)
+
+    def get_post_list(self, topic, pg):
+        self.login_if_required()
+        super(AuthenticatedGFAQSClient, self).get_post_list(topic, pg)
+
+    
 
 #--- Login ---#
 class AuthenticationError(StandardError):
     pass
 
-def authenticate(email, password):
+def authenticate(opener, email, password):
     """ logs into gamefaqs using the given (username, password)
         
         Returns a urllib2.opener with the login cookie if successful or raise an
@@ -65,11 +90,8 @@ def authenticate(email, password):
     """
     login_url = settings.GFAQS_LOGIN_URL
 
-    opener = build_opener()
     cj = cookielib.CookieJar()
     opener.add_handler(urllib2.HTTPCookieProcessor(cj))
-    foo = opener.open('http://www.gamefaqs.com')
-
     post_data = {
         "EMAILADDR": email,
         "PASSWORD": password,
