@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup, element
 from django.conf import settings
 
 from gfaqs.util import strptime
+from gfaqs.util import logger
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
 
@@ -162,6 +163,7 @@ class BoardScraper(Scraper):
         status_img = status_img_el["class"][-1]
         topic_status = TOPIC_STATUS_MAP.get(status_img)
         if topic_status not in TOPIC_STATUS_MAP:
+            logger.warn("Topic status %s unknown" % topic_status)
             # TODO: log warning
             topic_status = Topic.NORMAL
 

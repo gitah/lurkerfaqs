@@ -30,10 +30,6 @@ def log_on_error(fn, explode=False):
 
     return logged_fn
 
-def log_info(msg):
-    logger.info(msg)
-
-
 #--- Threading ---#
 strptime_mutex = Lock()
 def strptime(date_str, format_str):

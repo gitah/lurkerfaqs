@@ -8,12 +8,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db import connection, transaction
 
-from gfaqs.util import log_on_error, log_info
+from gfaqs.util import log_on_error, logger
 from gfaqs.util.daemon import Daemon
 from gfaqs.util.threadpool import ThreadPool
 from gfaqs.scraper import BoardScraper, TopicScraper
 from gfaqs.models import User, Board, Topic, Post
-from gfaqs.client import GFAQSClient
 
 
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
@@ -80,7 +79,7 @@ class Archiver(Daemon):
             recursive: archives the posts of each topic as well
         """
         bs = BoardScraper(b, self.gfaqs_client)
-        log_info("Archiving Board (%s) started" % b.alias)
+        logger.info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
 
         for t in bs.retrieve():
@@ -105,20 +104,20 @@ class Archiver(Daemon):
                 t.creator = self.add_user(t.creator)
                 t.save()
                 topics_saved += 1
-                log_info("Saved topic %s" % t)
+                logger.debug("Saved topic %s" % t)
 
             if recursive:
                 self.pool.add_task(self.archive_topic, t)
             throttle_thread()
 
-        log_info("Archiving Board (%s) finished; %s topics examined, %s new" % \
+        logger.info("Archiving Board (%s) finished; %s topics examined, %s new" % \
                 (b.alias, topics_examined, topics_saved))
 
     @log_on_error
     def archive_topic(self, t):
         """Scrapes the given topic and saves its posts"""
         ts = TopicScraper(t, self.gfaqs_client)
-        log_info("Archiving Topic (%s) started" % t.gfaqs_id)
+        logger.info("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
         posts = list(ts.retrieve())
@@ -144,7 +143,7 @@ class Archiver(Daemon):
             p_db.contents = p.contents
             p_db.save()
 
-        log_info("Archiving Topic (%s) finished; %s posts examined, %s new" % \
+        logger.debug("Archiving Topic (%s) finished; %s posts examined, %s new" % \
             (t.gfaqs_id, posts_examined, posts_saved))
 
     def add_user(self, user):
@@ -155,5 +154,5 @@ class Archiver(Daemon):
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
             user.save()
-            log_info("User added (%s)" % user.username)
+            logger.debug("User added (%s)" % user.username)
             return user

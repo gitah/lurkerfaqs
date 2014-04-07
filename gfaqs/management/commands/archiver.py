@@ -5,11 +5,13 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 from gfaqs.archiver import Archiver
+from gfaqs.archiver import Archiver
+from gfaqs.client import AuthenticatedGFAQSClient
 from django.conf import settings
 
 PIDFILE=settings.GFAQS_ARCHIVER_PID_FILE
 
-logger = logging.getLogger(settings.GFAQS_INFO_LOGGER)
+logger = logging.getLogger(settings.ARCHIVER_LOGGER)
 
 def help():
     return "usage: python manage.py archiver [start|stop|restart|status]\n"
@@ -37,7 +39,11 @@ class Command(BaseCommand):
             print help()
             sys.exit(2)
 
-        daemon = Archiver(pidfile=PIDFILE)
+        authed_gfaqs_client = AuthenticatedGFAQSClient(
+            settings.GFAQS_LOGIN_EMAIL,
+            settings.GFAQS_LOGIN_PASSWORD)
+        daemon = Archiver(pidfile=PIDFILE,
+                gfaqs_client=authed_gfaqs_client)
         #create pid file
         if args[0] == "start":
             try:
