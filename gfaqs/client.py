@@ -7,7 +7,7 @@ Currently it is implemented using python's urlib2
 import urllib2
 import cookielib
 from urllib import urlencode
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from bs4 import BeautifulSoup
@@ -63,18 +63,18 @@ class AuthenticatedGFAQSClient(GFAQSClient):
     
     def login_if_required(self):
         """ re-login if the time since last login is too long """
-        login_period = datetime.timedelta(hours=settings.GFAQS_LOGIN_REFRESH_PERIOD)
-        time_since_last_login = datetime.now - self.login_date
+        login_period = timedelta(hours=settings.GFAQS_LOGIN_REFRESH_PERIOD_HOURS)
+        time_since_last_login = datetime.now() - self.login_date
         if time_since_last_login > login_period:
             self.login()
 
     def get_topic_list(self, board, pg):
         self.login_if_required()
-        super(AuthenticatedGFAQSClient, self).get_topic_list(board, pg)
+        return super(AuthenticatedGFAQSClient, self).get_topic_list(board, pg)
 
     def get_post_list(self, topic, pg):
         self.login_if_required()
-        super(AuthenticatedGFAQSClient, self).get_post_list(topic, pg)
+        return super(AuthenticatedGFAQSClient, self).get_post_list(topic, pg)
 
     
 

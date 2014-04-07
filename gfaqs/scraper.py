@@ -126,7 +126,7 @@ class BoardScraper(Scraper):
         for topic_tr in topic_table.tbody.find_all("tr"):
             # remove the table header
             topic = self._parse_topic(topic_tr)
-            topics.append(topic_tr)
+            topics.append(topic)
 
         return topics
 
@@ -158,7 +158,8 @@ class BoardScraper(Scraper):
         assert len(tds) == 5, "Topic html invalid format (%s)" % self.base_url()
 
         # get topic icon
-        status_img = tds[0].i["class"][-1]
+        status_img_el = list(tds[0].children)[0]
+        status_img = status_img_el["class"][-1]
         topic_status = TOPIC_STATUS_MAP.get(status_img)
         if topic_status not in TOPIC_STATUS_MAP:
             # TODO: log warning

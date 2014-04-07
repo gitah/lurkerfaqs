@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
+
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 # Django settings for lurkerfaqs project.
@@ -178,8 +180,7 @@ GFAQS_LOGIN_REFRESH_PERIOD_HOURS = 24 * 10
 
 
 #-- Logging Settings --#
-GFAQS_INFO_LOGGER = 'gfaqs.info'
-GFAQS_ERROR_LOGGER = 'gfaqs.errors'
+ARCHIVER_LOGGER = 'gfaqs.archiver'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -192,23 +193,23 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
             'formatter': 'verbose'
-        }
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
-        GFAQS_ERROR_LOGGER: {
-            'handlers': ['file'],
-            'level': 'ERROR',
+        ARCHIVER_LOGGER: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO' if DEBUG else 'ERROR',
             'propagate': True,
-        },
-        GFAQS_INFO_LOGGER: {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
+        }
     }
 }
 
@@ -232,4 +233,3 @@ try:
     from custom_settings import *
 except ImportError:
     pass
-

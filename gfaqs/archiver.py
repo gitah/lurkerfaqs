@@ -26,21 +26,25 @@ def throttle_thread(throttle_time=THROTTLE_TIME):
 
 class Archiver(Daemon):
     """ A daemon that scrapers and saves Boards """
-    def __init__(self, board_info=settings.GFAQS_BOARDS,
+    def __init__(self,
+            board_info=settings.GFAQS_BOARDS,
             base=settings.GFAQS_BOARD_URL,
-            pidfile=settings.GFAQS_ARCHIVER_PID_FILE):
-        super(Archiver,self).__init__(pidfile)
+            pidfile=settings.GFAQS_ARCHIVER_PID_FILE,
+            gfaqs_client=None):
+        super(Archiver, self).__init__(pidfile)
         self.board_info = board_info
         self.base_url = base
-        self.gfaqs_client = None
+        self.gfaqs_client = gfaqs_client
 
     def run(self):
+        """
         # Build GFAQSClient to access webpage
         if settings.GFAQS_LOGIN_AS_USER:
             self.gfaqs_client = AuthenticatedGFAQSClient(
                 settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
         else:
             self.gfaqs_client = GFAQSClient()
+        """
 
         # Initialize threadpool
         # we need at least one thread for each board
@@ -75,11 +79,11 @@ class Archiver(Daemon):
             b: the models.Board to archive
             recursive: archives the posts of each topic as well
         """
-        bs = BoardScraper(b)
+        bs = BoardScraper(b, self.gfaqs_client)
         log_info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
 
-        for t in bs.retrieve(self.gfaqs_client):
+        for t in bs.retrieve():
             topics_examined += 1
             if t.status in Topic.ARCHIVED_STATUSES:
                 # we reached archived topics; don't continue
@@ -101,6 +105,7 @@ class Archiver(Daemon):
                 t.creator = self.add_user(t.creator)
                 t.save()
                 topics_saved += 1
+                log_info("Saved topic %s" % t)
 
             if recursive:
                 self.pool.add_task(self.archive_topic, t)
@@ -112,11 +117,11 @@ class Archiver(Daemon):
     @log_on_error
     def archive_topic(self, t):
         """Scrapes the given topic and saves its posts"""
-        ts = TopicScraper(t)
+        ts = TopicScraper(t, self.gfaqs_client)
         log_info("Archiving Topic (%s) started" % t.gfaqs_id)
         posts_examined, posts_saved = 0, 0
 
-        posts = list(ts.retrieve(self.gfaqs_client))
+        posts = list(ts.retrieve())
 
         for p in reversed(posts):
             posts_examined += 1
