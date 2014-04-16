@@ -9,7 +9,10 @@ from django.conf import settings
 
 
 #--- Logging ---#
-logger = logging.getLogger(settings.ARCHIVER_LOGGER)
+if settings.DEBUG:
+    logger = logging.getLogger(settings.DEBUG_LOGGER)
+else:
+    logger = logging.getLogger(settings.ARCHIVER_LOGGER)
 
 def log_on_error(fn, explode=False):
     """Decorator that logs the stack trace when an error occurs in the function"""

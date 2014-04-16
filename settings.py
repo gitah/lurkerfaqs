@@ -181,6 +181,8 @@ GFAQS_LOGIN_REFRESH_PERIOD_HOURS = 24 * 10
 
 #-- Logging Settings --#
 ARCHIVER_LOGGER = 'gfaqs.archiver'
+DEBUG_LOGGER = 'gfaqs.archiver.debug'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -206,8 +208,13 @@ LOGGING = {
     },
     'loggers': {
         ARCHIVER_LOGGER: {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        DEBUG_LOGGER: {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         }
     }

@@ -161,10 +161,11 @@ class BoardScraper(Scraper):
         # get topic icon
         status_img_el = list(tds[0].children)[0]
         status_img = status_img_el["class"][-1]
-        topic_status = TOPIC_STATUS_MAP.get(status_img)
-        if topic_status not in TOPIC_STATUS_MAP:
-            logger.warn("Topic status %s unknown" % topic_status)
+        if status_img not in TOPIC_STATUS_MAP:
+            logger.warn("Topic status %s unknown" % status_img)
             topic_status = Topic.NORMAL
+        else:
+            topic_status = TOPIC_STATUS_MAP.get(status_img)
 
         # get topic title
         topic_gfaqs_id = tds[1].a["href"].split("/")[-1]
@@ -291,6 +292,8 @@ class TopicScraper(Scraper):
             </span>
         </div>
        </td>
+
+        NOTE: archived topics are different (creator is not in span class)
         """
         post_infos = list(post_info_td.div.children)
         post_num = post_infos[0].a["name"]
