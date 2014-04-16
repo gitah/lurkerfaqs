@@ -114,9 +114,6 @@ class Archiver(Daemon):
                 if recursive:
                     self.pool.add_task(self.archive_topic, t)
                 throttle_thread()
-        except Exception, e:
-            log_error("Failed to parse board %s" % b, alert=True)
-            raise e, None, sys.exc_info()[2]
 
         logger.info("Archiving Board (%s) finished; %s topics examined, %s new" % \
                 (b.alias, topics_examined, topics_saved))
