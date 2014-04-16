@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from bs4 import BeautifulSoup
 
-from gfaqs.util import log_on_error, log_info
+from gfaqs.util import logger
 from gfaqs.models import User, Board, Topic, Post
 
 class GFAQSClient(object):
@@ -50,10 +50,10 @@ class GFAQSClient(object):
 
 class AuthenticatedGFAQSClient(GFAQSClient):
     def __init__(self, email, password):
-        log_info("Creating Authenticated GFAQSClient with email=%s" % email)
+        logger.info("Creating Authenticated GFAQSClient with email=%s" % email)
         self.opener = build_opener()
         self.login()
-        log_info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
+        logger.info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
 
     def login(self):
         self.opener = authenticate(self.opener,

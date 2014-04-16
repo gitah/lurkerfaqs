@@ -164,7 +164,6 @@ class BoardScraper(Scraper):
         topic_status = TOPIC_STATUS_MAP.get(status_img)
         if topic_status not in TOPIC_STATUS_MAP:
             logger.warn("Topic status %s unknown" % topic_status)
-            # TODO: log warning
             topic_status = Topic.NORMAL
 
         # get topic title
@@ -293,7 +292,7 @@ class TopicScraper(Scraper):
         </div>
        </td>
         """
-        post_infos = post_info_td.find_all("span", class_="author_data")
+        post_infos = list(post_info_td.div.children)
         post_num = post_infos[0].a["name"]
         post_creator = post_infos[1].text
         dt_raw = " ".join(post_infos[2].text.split())
