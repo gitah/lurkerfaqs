@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
 import time
-from threading import Thread
+from threading import Thread, Lock
 from datetime import datetime
 
 from django.conf import settings
@@ -16,8 +17,11 @@ from gfaqs.models import User, Board, Topic, Post
 
 
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
-THROTTLE_TIME = 0.1         # time in secs between performing gfaqs IO operations
+THROTTLE_TIME = 0.5         # time in secs between performing gfaqs IO operations
 BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
+
+# User lock: we need this when saving users with multiple threads
+user_mutex = Lock()
 
 def throttle_thread(throttle_time=THROTTLE_TIME):
     """Halts one of the archiver thread for a bit, to not overwhelm gamefaqs"""
@@ -45,6 +49,7 @@ class Archiver(Daemon):
             self.gfaqs_client = GFAQSClient()
         """
 
+    def run(self):
         # Initialize threadpool
         # we need at least one thread for each board
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
@@ -52,7 +57,7 @@ class Archiver(Daemon):
         def archive_board_task(board, refresh):
             while True:
                 self.archive_board(board)
-                time.sleep(refresh*60)
+                throttle_thread(refresh*60)
 
         for alias,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url, alias)
@@ -65,11 +70,11 @@ class Archiver(Daemon):
                     board.save()
                 self.pool.add_task(archive_board_task, board, refresh)
                 # we want boards to start at different times to spread out load
-                time.sleep(BOARD_STAGGER_TIME)
+                throttle_thread(BOARD_STAGGER_TIME)
 
         # hang thread, so daemon keeps running
         while True:
-            time.sleep(10)
+            throttle_thread(10)
 
     @log_on_error
     def archive_board(self, b, recursive=True):
@@ -106,9 +111,12 @@ class Archiver(Daemon):
                 topics_saved += 1
                 logger.debug("Saved topic %s" % t)
 
-            if recursive:
-                self.pool.add_task(self.archive_topic, t)
-            throttle_thread()
+                if recursive:
+                    self.pool.add_task(self.archive_topic, t)
+                throttle_thread()
+        except Exception, e:
+            log_error("Failed to parse board %s" % b, alert=True)
+            raise e, None, sys.exc_info()[2]
 
         logger.info("Archiving Board (%s) finished; %s topics examined, %s new" % \
                 (b.alias, topics_examined, topics_saved))
@@ -134,6 +142,7 @@ class Archiver(Daemon):
                     p.creator = self.add_user(p.creator)
                     p.save()
                     posts_saved += 1
+                    log_debug("Added Post %s" % t)
             throttle_thread()
 
         # update poll results if applicable
@@ -142,6 +151,7 @@ class Archiver(Daemon):
             p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
             p_db.contents = p.contents
             p_db.save()
+            log_debug("Updated Post %s for poll" % p)
 
         logger.debug("Archiving Topic (%s) finished; %s posts examined, %s new" % \
             (t.gfaqs_id, posts_examined, posts_saved))
@@ -150,9 +160,12 @@ class Archiver(Daemon):
         """ Check if user exists already in db, if not add it """
         if user.id:
             return user
+        user_mutex.acquire()
         try:
             return User.objects.get(username=user.username)
         except ObjectDoesNotExist:
             user.save()
             logger.debug("User added (%s)" % user.username)
             return user
+        finally:
+            user_mutex.release()

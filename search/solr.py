@@ -4,6 +4,8 @@ from httplib2 import socket
 
 from django.conf import settings
 
+from search.normalize import normalize_words
+
 solr_interface = sunburnt.SolrInterface(settings.SOLR_URL)
 
 def topic_to_doc(topic):
@@ -32,8 +34,8 @@ class SolrSearcher(object):
         Returns a 2-tuple: (total_results, result_list)
         """
         solr_q =  solr_interface.query()
-        for term in query.split():
-            solr_q = solr_q.query(title=term.lower())
+        for term in normalize_words(query.split()):
+            solr_q = solr_q.query(title=term)
 
         resp = solr_q \
             .filter(board_alias=board_alias) \
@@ -41,6 +43,22 @@ class SolrSearcher(object):
             .paginate(start=start, rows=count) \
             .execute()
         return (resp.result.numFound, [result_to_gfaqs_id(t) for t in resp])
+
+    def search_related_topics(self, topic, count):
+        """Sends a request to solr for topics related to the given topic
+        
+        Returns up to count number of related topics
+        Returns a list of topics
+        """
+        solr_q =  solr_interface.query()
+
+        query_terms = normalize_words(topic.title.split())
+        q_OR = solr_interface.Q(title="")
+        for term in query_terms:
+            q_OR |= solr_interface.Q(title=term)
+        solr_q = solr_q.query(q_OR).exclude(id=topic.gfaqs_id)
+        resp = solr_q.paginate(start=0, rows=count).execute()
+        return [result_to_gfaqs_id(t) for t in resp]
 
 
 # create singleton class

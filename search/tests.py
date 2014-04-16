@@ -17,7 +17,7 @@ import search.solr
 class SolrSearcherTest(TestCase):
     """Unit Tests for SolrSearcher """
     def setUp(self):
-        board = Board(alais="foobar", url="a")
+        board = Board(alias="foobar", url="a")
         user = User(username="pig")
         self.last_post_date = datetime.now()
         self.topic = Topic(topic_id="1234", title="my topic", creator=user,

@@ -98,6 +98,10 @@ def build_context(request, **kwargs):
     context = RequestContext(request, kwargs)
     return context
 
+def load_status_icon(topic):
+    # map topic status to icons
+    topic.status_icon = TOPIC_STATUS_TO_IMG.get(int(topic.status), TOPIC_STATUS_TO_IMG["default"])
+
 # -- Boards -- #
 @cache_page(settings.CACHE_STORAGE_TIME)
 def show_boards(request):
@@ -126,10 +130,8 @@ def show_board(request, board_alias):
     topics, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_TOPICS_PER_PAGE)
 
-    # map topic status to icons
     for tp in topics:
-        tp.status_icon = TOPIC_STATUS_TO_IMG.get(int(tp.status),
-            TOPIC_STATUS_TO_IMG["default"])
+        load_status_icon(tp)
 
     t = loader.get_template('topics.html')
     c = build_context(request, board=board, topics=topics,
@@ -152,10 +154,22 @@ def show_topic(request, board_alias, topic_num):
 
     for post in posts:
         post.contents = linkify(post.contents)
+    op_post = posts[0]
+    posts = posts[1:]
+
+    # get related topics to this one
+    related_topics_gids = SolrSearcher.search_related_topics(
+            topic, settings.LURKERFAQS_RELATED_TOPICS_COUNT)
+    related_topics = list(
+        Topic.objects.filter(gfaqs_id__in=related_topics_gids)
+    )
+    for tp in related_topics:
+        load_status_icon(tp)
 
     t = loader.get_template('posts.html')
     c = build_context(request, board=topic.board, topic=topic,
-            posts=posts, current_page=current_page, page_guide=page_guide)
+            posts=posts, op_post=op_post, related_topics=related_topics,
+            current_page=current_page, page_guide=page_guide)
     return HttpResponse(t.render(c))
 
 @cache_page(settings.CACHE_STORAGE_TIME)

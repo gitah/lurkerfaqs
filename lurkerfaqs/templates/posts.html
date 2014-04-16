@@ -17,6 +17,17 @@
 {% block table_class %}board message colorVisitedLink{% endblock %}
 {% block table_header %}{% endblock %}
 {% block table_contents %}
+    <tr id="{{op_post.post_num}}"><td>
+        <a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}
+    </td></tr>
+    <tr class="even"><td>
+            {{op_post.contents|safe}}
+            {% if op_post.signature %}
+                <br>--<br>
+                {{op_post.signature|safe}}
+            {% endif %}
+    </td></tr>
+
     {% for post in posts %}
     <tr id="{{post.post_num}}"><td>
         <a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
@@ -32,7 +43,23 @@
 {% endblock %}
 
 
-
 {% block page_url %}
     {% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}?
+{% endblock %}
+
+{% block page_extra %}
+{% if related_topics %}
+<br />
+<div class="head related_topics">Related Topics</div>
+<table class="related_topics colorVisitedLink">
+{% for rtopic in related_topics %}
+    <tr class="{% cycle 'even' 'odd' %}">
+        <td><img src="{{STATIC_URL}}img/{{rtopic.status_icon}}"/></td>
+        <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias rtopic.gfaqs_id %}">{{rtopic.title}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_user" rtopic.creator.username %}">{{rtopic.creator.username}}</a></td>
+        <td>{{rtopic.number_of_posts}}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
 {% endblock %}

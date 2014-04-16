@@ -27,10 +27,12 @@ libxslt-dev
 
 mysql-server
 mysql-client
+libmysqlclient-dev
 PACKAGES
 
 # Install python libraries
 easy_install pip
+easy_install distribute
 pip install MySQL-python        # mysql driver
 pip install beautifulsoup4      # website scraping
 pip install lxml                # sunburnt dependency

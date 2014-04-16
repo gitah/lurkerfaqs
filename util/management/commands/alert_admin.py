@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.mail import send_mail
 
+from util.alert import alert_admin
+
 
 class Command(BaseCommand):
     args = 'subject msg'
@@ -21,6 +23,4 @@ class Command(BaseCommand):
 
         subject = args[0]
         msg = args[1]
-
-        admin_emails = [x[1] for x in settings.ADMINS]
-        send_mail(subject, msg, 'alert@lurkerfaqs.com', admin_emails, fail_silently=False)
+        alert_admin(subject, msg)

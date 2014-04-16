@@ -7,7 +7,6 @@ from datetime import datetime
 
 from django.conf import settings
 
-
 #--- Logging ---#
 if settings.DEBUG:
     logger = logging.getLogger(settings.DEBUG_LOGGER)
@@ -29,7 +28,13 @@ def log_on_error(fn, explode=False):
         try:
             fn(*args, **kwargs)
         except Exception, e:
-            log_error(e)
+            error_msg = ["== Error =="]
+            error_msg.extend([traceback.format_exc()])
+            error_msg.extend(["========", ''])
+            error_msg = '\n'.join(error_msg)
+            log_error(error_msg)
+            if explode:
+                raise e
 
     return logged_fn
 

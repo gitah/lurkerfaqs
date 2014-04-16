@@ -12,6 +12,7 @@ from gfaqs.util import logger
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
 
+
 TOPIC_STATUS_MAP = {
     "board_icon_topic": Topic.NORMAL,
     "board_icon_topic_new": Topic.NORMAL,
@@ -47,12 +48,13 @@ TOPIC_DATE_FORMAT_STR = "%m/%d %I:%M%p"
 TOPIC_DATE_ALT_FORMAT_STR = "%m/%d/%Y"
 POST_DATE_FORMAT_STR = "Posted %m/%d/%Y %I:%M:%S %p"
 
+#GFAQS_ENCODING="ISO8559-1"
 # <rage>
 # The code below took me 3 hours to debug all because all because gfaqs is
 # backwards as fuck. Yes I'm mad.
 #
 # Modern sites basically all use UTF-8 encoding, but no not gfaqs: the header
-# and HTML says the page uses ISO-8859-1. This would be alright, but guess what?
+# and HTML says the page uses ISO-8859-1. This would be alright, but guess
 # It turns out this is a big fat lie...
 #</rage>
 GFAQS_ENCODING="windows-1252"
@@ -72,10 +74,6 @@ class Scraper(object):
         raise NotImplementedError()
 
     def scrape_page(self, page_num):
-        # implement in subclass
-        raise NotImplementedError()
-
-    def base_url(self):
         # implement in subclass
         raise NotImplementedError()
 
@@ -144,7 +142,6 @@ class BoardScraper(Scraper):
             <a href="**TOPIC_LINK**">**TOPIC_TITLE**</a>
             <br><span class="pglist">..</span>
           </td>
-
           <td class="tauthor">
             <span> <a>**USERNAME**</a></span>
           </td>

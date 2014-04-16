@@ -154,6 +154,9 @@ LURKERFAQS_TOP_USERS_TO_SHOW = 50
 # number of pagination links
 LURKERFAQS_PAGES_TO_DISPLAY = 10
 
+# number of related topics to show in topic list
+LURKERFAQS_RELATED_TOPICS_COUNT = 5
+
 #-- GFAQs Archiver Settings --#
 # path of PID file for gfaqs-archiver daemon
 GFAQS_ARCHIVER_PID_FILE = "%s/gfaqs-archiver.pid" % LURKERFAQS_RUN_DIR
@@ -192,6 +195,9 @@ LOGGING = {
         }
     },
     'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
     },
     'handlers': {
         'file': {
