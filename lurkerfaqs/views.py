@@ -152,6 +152,11 @@ def show_topic(request, board_alias, topic_num):
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
+    if not posts:
+        t = loader.get_template('posts_none.html')
+        c = build_context(request, topic=topic, board=topic.board)
+        return HttpResponse(t.render(c))
+
     for post in posts:
         post.contents = linkify(post.contents)
     op_post = posts[0]
