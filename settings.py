@@ -215,7 +215,7 @@ LOGGING = {
     'loggers': {
         ARCHIVER_LOGGER: {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
         DEBUG_LOGGER: {
