@@ -24,7 +24,7 @@ class BoardScraperTest(TestCase):
     def test_scrape_page(self):
         bs = BoardScraper(self.test_board, self.gfaqs_client)
         topics = bs.scrape_page(0)
-        self.assertTrue(topics)
+        self.assertTrue(len(topics) > 1)
 
 
 class TopicScraperTest(TestCase):
@@ -44,7 +44,7 @@ class TopicScraperTest(TestCase):
     def test_scrape_page(self):
         ts = TopicScraper(self.test_topic, self.gfaqs_client)
         posts = ts.scrape_page(0)
-        self.assertTrue(posts)
+        self.assertTrue(len(posts) > 1)
 
 
 class GFAQSAuthenticationTest(TestCase):

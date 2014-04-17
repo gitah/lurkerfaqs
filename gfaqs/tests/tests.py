@@ -4,6 +4,7 @@ from datetime import datetime
 from mock import patch
 from django.conf import settings
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from gfaqs.models import User, Board, Topic, Post
 from gfaqs.client import GFAQSClient
@@ -93,3 +94,28 @@ class ArchiverTest(TestCase):
         test_topic = TEST_TOPIC
         self.archiver.archive_topic(test_topic)
         self.assertEquals(len(Post.objects.all()), 1)
+
+"""
+class FooTest(TestCase):
+    @override_settings(DEBUG=True)
+    def test_foo(self):
+        gfaqs_client = GFAQSClient()
+        archiver = Archiver(gfaqs_client=gfaqs_client)
+
+        b = Board(
+            url="http://www.gamefaqs.com/boards/2000121-anime-and-manga-other-titles",
+            name="OT",
+            alias="foo")
+        b.save()
+        user = User(username='lkasdjflk')
+        user.save()
+        t = Topic(board=b,
+                creator=user,
+                gfaqs_id=69003129,
+                title="foo",
+                number_of_posts=22,
+                last_post_date=datetime.now(),
+                status=Topic.NORMAL)
+        t.save()
+        archiver.archive_topic(t)
+"""

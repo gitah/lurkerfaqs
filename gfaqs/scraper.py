@@ -91,11 +91,11 @@ class BoardScraper(Scraper):
         while True:
             try:
                 html = self.gfaqs_client.get_topic_list(self.board, pg)
-                for topic in self._parse_page(html):
-                    yield topic
-                pg += 1
             except ValueError:
                 break
+            for topic in self._parse_page(html):
+                yield topic
+                pg += 1
 
     def scrape_page(self, page_num):
         html = self.gfaqs_client.get_topic_list(self.board, page_num)
@@ -283,6 +283,9 @@ class TopicScraper(Scraper):
                     <b>jumi</b>
                 </a>
             </span>
+            *** OPTIONAL ***
+            <span class="author_data">(Topic Creator)</span>
+            *** /OPTIONAL ***
             <span class="author_data">Posted 4/5/2014 1:56:08 PM</span>
             <span class="author_data">
                 <a href="/boards/2000121-anime-and-manga-other-titles/68960382/779732076">message detail</a>
@@ -295,8 +298,13 @@ class TopicScraper(Scraper):
         post_infos = list(post_info_td.div.children)
         post_num = post_infos[0].a["name"]
         post_creator = post_infos[1].text
-        dt_raw = " ".join(post_infos[2].text.split())
-        post_dt = strptime(dt_raw, POST_DATE_FORMAT_STR)
+        try:
+            dt_raw = " ".join(post_infos[2].text.split())
+            post_dt = strptime(dt_raw, POST_DATE_FORMAT_STR)
+        except ValueError, e:
+            dt_raw = " ".join(post_infos[3].text.split())
+            post_dt = strptime(dt_raw, POST_DATE_FORMAT_STR)
+
         return (post_num, post_creator, post_dt)
 
     def _parse_post_contents(self, post_content_td):
