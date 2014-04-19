@@ -262,7 +262,7 @@ def show_user_posts(request, username):
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
     for post in posts:
-        post.contents = linkify(post.contents)
+        post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG )
 
     t = loader.get_template('user_posts.html')
     c = build_context(request, user=user, posts=posts,
