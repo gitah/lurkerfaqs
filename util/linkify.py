@@ -9,6 +9,8 @@ This implementation is just using the naive approach for now.
 """
 import re
 
+from django.conf import settings
+
 HTML_RE = re.compile(r'\b(https?://|www.)[^\s<>]+|[^\s<>]+\.(com|ca|net|org)(/[^\s<>]+)?\b', re.IGNORECASE)
 IMAGE_EXT_RE = re.compile(r'(jpg|png|gif)$', re.IGNORECASE)
 YOUTUBE_VID_RE = re.compile(r'v=([^\s]{11})', re.IGNORECASE)
@@ -18,8 +20,8 @@ YOUTUBE_HTML = '<iframe id="ytplayer" type="text/html" width="640" height="390" 
 IMAGE_HTML = '<img src="%s" alt="external image"/>'
 ANCHOR_HTML = '<a href="%s">%s</a>'
 
-def linkify(text):
-    """Adds anchor and image tags to the urls in text"""
+def linkify(text, linkify_img=True):
+    """Adds anchor and image tags (if true) to the urls in text"""
     def convert(matchobj):
         url = matchobj.group(0)
         if "youtube.com" in url or "youtu.be" in url:
@@ -29,7 +31,7 @@ def linkify(text):
             except:
                 pass
 
-        if re.search(IMAGE_EXT_RE, url):
+        if linkify_img and re.search(IMAGE_EXT_RE, url):
             return IMAGE_HTML % url
         else:
             return ANCHOR_HTML % (url, url)

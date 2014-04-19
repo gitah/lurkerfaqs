@@ -158,7 +158,7 @@ def show_topic(request, board_alias, topic_num):
         return HttpResponse(t.render(c))
 
     for post in posts:
-        post.contents = linkify(post.contents)
+        post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG)
     op_post = posts[0]
     posts = posts[1:]
 
