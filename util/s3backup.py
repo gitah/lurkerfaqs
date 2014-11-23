@@ -6,7 +6,9 @@ PROTIP: set the lifecycle in the s3 bucket to glacier for savings
 import os
 import subprocess
 import tempfile
+import logging
 
+from django.conf import settings
 import boto
 
 logger = logging.getLogger(settings.MISC_LOGGER)
