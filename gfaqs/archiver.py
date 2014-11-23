@@ -17,7 +17,7 @@ from gfaqs.models import User, Board, Topic, Post
 
 
 WORKERS_PER_BOARD = 10      # number of worker thread created for each board
-THROTTLE_TIME = 0.5         # time in secs between performing gfaqs IO operations
+THROTTLE_TIME = 1           # time in secs between performing gfaqs IO operations
 BOARD_STAGGER_TIME = 30     # time in secs between starting each board scraper
 
 # User lock: we need this when saving users with multiple threads
