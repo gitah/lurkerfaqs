@@ -56,24 +56,25 @@ class AuthenticatedGFAQSClient(GFAQSClient):
         logger.info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
 
     def login(self):
+        self.opener = build_opener()
         self.opener = authenticate(self.opener,
                 settings.GFAQS_LOGIN_EMAIL,
                 settings.GFAQS_LOGIN_PASSWORD)
         self.login_date = datetime.now()
     
-    def login_if_required(self):
-        """ re-login if the time since last login is too long """
+    def relogin_if_required(self):
+        """ relogin if the time since last login is too long """
         login_period = timedelta(hours=settings.GFAQS_LOGIN_REFRESH_PERIOD_HOURS)
         time_since_last_login = datetime.now() - self.login_date
         if time_since_last_login > login_period:
             self.login()
 
     def get_topic_list(self, board, pg):
-        self.login_if_required()
+        self.relogin_if_required()
         return super(AuthenticatedGFAQSClient, self).get_topic_list(board, pg)
 
     def get_post_list(self, topic, pg):
-        self.login_if_required()
+        self.relogin_if_required()
         return super(AuthenticatedGFAQSClient, self).get_post_list(topic, pg)
 
     
