@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from django.core.paginator import Paginator, EmptyPage
 from django.db import connection, transaction
+from django.conf import settings
 
 from gfaqs.models import Topic, UnindexedTopic
 from batch.batch_base import Batch
 from search.solr import SolrSearcher
 
+logger = logging.getLogger(settings.MISC_LOGGER)
 
 CHUNK_SIZE=10000
 
@@ -19,11 +23,13 @@ class IndexTopics(Batch):
         qs = Topic.objects.all()
         self._index(qs)
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def update(self):
+        log.info("Updating search index")
         qs = UnindexedTopic.objects.all()
         self._index([ut.topic for ut in qs])
         UnindexedTopic.objects.all().delete()
+        log.info("Successfully updated search index")
 
     def _index(self, qs):
         paginator = Paginator(qs, CHUNK_SIZE)
