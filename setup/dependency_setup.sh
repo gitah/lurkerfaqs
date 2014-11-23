@@ -9,7 +9,6 @@ BATCH_LOG=$RUN_DIR/batch.log
 
 # install apache, mysql
 export DEBIAN_FRONTEND=noninteractive
-apt-get -q -y install mysql-server
 apt-get update -q
 cat <<PACKAGES | xargs apt-get install -q -y
 git-core
@@ -40,4 +39,7 @@ pip install sunburnt            # solr
 pip install httplib2            # for sunburnt
 pip install boto                # AWS api
 pip install django              # web framework
-pip install mock                # for testing
+
+# For Testing
+pip install mock
+pip install ipdb

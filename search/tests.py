@@ -35,7 +35,7 @@ class SolrSearcherTest(TestCase):
             #TODO: assert mock.return_val
         pass
 
-    def test_search_topics
+    def test_search_topics(self):
         with patch(search.solor.SolrSearcher, "search_topic") as mock:
             #TODO
             search.solr.SolrSearcher.index_topics()

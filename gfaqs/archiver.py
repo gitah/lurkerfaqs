@@ -62,7 +62,7 @@ class Archiver(Daemon):
         for alias,name,refresh in self.board_info:
             board_url = "%s/%s" % (self.base_url, alias)
             # create board if not in db
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 try:
                     board = Board.objects.get(url=board_url)
                 except ObjectDoesNotExist:
@@ -105,7 +105,7 @@ class Archiver(Daemon):
             except ObjectDoesNotExist:
                 t.pk = None
 
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 t.creator = self.add_user(t.creator)
                 t.save()
                 topics_saved += 1
@@ -130,7 +130,7 @@ class Archiver(Daemon):
         for p in reversed(posts):
             posts_examined += 1
             # Check if post exists already in db to determine update or add
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 try:
                     p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
                     # we already have the rest of the posts in the db

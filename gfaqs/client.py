@@ -34,8 +34,8 @@ class GFAQSClient(object):
         page_url = "%s?%s" % (base, qs)
         try:
             return "".join(self.opener.open(page_url).readlines())
-        except IOError:
-            raise ValueError("page not found")
+        except IOError, e:
+            raise ValueError("page not found: " + str(e))
 
     def get_post_list(self, topic, pg):
         """Fetches the given topic list page"""
@@ -46,7 +46,7 @@ class GFAQSClient(object):
         try:
             return "".join(self.opener.open(page_url).readlines())
         except IOError:
-            raise ValueError("page not found")
+            raise ValueError("page not found: " + str(e))
 
 class AuthenticatedGFAQSClient(GFAQSClient):
     def __init__(self, email, password):

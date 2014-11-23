@@ -8,6 +8,9 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+# Unit test settings
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 ALLOWED_HOSTS = []
 
 ADMINS = (
@@ -187,6 +190,7 @@ GFAQS_LOGIN_REFRESH_PERIOD_HOURS = 24 * 10
 #-- Logging Settings --#
 ARCHIVER_LOGGER = 'gfaqs.archiver'
 DEBUG_LOGGER = 'gfaqs.archiver.debug'
+MISC_LOGGER = 'misc.info'
 
 LOGGING = {
     'version': 1,
@@ -202,10 +206,16 @@ LOGGING = {
         }
     },
     'handlers': {
-        'file': {
+        'archiver_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '%s/archiver.log' % LURKERFAQS_RUN_DIR,
+            'formatter': 'verbose'
+        },
+        'misc_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '%s/misc.log' % LURKERFAQS_RUN_DIR,
             'formatter': 'verbose'
         },
         'console':{
@@ -216,12 +226,17 @@ LOGGING = {
     },
     'loggers': {
         ARCHIVER_LOGGER: {
-            'handlers': ['file'],
+            'handlers': ['archiver_file'],
             'level': 'INFO',
             'propagate': True,
         },
         DEBUG_LOGGER: {
-            'handlers': ['file', 'console'],
+            'handlers': ['archiver_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        MISC_LOGGER: {
+            'handlers': ['misc_file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         }
