@@ -148,7 +148,7 @@ class Archiver(Daemon):
             p_db = Post.objects.filter(topic=t).get(post_num=p.post_num)
             p_db.contents = p.contents
             p_db.save()
-            logger.debug("Updated Post %s for poll" % p)
+            logger.debug("Updated Post [%s] for poll" % p.topic)
 
         logger.debug("Archiving Topic (%s) finished; %s posts examined, %s new" % \
             (t.gfaqs_id, posts_examined, posts_saved))

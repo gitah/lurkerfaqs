@@ -91,15 +91,15 @@ class BoardScraper(Scraper):
         while True:
             try:
                 html = self.gfaqs_client.get_topic_list(self.board, pg)
-            except ValueError:
-                break
-            try:
                 for topic in self._parse_page(html):
                     yield topic
                     pg += 1
+            except ValueError:
+                logger.debug("Reached end of board %s at page %s" % (self.board.url, pg))
+                break;
             except Exception as e:
-                logger.error("Error scrapping board %s, page %s: %s",
-                        self.board.url, pg, str(e))
+                # TODO: emit metric for exception
+                logger.error("Error scrapping board %s, page %s: %s" % (self.board.url, pg, str(e)))
 
 
     def scrape_page(self, page_num):
