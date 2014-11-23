@@ -228,17 +228,17 @@ LOGGING = {
         ARCHIVER_LOGGER: {
             'handlers': ['archiver_file'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         DEBUG_LOGGER: {
             'handlers': ['archiver_file', 'console'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
         MISC_LOGGER: {
             'handlers': ['misc_file', 'console'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         }
     }
 }
