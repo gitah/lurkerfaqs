@@ -5,7 +5,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 from gfaqs.archiver import Archiver
-from gfaqs.archiver import Archiver
+from gfaqs.client import GFAQSClient
 from gfaqs.client import AuthenticatedGFAQSClient
 from django.conf import settings
 
@@ -31,7 +31,7 @@ def show_status():
         print "archiver stopped"
 
 class Command(BaseCommand):
-    args = '<poll_id poll_id ...>'
+    args = '[start|stop|restart|status]'
     help = 'Starts the Gamefaqs archiver'
 
     def handle(self, *args, **options):
@@ -39,11 +39,15 @@ class Command(BaseCommand):
             print help()
             sys.exit(2)
 
-        authed_gfaqs_client = AuthenticatedGFAQSClient(
-            settings.GFAQS_LOGIN_EMAIL,
-            settings.GFAQS_LOGIN_PASSWORD)
+        if settings.GFAQS_LOGIN_AS_USER:
+            gfaqs_client = AuthenticatedGFAQSClient(
+                settings.GFAQS_LOGIN_EMAIL,
+                settings.GFAQS_LOGIN_PASSWORD)
+        else:
+            gfaqs_client = GFAQSClient
+
         daemon = Archiver(pidfile=PIDFILE,
-                gfaqs_client=authed_gfaqs_client)
+                gfaqs_client=gfaqs_client)
         #create pid file
         if args[0] == "start":
             try:
