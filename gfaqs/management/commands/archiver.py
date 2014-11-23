@@ -39,15 +39,16 @@ class Command(BaseCommand):
             print help()
             sys.exit(2)
 
+        my_gfaqs_client = None
         if settings.GFAQS_LOGIN_AS_USER:
-            gfaqs_client = AuthenticatedGFAQSClient(
+            my_gfaqs_client = AuthenticatedGFAQSClient(
                 settings.GFAQS_LOGIN_EMAIL,
                 settings.GFAQS_LOGIN_PASSWORD)
         else:
-            gfaqs_client = GFAQSClient
+            my_gfaqs_client = GFAQSClient()
 
         daemon = Archiver(pidfile=PIDFILE,
-                gfaqs_client=gfaqs_client)
+                gfaqs_client=my_gfaqs_client)
         #create pid file
         if args[0] == "start":
             try:
