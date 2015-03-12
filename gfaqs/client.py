@@ -99,7 +99,6 @@ def authenticate(opener, email, password):
         "path": settings.GFAQS_URL,
         "key": _get_login_key(opener)
     }
-
     # attempt login
     resp = opener.open(login_url, urlencode(post_data))
     _validate_login(cj)
@@ -109,17 +108,17 @@ def _get_login_key(opener):
     """ GameFAQs requires a 'key' field when logging in
         This method makes url request to main page and gets the key """
     fp = opener.open(settings.GFAQS_URL)
-    html = "".join(fp.readlines())
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(fp)
     login_tag = soup.find(id="login")
-    return login_tag.find_all("input")[1]['value']
+    login_key_tag = login_tag.find("input", attrs={"name": "key"})
+    return login_key_tag["value"]
 
 def _validate_login(cj):
     """ Inspects the response from a login attempt and returns true if login
         successful
     """
     try:
-        cj._cookies['.gamefaqs.com']['/']['MDAAuth']
+        cj._cookies['.gamefaqs.com']['/']['MDAUAuth']
     except KeyError:
         raise AuthenticationError("Invalid password/username")
 
