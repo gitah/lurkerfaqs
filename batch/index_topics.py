@@ -9,7 +9,7 @@ from gfaqs.models import Topic, UnindexedTopic
 from batch.batch_base import Batch
 from search.solr import SolrSearcher
 
-logger = logging.getLogger(settings.MISC_LOGGER)
+log = logging.getLogger(settings.MISC_LOGGER)
 
 CHUNK_SIZE=10000
 
