@@ -59,7 +59,7 @@ def handle_topic(gfaqs_topic_id):
             print "Aborted"
 
 def handle_post(gfaqs_topic_id, post_num):
-    post = visibility_manager.get_post(topic, post_num)
+    post = visibility_manager.get_post(gfaqs_topic_id, post_num)
     if not post:
         print "post %s,%s not found" % (gfaqs_topic_id, post_num)
     else:

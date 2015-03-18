@@ -17,6 +17,9 @@ class User(models.Model):
     def __str__(self):
         return self.username
 
+    def is_hidden(self):
+        return int(self.status) == User.HIDDEN
+
 class Board(models.Model):
     """Represents a gamefaqs board (ex. CE)"""
     url = models.CharField(max_length=100)
@@ -25,6 +28,7 @@ class Board(models.Model):
 
     def __str__(self):
         return self.alias
+
 
 class Topic(models.Model):
     """Represents a topic made on gameefaqs"""
@@ -69,6 +73,9 @@ class Topic(models.Model):
     def __str__(self):
         return "[%s] (%s, %s)" % (self.title, self.gfaqs_id, self.creator.username)
 
+    def is_hidden(self):
+        return int(self.status) == Topic.HIDDEN
+
 class Post(models.Model):
     """Represents a post made on gameefaqs"""
     NORMAL, CLOSED, MODDED, EDITED = 0, 1, 2, 3
@@ -94,6 +101,9 @@ class Post(models.Model):
     def __str__(self):
         return "%s\n %s \n---\n %s" % (self.topic,
             self.contents, self.signature)
+
+    def is_hidden(self):
+        return int(self.status) == Post.HIDDEN
 
 class UnindexedTopic(models.Model):
     """ A model for the top_users batch """

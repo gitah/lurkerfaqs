@@ -145,6 +145,8 @@ def show_topic(request, board_alias, topic_num):
     try:
         board = Board.objects.get(alias=board_alias)
         topic = Topic.objects.get(gfaqs_id=topic_num)
+        if topic.is_hidden():
+            raise Http404
     except ObjectDoesNotExist:
         raise Http404
 
@@ -158,6 +160,9 @@ def show_topic(request, board_alias, topic_num):
         return HttpResponse(t.render(c))
 
     for post in posts:
+        if post.is_hidden():
+            post.contents = "[REMOVED]"
+            post.signature = ""
         post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG)
     op_post = posts[0]
     posts = posts[1:]
@@ -216,6 +221,8 @@ def get_user(username):
     """ returns user with given username; raises Http404 if no user found"""
     try:
         user = User.objects.get(username=username)
+        if user.is_hidden():
+            raise Http404
     except ObjectDoesNotExist:
         raise Http404
     return user
