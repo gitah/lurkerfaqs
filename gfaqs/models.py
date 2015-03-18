@@ -3,7 +3,8 @@ from django.db import models
 
 class User(models.Model):
     """Represents a gamefaqs user"""
-    NORMAL, MOD, ADMIN, HIDDEN= 0,1,2,9
+    NORMAL, MOD, ADMIN = 0, 1, 2
+    HIDDEN = 99
     USER_STATUS = (
         (NORMAL,"normal"),
         (MOD,"mod"),
@@ -30,6 +31,7 @@ class Topic(models.Model):
     NORMAL, CLOSED, ARCHIVED = 0, 1, 2
     STICKY, STICKY_CLOSED,PURGED = 3, 4, 5
     POLL, POLL_CLOSED, POLL_ARCHIVED = 6, 7, 8
+    HIDDEN = 99
 
     POLL_STATUSES = {POLL, POLL_CLOSED, POLL_ARCHIVED}
     ARCHIVED_STATUSES = {ARCHIVED, POLL_ARCHIVED}
@@ -45,6 +47,7 @@ class Topic(models.Model):
         (POLL, "poll"),
         (POLL_CLOSED, "poll_closed"),
         (POLL_ARCHIVED, "poll_archived"),
+        (HIDDEN, "hidden"),
     )
     board = models.ForeignKey(Board)
     creator = models.ForeignKey(User)
@@ -68,12 +71,14 @@ class Topic(models.Model):
 
 class Post(models.Model):
     """Represents a post made on gameefaqs"""
-    NORMAL, CLOSED, MODDED, EDITED = 0,1,2,3
+    NORMAL, CLOSED, MODDED, EDITED = 0, 1, 2, 3
+    HIDDEN = 99
     POST_STATUS = (
         (NORMAL,"normal"),
         (CLOSED,"closed"),
         (MODDED,"modded"),
-        (EDITED,"edited")
+        (EDITED,"edited"),
+        (HIDDEN,"hidden"),
     )
     topic = models.ForeignKey(Topic)
     creator = models.ForeignKey(User)
