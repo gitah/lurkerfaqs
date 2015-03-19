@@ -187,6 +187,12 @@ GFAQS_LOGIN_PASSWORD = ""
 GFAQS_LOGIN_REFRESH_PERIOD_HOURS = 24 * 10
 
 
+#-- Paypal Settings --#
+PAYPAL_USE_SANDBOX = True
+PAYPAL_CLIENT_ID = None
+PAYPAL_CLIENT_SECRET = None
+
+
 #-- Logging Settings --#
 ARCHIVER_LOGGER = 'gfaqs.archiver'
 DEBUG_LOGGER = 'gfaqs.archiver.debug'

@@ -39,6 +39,7 @@ pip install sunburnt            # solr
 pip install httplib2            # for sunburnt
 pip install boto                # AWS api
 pip install django              # web framework
+pip install paypalrestsdk       # paypal sdk
 
 # For Testing
 pip install mock
