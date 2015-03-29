@@ -25,6 +25,7 @@ if settings.PAYPAL_CLIENT_ID and settings.PAYPAL_CLIENT_SECRET:
     mode = PaypalServiceAccessor.CLIENT_SANDBOX_MODE if settings.PAYPAL_USE_SANDBOX else PaypalServiceAccessor.CLIENT_LIVE_MODE
     ppAcc = PaypalServiceAccessor(settings.PAYPAL_CLIENT_ID,
             settings.PAYPAL_CLIENT_SECRET, mode)
+    print "FOOBAR ", mode, settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET
 
 
 def create_payment_delete_post(request, gfaqs_topic_id, post_num):
@@ -34,15 +35,16 @@ def create_payment_delete_post(request, gfaqs_topic_id, post_num):
 
     ret_url = reverse(confirm_payment_delete_post, args=[gfaqs_topic_id, post_num])
     description = DELETE_POST_DESCRIPTION_TMPL % (gfaqs_topic_id, post_num)
-    return _create_payment(request, DELETE_POST_AMOUNT_USD, ret_url)
+    return _create_payment(request, DELETE_POST_AMOUNT_USD, ret_url, description)
 
-def _create_payment(request, amount, return_url):
+def _create_payment(request, amount, return_url, description):
     if not ppAcc:
         raise Http404("Server not configured for payments")
 
     # cancel url is same as return url since payment confirmation api will
     # figure out whether or not user paid
-    approval_url = ppAcc.create_payment(amount, return_url, return_url, description)
+    full_ret_url = "http://%s%s" % (request.META['HTTP_HOST'], return_url)
+    approval_url = ppAcc.create_payment(amount, full_ret_url, full_ret_url, description)
 
     resp = {
         "approval_url": approval_url
@@ -57,36 +59,38 @@ def confirm_payment_delete_post(request, gfaqs_topic_id, post_num):
         3. delete post
         4. redirect to original topic
     """
-    redirect_url = reverse(views.show_topic, args=[gfaqs_topic_id, post_num])
-    success = _confirm_payment(request, redirect_url)
-    if not success:
-        log.info("Payment failed for post %s,%s" % (gfaqs_topic_id, post_num))
-        return HttpResponseRedirect(redirect_url)
     post = visibility_manager.get_post(gfaqs_topic_id, post_num)
     if not post:
         log.error("Post %s,%s could not be found" % (gfaqs_topic_id, post_num))
         return HttpResponseRedirect(redirect_url)
-    visibility_manager.hide_post(gfaqs_topic_id, post_num)
+    board_id = post.topic.board.alias
+    topic_id = post.topic.gfaqs_id
+    redirect_url = reverse(views.show_topic, args=[board_id, topic_id])
+    success = _confirm_payment(request)
+    success = True
+    if not success:
+        log.info("Payment failed for post %s,%s" % (gfaqs_topic_id, post_num))
+        return HttpResponseRedirect(redirect_url)
+    visibility_manager.hide_post(post)
     log.info("Successfully processed payment and hid post %s!" % post)
     return HttpResponseRedirect(redirect_url)
 
 
 def _extract_payment_params(request):
     """ Example:
-    ?success=true&paymentId=<PAYMENT_ID>&token=<TOKEN>&PayerID=<PAYER_ID>
+    ?paymentId=<PAYMENT_ID>&token=<TOKEN>&PayerID=<PAYER_ID>
     """
     qs_dict = request.GET
-    success = qs_dict.get(PaypalServiceAccessor.RESPONSE_QS_SUCCESS, False)
     payment_id = qs_dict.get(PaypalServiceAccessor.RESPONSE_QS_PAYMENT_ID)
     payer_id = qs_dict.get(PaypalServiceAccessor.RESPONSE_QS_PAYER_ID)
-    return (success, payment_id, payer_id)
+    return (payment_id, payer_id)
 
 # TODO: redirect with flash
 def _confirm_payment(request):
     if not ppAcc:
         raise Http404("Server not configured for payments")
 
-    success, payment_id, payer_id  = _extract_payment_params(request)
-    if not success:
+    payment_id, payer_id  = _extract_payment_params(request)
+    if not payment_id or not payer_id:
         return False
-    return pp.execute_payment(payment_id, payer_id)
+    return ppAcc.execute_payment(payment_id, payer_id)

@@ -1,4 +1,5 @@
 import paypalrestsdk
+from django.conf import settings
 
 class PaypalServiceAccessor(object):
     """
@@ -51,7 +52,8 @@ class PaypalServiceAccessor(object):
         payment.create()
         payment_info = payment.to_dict()
         if not payment.success():
-            raise ValueError("Payment creation failed: %s" % payment_info)
+            error_info = payment.error
+            raise ValueError("Payment creation failed: %s with error: %s" % (payment_info, error_info))
         for link in payment_info['links']:
             if link['rel'] == 'approval_url':
                 return link['href']
@@ -64,3 +66,18 @@ class PaypalServiceAccessor(object):
     def execute_payment(self, payment_id, payer_id):
         payment = self.paypal_client.Payment.find(payment_id)
         return payment.execute({"payer_id": payer_id})
+
+
+def test():
+    client_id = settings.PAYPAL_CLIENT_ID
+    client_secret = settings.PAYPAL_CLIENT_SECRET
+    pp = PaypalServiceAccessor(client_id, client_secret, "sandbox")
+
+    auth_url = pp.create_payment(10.0,
+            "https://devtools-paypal.com/guide/pay_paypal/python?success=true",
+            "https://devtools-paypal.com/guide/pay_paypal/python?cancel=true",
+            "foobarkk")
+    print auth_url
+
+if __name__ == "__main__":
+    test()
