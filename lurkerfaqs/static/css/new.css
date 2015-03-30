@@ -8,6 +8,13 @@ blockquote {
     margin-left: 0px;
 }
 
+.row [class*='col-']:not(:first-child),
+.row [class*='col-']:not(:last-child) {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+
 .container-fluid {
     margin-right: 0px;
     margin-left: 0px;
@@ -15,6 +22,7 @@ blockquote {
     padding-left: 0px;
 }
 
+/*-- General --*/
 .lurk-board-title h1 {
 	border-bottom: 1px solid #898989;
 	margin: 0px;
@@ -30,6 +38,9 @@ blockquote {
 	border-collapse: collapse;
 	width: 100%;
 	text-align: left;
+	border: 0 solid #999;
+	border-width: 2px 0 0;
+	margin: 1px 0 15px;
 }
 
 .lurk-table .row {

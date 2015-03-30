@@ -20,9 +20,10 @@
 <div class="container-fluid lurk-table colorVisitedLink">
 
     <div class="row lurk-post-info" id="{{op_post.post_num}}">
-        <!--<div class="col-md-12 text-left">-->
+        <div class="col-xs-6 text-left">
             <a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}
-        <!--</div>-->
+        </div>
+        <div class="col-xs-6 text-right">Foobar</div>
     </div>
     <div class="row lurk-post-content">
         {{op_post.contents|safe}}
@@ -64,6 +65,7 @@
 </div>
 {% endif %}
 
+{% if related_topics %}
 <br />
 <div class="head related_topics">Related Topics</div>
 <table class="related_topics colorVisitedLink">
@@ -76,5 +78,6 @@
     </tr>
 {% endfor %}
 </table>
+{% endif %}
 
 {% endblock %}
