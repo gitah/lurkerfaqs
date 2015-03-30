@@ -17,7 +17,9 @@ a {
 	text-decoration: none;
 }
 
-a:hover {text-decoration: underline;}
+a:hover {
+    text-decoration: underline;
+}
 
 #container {
    min-height:100%;
@@ -223,7 +225,11 @@ table.message img {
 .board_poll .table .table_row:last-child{border-bottom:0;}
 
 /* -- Quotes -- */
-blockquote{border-style:dotted;border-width:1px;padding:2px 6px 2px 6px;margin:0;}
+blockquote {
+    padding:2px 6px 2px 6px;
+    margin:0;
+    border: 1px dotted black;
+}
 cite{font-weight:bold; font-style: italic}
 
 /* -- Spoilers */

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+<!--Board Title-->
+<div class="lurk-board-title"><h1>{{board.name}}</h1></div>
+
+<!--NAV-->
+<div class="navLinks right">
+    Back To:
+    <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a> |
+    <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a>
+</div>
+<div class="clear"></div>
+
+<!--Topic Title-->
+<div class="row lurk-post-topic-title">{{ topic.title }}</div>
+
+<!--Posts Table-->
+<div class="container-fluid lurk-table colorVisitedLink">
+
+    <div class="row lurk-post-info" id="{{op_post.post_num}}">
+        <!--<div class="col-md-12 text-left">-->
+            <a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}
+        <!--</div>-->
+    </div>
+    <div class="row lurk-post-content">
+        {{op_post.contents|safe}}
+        {% if op_post.signature %}
+            <br>--<br>
+            {{op_post.signature|safe}}
+        {% endif %}
+    </div>
+
+    {% for post in posts %}
+    <div class="row lurk-post-info" id="{{post.post_num}}">
+        <a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
+    </div>
+    <div class="row lurk-post-content">
+        {{post.contents|safe}}
+        {% if post.signature %}
+            <br>--<br>
+            {{post.signature|safe}}
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</div>
+
+{% if page_guide %}
+<div class="pagination">
+    Jump to page:
+    {% for i in page_guide %}
+        {% if i == "..." or i == '|'%}
+          <span>{{i}}</span>
+        {% elif i == current_page %}
+          <span class="current">{{i}}</span>
+        {% else %}
+            <span>
+                <a href="{% url "lurkerfaqs.views.show_topic" board.alias topic.gfaqs_id %}?page={{i}}">{{i}}</a>
+            </span>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<br />
+<div class="head related_topics">Related Topics</div>
+<table class="related_topics colorVisitedLink">
+{% for rtopic in related_topics %}
+    <tr class="{% cycle 'even' 'odd' %}">
+        <td><img src="{{STATIC_URL}}img/{{rtopic.status_icon}}"/></td>
+        <td><a href="{% url "lurkerfaqs.views.show_topic" board.alias rtopic.gfaqs_id %}">{{rtopic.title}}</a></td>
+        <td><a href="{% url "lurkerfaqs.views.show_user" rtopic.creator.username %}">{{rtopic.creator.username}}</a></td>
+        <td>{{rtopic.number_of_posts}}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}

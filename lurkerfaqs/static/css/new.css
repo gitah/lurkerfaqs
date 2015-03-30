@@ -1,0 +1,84 @@
+/* -- Bootstrap overrides -- */
+blockquote {
+    font-size: inherit;
+}
+
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.container-fluid {
+    margin-right: 0px;
+    margin-left: 0px;
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.lurk-board-title h1 {
+	border-bottom: 1px solid #898989;
+	margin: 0px;
+	margin-bottom: 20px;
+	padding: 0px;
+	color: blue;
+    font: 22px arial,helvetica,sans-serif;
+    font-weight: bold;
+}
+
+/* -- Table --*/
+.lurk-table {
+	border-collapse: collapse;
+	width: 100%;
+	text-align: left;
+}
+
+.lurk-table .row {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.lurk-table p {
+    margin: 0px;
+}
+
+
+/* -- Post List -- */
+.lurk-post-topic-title{
+	background:#6564FF;
+	color: white;
+	font-weight: bold;
+	padding: 6px 8px;
+	line-height: 16px;
+}
+
+.lurk-post-info, .lurk-post-content {
+	border: 0 solid #999;
+    border-width: 0 0 2px;
+	font-size: 12px;
+	padding: 10px;
+	vertical-align: top;
+}
+
+.lurk-post-info {
+	background: #EEE;
+}
+
+.lurk-post-content {
+    background: white
+}
+
+
+.lurk-post-content img {
+    max-width: 100%;
+}
+
+.lurk-post-content blockquote {
+    padding:2px 6px 2px 6px;
+    margin:0;
+    border: 1px dotted black;
+}
+
+/*-- Related Topics --*/
+.related_topics td {
+    padding: 1px;
+}

@@ -176,7 +176,7 @@ def show_topic(request, board_alias, topic_num):
     for tp in related_topics:
         load_status_icon(tp)
 
-    t = loader.get_template('posts.html')
+    t = loader.get_template('posts_new.html')
     c = build_context(request, board=topic.board, topic=topic,
             posts=posts, op_post=op_post, related_topics=related_topics,
             current_page=current_page, page_guide=page_guide)
