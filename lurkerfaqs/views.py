@@ -163,9 +163,12 @@ def show_topic(request, board_alias, topic_num):
         if post.is_hidden():
             post.contents = "[REMOVED]"
             post.signature = ""
+            post.removed = True
+        else:
+            post.removed = False
         post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG)
     op_post = posts[0]
-    posts = posts[1:]
+    posts = posts
 
     # get related topics to this one
     related_topics_gids = SolrSearcher.search_related_topics(

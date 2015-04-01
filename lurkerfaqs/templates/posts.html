@@ -19,7 +19,6 @@
 {% block table_contents %}
     <tr id="{{op_post.post_num}}">
         <td><a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}</td>
-        <td>foobar</td>
     </tr>
     <tr class="even"><td>
             {{op_post.contents|safe}}
@@ -32,7 +31,6 @@
     {% for post in posts %}
     <tr id="{{post.post_num}}">
         <td><a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}</td>
-        <td>foobar</td>
     </tr>
     <tr class="even"><td>
         {{post.contents|safe}}

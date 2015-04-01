@@ -18,24 +18,17 @@
 
 <!--Posts Table-->
 <div class="container-fluid lurk-table colorVisitedLink">
-
-    <div class="row lurk-post-info" id="{{op_post.post_num}}">
-        <div class="col-xs-6 text-left">
-            <a href={% url "lurkerfaqs.views.show_user" op_post.creator.username %}>{{op_post.creator.username}}</a> | Posted on {{op_post.date}}
-        </div>
-        <div class="col-xs-6 text-right">Foobar</div>
-    </div>
-    <div class="row lurk-post-content">
-        {{op_post.contents|safe}}
-        {% if op_post.signature %}
-            <br>--<br>
-            {{op_post.signature|safe}}
-        {% endif %}
-    </div>
-
     {% for post in posts %}
     <div class="row lurk-post-info" id="{{post.post_num}}">
-        <a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
+        <div class="col-xs-6 text-left">
+            <a href={% url "lurkerfaqs.views.show_user" post.creator.username %}>{{post.creator.username}}</a> | Posted on {{post.date}}
+        </div>
+        <div class="col-xs-6 text-right">
+            {% if not post.removed %}
+                <span onclick="showDeletePostPopup({{topic.gfaqs_id}}, {{post.post_num}})"
+                    class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            {% endif %}
+        </div>
     </div>
     <div class="row lurk-post-content">
         {{post.contents|safe}}
@@ -45,8 +38,35 @@
         {% endif %}
     </div>
     {% endfor %}
-
 </div>
+
+
+<div id="deletePostModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title text-center">Delete Post #<span id="post_num_display"> </span></h4>
+      </div>
+      <div class="modal-body">
+      <div class="container-fluid large-text">
+        <div class="row text-left">
+            <p>Want to delete this post? Please donate <span class="currency-text">$5.00</span> to <span class="brand-text">LukerFAQs</span>.
+            This contribution will be spent for this site's operation expenses.</p>
+        </div>
+        <p>Payment is processed through <span class="brand-text">Paypal</span></p>
+        <div class="row text-center mid-spacing">
+            <button id="donateButton" type="button" class="btn btn-warning">Donate</button>
+        </div>
+        <div class="row text-center">
+            <img src="https://www.paypalobjects.com/webstatic/mktg/logo/bdg_payments_by_pp_2line.png"/>
+        </div>
+      </div><!--/.container-fluid-->
+      </div><!-- /.modal-body -->
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 {% if page_guide %}
 <div class="pagination">
