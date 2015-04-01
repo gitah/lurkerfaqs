@@ -36,6 +36,8 @@ LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
 
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+
 # SMTP settings
 EMAIL_HOST = ''
 EMAIL_PORT = 587
@@ -102,6 +104,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
+    'django.contrib.messages.context_processors.messages',
 )
 
 TEMPLATE_DIRS = (
@@ -112,9 +115,9 @@ TEMPLATE_DIRS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware',
     #'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -125,6 +128,7 @@ WSGI_APPLICATION = 'lurkerfaqs.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.staticfiles',
+    'django.contrib.messages',
     'gfaqs',
     'batch',
     'lurkerfaqs',

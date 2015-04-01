@@ -7,6 +7,8 @@ from django.template import loader, RequestContext
 from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.db import connection, transaction
+from django.contrib import messages
+
 
 from batch.models import UserTopicCount, UserPostCount
 from gfaqs.models import Board, User, Topic, Post

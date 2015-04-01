@@ -26,7 +26,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
-
     <!-- Lurkerfaqs -->
     <link rel="stylesheet" type="text/css" href={{STATIC_URL}}css/default.css />
     <link rel="stylesheet" type="text/css" href={{STATIC_URL}}css/new.css />
@@ -66,9 +65,20 @@
   </div>
 
   <!-- Main -->
-  <div id="notifications">
-  </div>
   <div id="contents">
+      <div id="messages">
+        {% if messages %}
+          {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+              <div class="alert alert-success" role="alert"> {{ message }} </div>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+              <div class="alert alert-danger" role="alert"> {{ message }} </div>
+            {% else %}
+              <div class="alert alert-info" role="alert"> {{ message }} </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
       {% block main %}{% endblock %}
   </div>
 

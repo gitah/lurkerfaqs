@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseServerError, HttpResponseNotFound, Http404
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.contrib import messages
 
 from gfaqs.admin import ContentVisibilityManager
 from payments.paypal import PaypalServiceAccessor
@@ -18,6 +19,8 @@ DELETE_TOPIC_AMOUNT_USD = 10.0
 DELETE_USER_AMOUNT_USD = 25.0
 
 DELETE_POST_DESCRIPTION_TMPL = "Payment to delete topic %s, post %s"
+PAYMENT_ERROR_MSG = "Error Processing Payment. Please try again."
+PAYMENT_SUCCESS_MSG = "Success! Post #%s by %s has been deleted"
 
 visibility_manager = ContentVisibilityManager()
 ppAcc = None
@@ -25,7 +28,6 @@ if settings.PAYPAL_CLIENT_ID and settings.PAYPAL_CLIENT_SECRET:
     mode = PaypalServiceAccessor.CLIENT_SANDBOX_MODE if settings.PAYPAL_USE_SANDBOX else PaypalServiceAccessor.CLIENT_LIVE_MODE
     ppAcc = PaypalServiceAccessor(settings.PAYPAL_CLIENT_ID,
             settings.PAYPAL_CLIENT_SECRET, mode)
-    print "FOOBAR ", mode, settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET
 
 
 def create_payment_delete_post(request, gfaqs_topic_id, post_num):
@@ -61,17 +63,19 @@ def confirm_payment_delete_post(request, gfaqs_topic_id, post_num):
     """
     post = visibility_manager.get_post(gfaqs_topic_id, post_num)
     if not post:
+        messages.error(request, PAYMENT_ERROR_MSG)
         log.error("Post %s,%s could not be found" % (gfaqs_topic_id, post_num))
         return HttpResponseRedirect(redirect_url)
     board_id = post.topic.board.alias
     topic_id = post.topic.gfaqs_id
     redirect_url = reverse(views.show_topic, args=[board_id, topic_id])
     success = _confirm_payment(request)
-    success = True
     if not success:
-        log.info("Payment failed for post %s,%s" % (gfaqs_topic_id, post_num))
+        messages.error(request, PAYMENT_ERROR_MSG)
+        log.error("Payment failed for post %s,%s" % (gfaqs_topic_id, post_num))
         return HttpResponseRedirect(redirect_url)
     visibility_manager.hide_post(post)
+    messages.success(request, PAYMENT_SUCCESS_MSG % (post.post_num, post.creator.username))
     log.info("Successfully processed payment and hid post %s!" % post)
     return HttpResponseRedirect(redirect_url)
 
@@ -85,7 +89,6 @@ def _extract_payment_params(request):
     payer_id = qs_dict.get(PaypalServiceAccessor.RESPONSE_QS_PAYER_ID)
     return (payment_id, payer_id)
 
-# TODO: redirect with flash
 def _confirm_payment(request):
     if not ppAcc:
         raise Http404("Server not configured for payments")
