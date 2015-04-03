@@ -27,6 +27,9 @@ urlpatterns = patterns('',
 urlpatterns += patterns('',
     url(r'^payment/delete_post/(?P<gfaqs_topic_id>\d+)/(?P<post_num>\d+)/$', payment_views.create_payment_delete_post),
     url(r'^payment_confirmation/delete_post/(?P<gfaqs_topic_id>\d+)/(?P<post_num>\d+)/$', payment_views.confirm_payment_delete_post),
+
+    url(r'^payment/delete_topic/(?P<gfaqs_topic_id>\d+)/$', payment_views.create_payment_delete_topic),
+    url(r'^payment_confirmation/delete_topic/(?P<gfaqs_topic_id>\d+)/$', payment_views.confirm_payment_delete_topic),
     #url(r'^payment_cancel/$', 'cancel_payment'),
 )
 

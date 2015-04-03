@@ -15,12 +15,14 @@ from lurkerfaqs import views
 log = logging.getLogger(settings.MISC_LOGGER)
 
 DELETE_POST_AMOUNT_USD = 5.0
-DELETE_TOPIC_AMOUNT_USD = 10.0
+DELETE_TOPIC_AMOUNT_USD = 15.0
 DELETE_USER_AMOUNT_USD = 25.0
 
 DELETE_POST_DESCRIPTION_TMPL = "Payment to delete topic %s, post %s"
+DELETE_TOPIC_DESCRIPTION_TMPL = "Payment to delete topic %s"
 PAYMENT_ERROR_MSG = "Error Processing Payment. Please try again."
-PAYMENT_SUCCESS_MSG = "Success! Post #%s by %s has been deleted"
+PAYMENT_DELETE_POST_SUCCESS_MSG = "Success! Post #%s by %s has been deleted"
+PAYMENT_DELETE_TOPIC_SUCCESS_MSG = "Success! Topic #%s by %s has been deleted"
 
 visibility_manager = ContentVisibilityManager()
 ppAcc = None
@@ -39,6 +41,15 @@ def create_payment_delete_post(request, gfaqs_topic_id, post_num):
     description = DELETE_POST_DESCRIPTION_TMPL % (gfaqs_topic_id, post_num)
     return _create_payment(request, DELETE_POST_AMOUNT_USD, ret_url, description)
 
+def create_payment_delete_topic(request, gfaqs_topic_id):
+    topic = visibility_manager.get_topic(gfaqs_topic_id)
+    if not topic:
+        raise Http404("Invalid Topic %ss" % (gfaqs_topic_id))
+
+    ret_url = reverse(confirm_payment_delete_topic, args=[gfaqs_topic_id])
+    description = DELETE_TOPIC_DESCRIPTION_TMPL % (gfaqs_topic_id)
+    return _create_payment(request, DELETE_TOPIC_AMOUNT_USD, ret_url, description)
+
 def _create_payment(request, amount, return_url, description):
     if not ppAcc:
         raise Http404("Server not configured for payments")
@@ -54,20 +65,31 @@ def _create_payment(request, amount, return_url, description):
     return JsonResponse(resp)
 
 
+def confirm_payment_delete_topic(request, gfaqs_topic_id):
+    topic = visibility_manager.get_topic(gfaqs_topic_id)
+    if not topic:
+        messages.error(request, PAYMENT_ERROR_MSG)
+        log.error("Topic %s could not be found" % (gfaqs_topic_id))
+        return HttpResponseRedirect(redirect_url)
+    board_id = topic.board.alias
+    redirect_url = reverse(views.show_board, args=[board_id])
+    success = _confirm_payment(request)
+    if not success:
+        messages.error(request, PAYMENT_ERROR_MSG)
+        log.error("Payment failed for topic %s" % (gfaqs_topic_id))
+        return HttpResponseRedirect(redirect_url)
+    visibility_manager.hide_topic(topic)
+    messages.success(request, PAYMENT_DELETE_TOPIC_SUCCESS_MSG % (topic.gfaqs_id, topic.creator.username))
+    log.info("Successfully processed payment and hid topic %s!" % topic)
+    return HttpResponseRedirect(redirect_url)
+
 def confirm_payment_delete_post(request, gfaqs_topic_id, post_num):
-    """
-        1. confirm payment and execute
-        2. find post
-        3. delete post
-        4. redirect to original topic
-    """
     post = visibility_manager.get_post(gfaqs_topic_id, post_num)
     if not post:
         messages.error(request, PAYMENT_ERROR_MSG)
         log.error("Post %s,%s could not be found" % (gfaqs_topic_id, post_num))
         return HttpResponseRedirect(redirect_url)
-    board_id = post.topic.board.alias
-    topic_id = post.topic.gfaqs_id
+    board_id, topic_id = post.topic.board.alias, post.topic.gfaqs_id
     redirect_url = reverse(views.show_topic, args=[board_id, topic_id])
     success = _confirm_payment(request)
     if not success:
@@ -75,7 +97,7 @@ def confirm_payment_delete_post(request, gfaqs_topic_id, post_num):
         log.error("Payment failed for post %s,%s" % (gfaqs_topic_id, post_num))
         return HttpResponseRedirect(redirect_url)
     visibility_manager.hide_post(post)
-    messages.success(request, PAYMENT_SUCCESS_MSG % (post.post_num, post.creator.username))
+    messages.success(request, PAYMENT_DELETE_POST_SUCCESS_MSG % (post.post_num, post.creator.username))
     log.info("Successfully processed payment and hid post %s!" % post)
     return HttpResponseRedirect(redirect_url)
 

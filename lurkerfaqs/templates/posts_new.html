@@ -9,7 +9,9 @@
 <div class="navLinks right">
     Back To:
     <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a> |
-    <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a>
+    <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a> |
+    <a href="#" onclick="showDeleteContentPopup({{topic.gfaqs_id}})">Delete Topic</a> |
+    <a href="#" onclick="toggleDeletePostVisibility()">Delete Post</a>
 </div>
 <div class="clear"></div>
 
@@ -25,8 +27,8 @@
         </div>
         <div class="col-xs-6 text-right">
             {% if not post.removed %}
-                <span onclick="showDeletePostPopup({{topic.gfaqs_id}}, {{post.post_num}})"
-                    class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                <span onclick="showDeleteContentPopup({{topic.gfaqs_id}}, {{post.post_num}})"
+                    class="deletePostButton glyphicon glyphicon-remove" aria-hidden="true"></span>
             {% endif %}
         </div>
     </div>
@@ -51,7 +53,7 @@
       <div class="modal-body">
       <div class="container-fluid large-text">
         <div class="row text-left">
-            <p>Want to delete this post? Please donate <span class="currency-text">$5.00</span> to <span class="brand-text">LukerFAQs</span>.
+            <p>Want to delete this <span class="contentType"></span>? Please donate <span class="currency-text">$5.00</span> to <span class="brand-text">LukerFAQs</span>.
             This contribution will be spent for this site's operation expenses.</p>
         </div>
         <p>Payment is processed through <span class="brand-text">Paypal</span></p>
