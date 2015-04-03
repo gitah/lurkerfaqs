@@ -3,13 +3,19 @@ import os
 import logging
 
 from django.core.management.base import BaseCommand, CommandError
-from gfaqs.models import User, Board, Topic, Post
+from django.core.cache import cache
 from django.conf import settings
+from django.db import transaction
+
+from gfaqs.models import User, Board, Topic, Post
 
 class ContentVisibilityManager(object):
     """
     Manages visibility of content
     """
+    def clear_cache(self):
+        cache.clear()
+
     def get_user(self, username):
         return User.objects.get(username=username)
 
@@ -28,15 +34,19 @@ class ContentVisibilityManager(object):
         else:
             user.status = User.HIDDEN
             user.save()
-            return user
+        self.clear_cache()
+        return user
 
     def hide_topic(self, topic):
         if not topic:
             return None
-        else:
+        with transaction.atomic():
+            for post in topic.posts:
+                self.hide_post(post)
             topic.status = Topic.HIDDEN
             topic.save()
-            return topic
+        self.clear_cache()
+        return topic
 
     def hide_post(self, post):
         if not post:
@@ -44,5 +54,6 @@ class ContentVisibilityManager(object):
         else:
             post.status = post.HIDDEN
             post.save()
-            return post
+        self.clear_cache()
+        return post
 

@@ -74,6 +74,7 @@ $(function() {
         } else {
             url = getCreatePaymentDeleteTopicUrl(topicId);
         }
+
         $.getJSON(url, function(resp) {
             var approvalUrl = resp["approval_url"];
             window.location.replace(approvalUrl);

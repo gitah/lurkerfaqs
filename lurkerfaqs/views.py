@@ -104,6 +104,16 @@ def load_status_icon(topic):
     # map topic status to icons
     topic.status_icon = TOPIC_STATUS_TO_IMG.get(int(topic.status), TOPIC_STATUS_TO_IMG["default"])
 
+def remove_hidden_posts(posts):
+    for post in posts:
+        if post.is_hidden():
+            post.contents = "[REMOVED]"
+            post.signature = ""
+            post.removed = True
+        else:
+            post.removed = False
+    return posts
+
 # -- Boards -- #
 @cache_page(settings.CACHE_STORAGE_TIME)
 def show_boards(request):
@@ -161,16 +171,10 @@ def show_topic(request, board_alias, topic_num):
         c = build_context(request, topic=topic, board=topic.board)
         return HttpResponse(t.render(c))
 
+    posts = remove_hidden_posts(posts)
     for post in posts:
-        if post.is_hidden():
-            post.contents = "[REMOVED]"
-            post.signature = ""
-            post.removed = True
-        else:
-            post.removed = False
         post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG)
     op_post = posts[0]
-    posts = posts
 
     # get related topics to this one
     related_topics_gids = SolrSearcher.search_related_topics(
@@ -273,6 +277,7 @@ def show_user_posts(request, username):
     posts, current_page, page_guide = get_qs_paged(
         request, qs, settings.LURKERFAQS_POSTS_PER_PAGE)
 
+    posts = remove_hidden_posts(posts)
     for post in posts:
         post.contents = linkify(post.contents, settings.LURKERFAQS_LINKIFY_IMG )
 
