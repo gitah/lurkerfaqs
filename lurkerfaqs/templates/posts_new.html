@@ -8,10 +8,12 @@
 <!--NAV-->
 <div class="navLinks right">
     Back To:
-    <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a> |
-    <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a> |
-    <a href="#" onclick="showDeleteContentPopup({{topic.gfaqs_id}})">Delete Topic</a> |
-    <a href="#" onclick="toggleDeletePostVisibility()">Delete Post</a>
+    <a href="{% url "lurkerfaqs.views.show_boards" %}">Board list</a>
+    | <a href="{% url "lurkerfaqs.views.show_board" board.alias %}">Topic list</a>
+    {% if payment_enabled %}
+        | <a href="#" onclick="showDeleteContentPopup({{topic.gfaqs_id}})">Delete Topic</a>
+        | <a href="#" onclick="toggleDeletePostVisibility()">Delete Post</a>
+    {% endif %}
 </div>
 <div class="clear"></div>
 

@@ -185,10 +185,13 @@ def show_topic(request, board_alias, topic_num):
     for tp in related_topics:
         load_status_icon(tp)
 
+    payment_enabled = settings.ENABLE_PAYMENTS
+
     t = loader.get_template('posts_new.html')
     c = build_context(request, board=topic.board, topic=topic,
             posts=posts, op_post=op_post, related_topics=related_topics,
-            current_page=current_page, page_guide=page_guide)
+            current_page=current_page, page_guide=page_guide,
+            payment_enabled=payment_enabled)
     return HttpResponse(t.render(c))
 
 @cache_page(settings.CACHE_STORAGE_TIME)
