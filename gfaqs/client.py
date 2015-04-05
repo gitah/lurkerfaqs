@@ -51,22 +51,23 @@ class GFAQSClient(object):
 class AuthenticatedGFAQSClient(GFAQSClient):
     def __init__(self, email, password):
         logger.info("Creating Authenticated GFAQSClient with email=%s" % email)
-        self.opener = build_opener()
+        self.email = email
+        self.password = password
         self.login()
-        logger.info("Logged in as %s" % settings.GFAQS_LOGIN_EMAIL)
 
     def login(self):
+        logger.info("Attempting to log in in as %s" % self.email)
         self.opener = build_opener()
-        self.opener = authenticate(self.opener,
-                settings.GFAQS_LOGIN_EMAIL,
-                settings.GFAQS_LOGIN_PASSWORD)
+        self.opener = authenticate(self.opener, self.email, self.password)
         self.login_date = datetime.now()
+        logger.info("Logged in as %s" % self.email)
     
     def relogin_if_required(self):
         """ relogin if the time since last login is too long """
         login_period = timedelta(hours=settings.GFAQS_LOGIN_REFRESH_PERIOD_HOURS)
         time_since_last_login = datetime.now() - self.login_date
         if time_since_last_login > login_period:
+            logger.info("Login time expired. Re-login in as %s" % self.email)
             self.login()
 
     def get_topic_list(self, board, pg):

@@ -40,16 +40,6 @@ class Archiver(Daemon):
         self.gfaqs_client = gfaqs_client
 
     def run(self):
-        """
-        # Build GFAQSClient to access webpage
-        if settings.GFAQS_LOGIN_AS_USER:
-            self.gfaqs_client = AuthenticatedGFAQSClient(
-                settings.GFAQS_LOGIN_EMAIL, settings.GFAQS_LOGIN_PASSWORD)
-        else:
-            self.gfaqs_client = GFAQSClient()
-        """
-
-    def run(self):
         # Initialize threadpool
         # we need at least one thread for each board
         num_workers = len(self.board_info)* WORKERS_PER_BOARD + 1
