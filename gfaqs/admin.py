@@ -19,8 +19,20 @@ class ContentVisibilityManager(object):
     def get_user(self, username):
         return User.objects.get(username=username)
 
+    def get_topics_for_user(self, user):
+        qs = Topic.objects.filter(creator=user).order_by('-last_post_date')
+        return qs.all()
+
+    def get_posts_for_user(self, user):
+        qs = Post.objects.filter(creator=user).order_by('-date')
+        return qs.all()
+
     def get_topic(self, gfaqs_topic_id):
         return Topic.objects.get(gfaqs_id=gfaqs_topic_id)
+
+    def get_posts_for_topic(self, topic):
+        qs = Post.objects.filter(topic=topic).order_by('date')
+        return qs.all()
 
     def get_post(self, gfaqs_topic_id, post_num):
         topic = Topic.objects.get(gfaqs_id=gfaqs_topic_id)
@@ -34,6 +46,10 @@ class ContentVisibilityManager(object):
         else:
             user.status = User.HIDDEN
             user.save()
+        for topic in self.get_topics_for_user(user):
+            self.hide_topic(topic)
+        for post in self.get_posts_for_user(user):
+            self.hide_post(post)
         self.clear_cache()
         return user
 
@@ -41,7 +57,7 @@ class ContentVisibilityManager(object):
         if not topic:
             return None
         with transaction.atomic():
-            for post in topic.posts:
+            for post in self.get_posts_for_topic(topic):
                 self.hide_post(post)
             topic.status = Topic.HIDDEN
             topic.save()
