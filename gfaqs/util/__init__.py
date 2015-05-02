@@ -13,6 +13,13 @@ if settings.DEBUG:
 else:
     logger = logging.getLogger(settings.ARCHIVER_LOGGER)
 
+def print_exception(e):
+    error_msg = ["== Error =="]
+    error_msg.extend([traceback.format_exc()])
+    error_msg.extend(["========", ''])
+    error_msg = '\n'.join(error_msg)
+    log_error(error_msg)
+
 def log_on_error(fn, explode=False):
     """Decorator that logs the stack trace when an error occurs in the function"""
     def log_error(e):

@@ -24,7 +24,7 @@ class ThreadPool(object):
 class Worker(threading.Thread):
     """ Runs tasks from thread pool"""
     def __init__(self, tasks):
-        super(Worker,self).__init__()
+        super(Worker, self).__init__()
         self.daemon= True
         self.tasks = tasks
         self.start()

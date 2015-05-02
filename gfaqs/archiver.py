@@ -46,7 +46,10 @@ class Archiver(Daemon):
         self.pool = ThreadPool(num_workers)
         def archive_board_task(board, refresh):
             while True:
-                self.archive_board(board)
+                try:
+                    self.archive_board(board)
+                except:
+                    logger.error("Unhandled error for board %s" % board, sys.exc_info()[0])
                 throttle_thread(refresh*60)
 
         for alias,name,refresh in self.board_info:
@@ -73,6 +76,7 @@ class Archiver(Daemon):
             b: the models.Board to archive
             recursive: archives the posts of each topic as well
         """
+        raise ValueError("foobar")
         bs = BoardScraper(b, self.gfaqs_client)
         logger.info("Archiving Board (%s) started" % b.alias)
         topics_examined, topics_saved = 0, 0
