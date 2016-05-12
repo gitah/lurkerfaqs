@@ -16,12 +16,12 @@
 {% block table_header %}{% endblock %}
 {% block table_contents %}
 {% for post in posts %}
+    {% if not post.is_hidden %}
     <tr><td>
-     {#TODO: Format date #}
       <a href="{% url "lurkerfaqs.views.show_topic" post.topic.board.alias post.topic.gfaqs_id %}">{{post.topic.title}}</a> ({{post.post_num}}) | Posted on {{post.date}}
     </td></tr>
-
     <tr class="even"><td>{{post.contents|safe}}</td></tr>
+    {% endif %}
 {% endfor %}
 {% endblock %}
 
